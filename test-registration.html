@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Registration</title>
+</head>
+<body>
+    <h1>Test Registration</h1>
+    <form id="testForm">
+        <div>
+            <label>Email:</label>
+            <input type="email" id="email" value="aryatest1@gmail.com" required>
+        </div>
+        <div>
+            <label>Password:</label>
+            <input type="password" id="password" value="Aryateja@5" required>
+        </div>
+        <div>
+            <label>Name:</label>
+            <input type="text" id="name" value="aryatest1" required>
+        </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('testForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            
+            console.log('Attempting registration with:', { email, name });
+            
+            try {
+                const response = await fetch('/api/auth/sign-up/email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email,
+                        password,
+                        name,
+                    }),
+                });
+                
+                const result = await response.text();
+                console.log('Response status:', response.status);
+                console.log('Response:', result);
+                
+                document.getElementById('result').innerHTML = `
+                    <h3>Response (${response.status}):</h3>
+                    <pre>${result}</pre>
+                `;
+                
+                if (response.ok) {
+                    alert('Registration successful!');
+                } else {
+                    alert('Registration failed: ' + result);
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').innerHTML = `
+                    <h3>Error:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

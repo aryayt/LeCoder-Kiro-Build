@@ -1,0 +1,141 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  projects      Project[]
+  sessions      Session[]
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id @default(cuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id @default(cuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+
+  @@map("verification")
+}
+
+model Project {
+  id             String          @id @default(cuid())
+  userId         String?
+  title          String
+  paperContent   String
+  status         ProjectStatus   @default(UPLOADED)
+  currentStage   Int             @default(0)
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  generatedFiles GeneratedFile[]
+  stages         PipelineStage[]
+  user           User?           @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+model PipelineStage {
+  id           String      @id @default(cuid())
+  projectId    String
+  stageNumber  Int
+  stageName    String
+  status       StageStatus @default(PENDING)
+  inputData    Json?
+  outputData   Json?
+  errorMessage String?
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime    @default(now())
+  project      Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, stageNumber])
+  @@index([projectId])
+  @@index([status])
+  @@map("pipeline_stages")
+}
+
+model GeneratedFile {
+  id          String   @id @default(cuid())
+  projectId   String
+  filePath    String
+  fileContent String
+  fileType    String
+  createdAt   DateTime @default(now())
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("generated_files")
+}
+
+enum ProjectStatus {
+  UPLOADED
+  PROCESSING
+  COMPLETED
+  ERROR
+  CANCELLED
+
+  @@map("project_status")
+}
+
+enum StageStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  ERROR
+  RETRYING
+
+  @@map("stage_status")
+}
