@@ -30,35 +30,29 @@ LeCodeR is an open-source web application that automatically transforms academic
 
 ## 🏃‍♂️ Quick Start
 
-1. **Clone and install dependencies**:
-   ```bash
-   git clone <repository-url>
-   cd lecoder-mvp
-   npm install
-   ```
+```bash
+# 1. Clone the repository
+git clone https://github.com/aryayt/LeCoder-Kiro-Build.git
+cd LeCoder-Kiro-Build
 
-2. **Set up environment variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env with your database URL and API keys
-   ```
+# 2. Install dependencies
+npm install
 
-3. **Start the database**:
-   ```bash
-   ./start-database.sh
-   ```
+# 3. Set up environment (see setup guide for details)
+cp .env.example .env
+# Edit .env with your configuration
 
-4. **Set up the database**:
-   ```bash
-   npm run db:push
-   ```
+# 4. Start database and set up schema
+./start-database.sh
+npm run db:setup
 
-5. **Start development server**:
-   ```bash
-   npm run dev
-   ```
+# 5. Start development server
+npm run dev
+```
 
 Visit [http://localhost:3000](http://localhost:3000) to see the application.
+
+📖 **For detailed setup instructions including environment variables, see [Local Development Setup Guide](./docs/local-development-setup.md)**
 
 ## 🧪 Testing
 
