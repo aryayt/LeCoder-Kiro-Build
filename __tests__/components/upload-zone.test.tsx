@@ -1,176 +1,155 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { UploadZone } from '~/components/ui/upload-zone';
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { UploadZone } from "~/components/ui/upload-zone";
 
 // Mock the PDF processor
-jest.mock('~/lib/pdf/processor', () => ({
-  validatePdfFile: jest.fn(),
+jest.mock("~/lib/pdf/processor", () => ({
+	validatePdfFile: jest.fn(),
 }));
 
-describe('UploadZone Component', () => {
-  const mockOnFileUpload = jest.fn();
+describe("UploadZone Component", () => {
+	const mockOnFileUpload = jest.fn();
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
 
-  it('should render upload zone with correct text', () => {
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={false}
-      />
-    );
+	it("should render upload zone with correct text", () => {
+		render(<UploadZone onFileUpload={mockOnFileUpload} isUploading={false} />);
 
-    expect(screen.getByText('Upload your research paper')).toBeInTheDocument();
-    expect(screen.getByText(/Drag and drop a PDF file here/)).toBeInTheDocument();
-  });
+		expect(screen.getByText("Upload your research paper")).toBeInTheDocument();
+		expect(
+			screen.getByText(/Drag and drop a PDF file here/),
+		).toBeInTheDocument();
+	});
 
-  it('should show loading state when uploading', () => {
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={true}
-      />
-    );
+	it("should show loading state when uploading", () => {
+		render(<UploadZone onFileUpload={mockOnFileUpload} isUploading={true} />);
 
-    expect(screen.getByText('Processing...')).toBeInTheDocument();
-    expect(screen.getByText('Please wait while we process your PDF')).toBeInTheDocument();
-  });
+		expect(screen.getByText("Processing...")).toBeInTheDocument();
+		expect(
+			screen.getByText("Please wait while we process your PDF"),
+		).toBeInTheDocument();
+	});
 
-  it('should handle file input change', async () => {
-    const user = userEvent.setup();
-    
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={false}
-      />
-    );
+	it("should handle file input change", async () => {
+		const user = userEvent.setup();
 
-    const file = new File(['test content'], 'test.pdf', {
-      type: 'application/pdf',
-    });
+		render(<UploadZone onFileUpload={mockOnFileUpload} isUploading={false} />);
 
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-    
-    await user.upload(input, file);
+		const file = new File(["test content"], "test.pdf", {
+			type: "application/pdf",
+		});
 
-    await waitFor(() => {
-      expect(mockOnFileUpload).toHaveBeenCalledWith(file);
-    });
-  });
+		const input = document.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
 
-  it('should handle drag and drop', async () => {
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={false}
-      />
-    );
+		await user.upload(input, file);
 
-    const file = new File(['test content'], 'test.pdf', {
-      type: 'application/pdf',
-    });
+		await waitFor(() => {
+			expect(mockOnFileUpload).toHaveBeenCalledWith(file);
+		});
+	});
 
-    const dropZone = screen.getByText('Upload your research paper').closest('div');
-    
-    // Simulate drag over
-    fireEvent.dragOver(dropZone!, {
-      dataTransfer: {
-        files: [file],
-      },
-    });
+	it("should handle drag and drop", async () => {
+		render(<UploadZone onFileUpload={mockOnFileUpload} isUploading={false} />);
 
-    // Simulate drop
-    fireEvent.drop(dropZone!, {
-      dataTransfer: {
-        files: [file],
-      },
-    });
+		const file = new File(["test content"], "test.pdf", {
+			type: "application/pdf",
+		});
 
-    await waitFor(() => {
-      expect(mockOnFileUpload).toHaveBeenCalledWith(file);
-    });
-  });
+		const dropZone = screen
+			.getByText("Upload your research paper")
+			.closest("div");
 
-  it('should show error message when validation fails', async () => {
-    const { validatePdfFile } = require('~/lib/pdf/processor');
-    validatePdfFile.mockReturnValue({
-      message: 'Invalid file type',
-      code: 'INVALID_FILE_TYPE',
-    });
+		// Simulate drag over
+		fireEvent.dragOver(dropZone!, {
+			dataTransfer: {
+				files: [file],
+			},
+		});
 
-    const user = userEvent.setup();
-    
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={false}
-      />
-    );
+		// Simulate drop
+		fireEvent.drop(dropZone!, {
+			dataTransfer: {
+				files: [file],
+			},
+		});
 
-    const file = new File(['test content'], 'test.txt', {
-      type: 'text/plain',
-    });
+		await waitFor(() => {
+			expect(mockOnFileUpload).toHaveBeenCalledWith(file);
+		});
+	});
 
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-    
-    await user.upload(input, file);
+	it("should show error message when validation fails", async () => {
+		const { validatePdfFile } = require("~/lib/pdf/processor");
+		validatePdfFile.mockReturnValue({
+			message: "Invalid file type",
+			code: "INVALID_FILE_TYPE",
+		});
 
-    await waitFor(() => {
-      expect(screen.getByText('Invalid file type')).toBeInTheDocument();
-    });
+		const user = userEvent.setup();
 
-    expect(mockOnFileUpload).not.toHaveBeenCalled();
-  });
+		render(<UploadZone onFileUpload={mockOnFileUpload} isUploading={false} />);
 
-  it('should show error when upload fails', async () => {
-    mockOnFileUpload.mockRejectedValue(new Error('Upload failed'));
+		const file = new File(["test content"], "test.txt", {
+			type: "text/plain",
+		});
 
-    const user = userEvent.setup();
-    
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={false}
-      />
-    );
+		const input = document.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
 
-    const file = new File(['test content'], 'test.pdf', {
-      type: 'application/pdf',
-    });
+		await user.upload(input, file);
 
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-    
-    await user.upload(input, file);
+		await waitFor(() => {
+			expect(screen.getByText("Invalid file type")).toBeInTheDocument();
+		});
 
-    await waitFor(() => {
-      expect(screen.getByText('Upload failed')).toBeInTheDocument();
-    });
-  });
+		expect(mockOnFileUpload).not.toHaveBeenCalled();
+	});
 
-  it('should disable input when uploading', () => {
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={true}
-      />
-    );
+	it("should show error when upload fails", async () => {
+		mockOnFileUpload.mockRejectedValue(new Error("Upload failed"));
 
-    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
-    expect(input).toBeDisabled();
-  });
+		const user = userEvent.setup();
 
-  it('should accept custom file size limit', () => {
-    render(
-      <UploadZone
-        onFileUpload={mockOnFileUpload}
-        isUploading={false}
-        maxSize={25}
-      />
-    );
+		render(<UploadZone onFileUpload={mockOnFileUpload} isUploading={false} />);
 
-    expect(screen.getByText(/max 25MB/)).toBeInTheDocument();
-  });
+		const file = new File(["test content"], "test.pdf", {
+			type: "application/pdf",
+		});
+
+		const input = document.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+
+		await user.upload(input, file);
+
+		await waitFor(() => {
+			expect(screen.getByText("Upload failed")).toBeInTheDocument();
+		});
+	});
+
+	it("should disable input when uploading", () => {
+		render(<UploadZone onFileUpload={mockOnFileUpload} isUploading={true} />);
+
+		const input = document.querySelector(
+			'input[type="file"]',
+		) as HTMLInputElement;
+		expect(input).toBeDisabled();
+	});
+
+	it("should accept custom file size limit", () => {
+		render(
+			<UploadZone
+				onFileUpload={mockOnFileUpload}
+				isUploading={false}
+				maxSize={25}
+			/>,
+		);
+
+		expect(screen.getByText(/max 25MB/)).toBeInTheDocument();
+	});
 });

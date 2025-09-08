@@ -5,8 +5,8 @@
  * This script tests the core authentication functionality
  */
 
-import { db } from "~/server/db";
 import bcrypt from "bcryptjs";
+import { db } from "~/server/db";
 
 async function testAuthSystem() {
 	console.log("🔐 Testing Authentication System...\n");

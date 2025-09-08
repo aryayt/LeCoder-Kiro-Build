@@ -1,234 +1,581 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { ProgressTracker, type PipelineStage } from "~/components/ui/progress-tracker";
+import { useState } from "react";
+import { DashboardLayout } from "~/components/layout/dashboard-layout";
+import { ConfirmationDialog } from "~/components/ui/confirmation-dialog";
+import { ProgressTracker } from "~/components/ui/progress-tracker";
 import { api } from "~/trpc/react";
-
-interface Project {
-  id: string;
-  title: string;
-  status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'ERROR' | 'CANCELLED';
-  currentStage: number;
-  metadata: {
-    fileName: string;
-    fileSize: number;
-    pageCount: number;
-    authors?: string[];
-  };
-  createdAt: string;
-  updatedAt: string;
-  pipelineStages: PipelineStage[];
-}
+import type { Project } from "~/types/project";
 
 export default function ProjectDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const projectId = params.id as string;
+	const params = useParams();
+	const router = useRouter();
+	const projectId = params.id as string;
+	const [deleteConfirmation, setDeleteConfirmation] = useState(false);
 
-  const { data: project, isLoading, error, refetch } = api.project.getById.useQuery(
-    { id: projectId },
-    { 
-      enabled: !!projectId,
-      refetchInterval: (data) => {
-        // Refetch every 2 seconds if project is still processing
-        return data && 'status' in data && data.status === 'PROCESSING' ? 2000 : false;
-      }
-    }
-  );
+	const {
+		data: project,
+		isLoading,
+		error,
+		refetch,
+	} = api.project.getById.useQuery(
+		{ id: projectId },
+		{
+			enabled: !!projectId,
+			refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
+		},
+	);
 
-  const handleDownload = async () => {
-    if (!project || project.status !== 'COMPLETED') return;
+	const { data: aiConfig } = api.project.getAIConfig.useQuery();
 
-    try {
-      // For now, just create a simple download URL
-      // In a full implementation, this would call the download API
-      const downloadUrl = `/api/projects/${project.id}/download`;
-      window.open(downloadUrl, '_blank');
-    } catch (error) {
-      console.error('Download failed:', error);
-    }
-  };
+	const startPipelineMutation = api.project.startPipeline.useMutation({
+		onSuccess: () => {
+			refetch();
+		},
+	});
 
-  const handleBack = () => {
-    router.push('/dashboard');
-  };
+	const cancelPipelineMutation = api.project.cancelPipeline.useMutation({
+		onSuccess: () => {
+			refetch();
+		},
+	});
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading project...</p>
-        </div>
-      </div>
-    );
-  }
+	const retryPipelineMutation = api.project.retryPipeline.useMutation({
+		onSuccess: () => {
+			refetch();
+		},
+	});
 
-  if (error || !project) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="mx-auto w-12 h-12 text-red-400 mb-4">
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Project Not Found</h2>
-          <p className="text-gray-600 mb-4">The project you're looking for doesn't exist or has been deleted.</p>
-          <button
-            onClick={handleBack}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
+	const deleteProjectMutation = api.project.delete.useMutation({
+		onSuccess: () => {
+			router.push("/dashboard");
+		},
+	});
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
+	const handleDelete = async () => {
+		await deleteProjectMutation.mutateAsync({ id: projectId });
+		setDeleteConfirmation(false);
+	};
 
-  const getStatusColor = (status: Project['status']) => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800';
-      case 'PROCESSING':
-        return 'bg-blue-100 text-blue-800';
-      case 'ERROR':
-        return 'bg-red-100 text-red-800';
-      case 'CANCELLED':
-        return 'bg-gray-100 text-gray-800';
-      case 'UPLOADED':
-      default:
-        return 'bg-yellow-100 text-yellow-800';
-    }
-  };
+	const handleDownload = async () => {
+		try {
+			// For now, just create a simple download URL
+			// In a full implementation, this would call the download API
+			const downloadUrl = `/api/projects/${projectId}/download`;
+			window.open(downloadUrl, "_blank");
+		} catch (error) {
+			console.error("Download failed:", error);
+		}
+	};
 
-  return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <button
-            onClick={handleBack}
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700 mb-4"
-          >
-            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Dashboard
-          </button>
-          
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                {project.title}
-              </h1>
-              <p className="text-gray-600">{(project.metadata as any)?.fileName || 'Unknown file'}</p>
-            </div>
-            
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(project.status)}`}>
-              {project.status.charAt(0) + project.status.slice(1).toLowerCase()}
-            </span>
-          </div>
-        </div>
+	const handleStartPipeline = async () => {
+		try {
+			await startPipelineMutation.mutateAsync({ id: projectId });
+		} catch (error) {
+			console.error("Failed to start pipeline:", error);
+		}
+	};
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Progress Section */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <ProgressTracker 
-                stages={(project as any).stages || []}
-                currentStage={project.currentStage}
-              />
-            </div>
-          </div>
+	const handleCancelPipeline = async () => {
+		try {
+			await cancelPipelineMutation.mutateAsync({ id: projectId });
+		} catch (error) {
+			console.error("Failed to cancel pipeline:", error);
+		}
+	};
 
-          {/* Project Info Sidebar */}
-          <div className="space-y-6">
-            {/* Project Details */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Project Details
-              </h3>
-              <div className="space-y-3 text-sm">
-                <div>
-                  <span className="font-medium text-gray-700">File Size:</span>
-                  <span className="ml-2 text-gray-600">
-                    {formatFileSize((project.metadata as any)?.fileSize || 0)}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Pages:</span>
-                  <span className="ml-2 text-gray-600">
-                    {(project.metadata as any)?.pageCount || 0}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Created:</span>
-                  <span className="ml-2 text-gray-600">
-                    {new Date(project.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Updated:</span>
-                  <span className="ml-2 text-gray-600">
-                    {new Date(project.updatedAt).toLocaleDateString()}
-                  </span>
-                </div>
-                {(project.metadata as any)?.authors && Array.isArray((project.metadata as any).authors) && (project.metadata as any).authors.length > 0 && (
-                  <div>
-                    <span className="font-medium text-gray-700">Authors:</span>
-                    <div className="ml-2 text-gray-600">
-                      {(project.metadata as any).authors.join(', ')}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
+	const handleRetryPipeline = async () => {
+		try {
+			await retryPipelineMutation.mutateAsync({ id: projectId });
+		} catch (error) {
+			console.error("Failed to retry pipeline:", error);
+		}
+	};
 
-            {/* Actions */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Actions
-              </h3>
-              <div className="space-y-3">
-                {project.status === 'COMPLETED' && (
-                  <button
-                    onClick={handleDownload}
-                    disabled={false}
-                    className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    <>
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Download Code
-                    </>
-                  </button>
-                )}
-                
-                <button
-                  onClick={() => refetch()}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Refresh Status
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+	if (isLoading) {
+		return (
+			<DashboardLayout
+				title="Loading..."
+				description="Loading project details..."
+			>
+				<div className="animate-pulse space-y-6">
+					<div className="h-8 w-64 rounded bg-gray-200" />
+					<div className="h-64 w-full rounded-lg bg-gray-200" />
+					<div className="h-48 w-full rounded-lg bg-gray-200" />
+				</div>
+			</DashboardLayout>
+		);
+	}
+
+	if (error || !project) {
+		return (
+			<DashboardLayout
+				title="Project Not Found"
+				description="The requested project could not be found."
+			>
+				<div className="rounded-lg bg-white p-12 text-center shadow">
+					<svg
+						className="mx-auto h-12 w-12 text-gray-400"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth={2}
+							d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+						/>
+					</svg>
+					<h3 className="mt-2 font-medium text-gray-900 text-sm">
+						Project not found
+					</h3>
+					<p className="mt-1 text-gray-500 text-sm">
+						The project you're looking for doesn't exist or has been deleted.
+					</p>
+					<div className="mt-6">
+						<Link
+							href="/dashboard"
+							className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 font-medium text-sm text-white hover:bg-indigo-700"
+						>
+							Back to Dashboard
+						</Link>
+					</div>
+				</div>
+			</DashboardLayout>
+		);
+	}
+
+	const formatFileSize = (bytes: number) => {
+		if (bytes === 0) return "0 Bytes";
+		const k = 1024;
+		const sizes = ["Bytes", "KB", "MB", "GB"];
+		const i = Math.floor(Math.log(bytes) / Math.log(k));
+		return (
+			Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
+		);
+	};
+
+	const getStatusColor = (status: string) => {
+		switch (status) {
+			case "COMPLETED":
+				return "bg-green-100 text-green-800";
+			case "PROCESSING":
+				return "bg-blue-100 text-blue-800";
+			case "ERROR":
+				return "bg-red-100 text-red-800";
+			case "CANCELLED":
+				return "bg-gray-100 text-gray-800";
+			case "UPLOADED":
+			default:
+				return "bg-yellow-100 text-yellow-800";
+		}
+	};
+
+	return (
+		<>
+			<DashboardLayout
+				title={project.title}
+				description={`Project created on ${new Date(project.createdAt).toLocaleDateString()}`}
+			>
+				{/* Breadcrumb */}
+				<nav className="mb-6 flex" aria-label="Breadcrumb">
+					<ol className="flex items-center space-x-4">
+						<li>
+							<Link
+								href="/dashboard"
+								className="text-gray-400 hover:text-gray-500"
+							>
+								Dashboard
+							</Link>
+						</li>
+						<li>
+							<div className="flex items-center">
+								<svg
+									className="h-5 w-5 flex-shrink-0 text-gray-300"
+									fill="currentColor"
+									viewBox="0 0 20 20"
+								>
+									<path
+										fillRule="evenodd"
+										d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+										clipRule="evenodd"
+									/>
+								</svg>
+								<span className="ml-4 font-medium text-gray-500 text-sm">
+									{project.title}
+								</span>
+							</div>
+						</li>
+					</ol>
+				</nav>
+
+				{/* Project Header */}
+				<div className="mb-8 rounded-lg bg-white p-6 shadow">
+					<div className="flex items-start justify-between">
+						<div className="min-w-0 flex-1">
+							<div className="flex items-center space-x-3">
+								<h1 className="font-bold text-2xl text-gray-900">
+									{project.title}
+								</h1>
+								<span
+									className={`inline-flex items-center rounded-full px-2.5 py-0.5 font-medium text-xs ${getStatusColor(project.status)}`}
+								>
+									{project.status}
+								</span>
+							</div>
+							<p className="mt-2 text-gray-600">
+								{(project.metadata as any)?.fileName || "Unknown file"}
+							</p>
+						</div>
+
+						<div className="flex items-center space-x-3">
+							{project.status === "UPLOADED" && (
+								<button
+									onClick={handleStartPipeline}
+									disabled={startPipelineMutation.isPending}
+									className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 font-medium text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
+								>
+									{startPipelineMutation.isPending ? (
+										<>
+											<svg
+												className="mr-2 h-4 w-4 animate-spin"
+												fill="none"
+												viewBox="0 0 24 24"
+											>
+												<circle
+													className="opacity-25"
+													cx="12"
+													cy="12"
+													r="10"
+													stroke="currentColor"
+													strokeWidth="4"
+												></circle>
+												<path
+													className="opacity-75"
+													fill="currentColor"
+													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+												></path>
+											</svg>
+											Starting...
+										</>
+									) : (
+										<>
+											<svg
+												className="mr-2 h-4 w-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+												/>
+											</svg>
+											Start AI Analysis
+										</>
+									)}
+								</button>
+							)}
+
+							{project.status === "PROCESSING" && (
+								<button
+									onClick={handleCancelPipeline}
+									disabled={cancelPipelineMutation.isPending}
+									className="inline-flex items-center rounded-md border border-red-300 bg-white px-4 py-2 font-medium text-red-700 text-sm hover:bg-red-50 disabled:opacity-50"
+								>
+									{cancelPipelineMutation.isPending ? (
+										<>
+											<svg
+												className="mr-2 h-4 w-4 animate-spin"
+												fill="none"
+												viewBox="0 0 24 24"
+											>
+												<circle
+													className="opacity-25"
+													cx="12"
+													cy="12"
+													r="10"
+													stroke="currentColor"
+													strokeWidth="4"
+												></circle>
+												<path
+													className="opacity-75"
+													fill="currentColor"
+													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+												></path>
+											</svg>
+											Cancelling...
+										</>
+									) : (
+										<>
+											<svg
+												className="mr-2 h-4 w-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M6 18L18 6M6 6l12 12"
+												/>
+											</svg>
+											Cancel
+										</>
+									)}
+								</button>
+							)}
+
+							{project.status === "ERROR" && (
+								<button
+									onClick={handleRetryPipeline}
+									disabled={retryPipelineMutation.isPending}
+									className="inline-flex items-center rounded-md bg-yellow-600 px-4 py-2 font-medium text-sm text-white hover:bg-yellow-700 disabled:opacity-50"
+								>
+									{retryPipelineMutation.isPending ? (
+										<>
+											<svg
+												className="mr-2 h-4 w-4 animate-spin"
+												fill="none"
+												viewBox="0 0 24 24"
+											>
+												<circle
+													className="opacity-25"
+													cx="12"
+													cy="12"
+													r="10"
+													stroke="currentColor"
+													strokeWidth="4"
+												></circle>
+												<path
+													className="opacity-75"
+													fill="currentColor"
+													d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+												></path>
+											</svg>
+											Retrying...
+										</>
+									) : (
+										<>
+											<svg
+												className="mr-2 h-4 w-4"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+												/>
+											</svg>
+											Retry Pipeline
+										</>
+									)}
+								</button>
+							)}
+
+							{project.status === "COMPLETED" && (
+								<button
+									onClick={handleDownload}
+									className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 text-sm hover:bg-gray-50"
+								>
+									<svg
+										className="mr-2 h-4 w-4"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+										/>
+									</svg>
+									Download
+								</button>
+							)}
+							<button
+								onClick={() => setDeleteConfirmation(true)}
+								className="inline-flex items-center rounded-md border border-red-300 bg-white px-4 py-2 font-medium text-red-700 text-sm hover:bg-red-50"
+							>
+								<svg
+									className="mr-2 h-4 w-4"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+									/>
+								</svg>
+								Delete
+							</button>
+						</div>
+					</div>
+
+					{/* Project Metadata */}
+					<div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+						<div>
+							<dt className="font-medium text-gray-500 text-sm">File Size</dt>
+							<dd className="mt-1 text-gray-900 text-sm">
+								{formatFileSize((project.metadata as any)?.fileSize || 0)}
+							</dd>
+						</div>
+						<div>
+							<dt className="font-medium text-gray-500 text-sm">Pages</dt>
+							<dd className="mt-1 text-gray-900 text-sm">
+								{(project.metadata as any)?.pageCount || 0}
+							</dd>
+						</div>
+						<div>
+							<dt className="font-medium text-gray-500 text-sm">Created</dt>
+							<dd className="mt-1 text-gray-900 text-sm">
+								{new Date(project.createdAt).toLocaleDateString()}
+							</dd>
+						</div>
+						{(project.metadata as any)?.authors &&
+							Array.isArray((project.metadata as any).authors) &&
+							(project.metadata as any).authors.length > 0 && (
+								<div className="sm:col-span-3">
+									<dt className="font-medium text-gray-500 text-sm">Authors</dt>
+									<dd className="mt-1 text-gray-900 text-sm">
+										{(project.metadata as any).authors.join(", ")}
+									</dd>
+								</div>
+							)}
+					</div>
+
+					{/* AI Configuration Info */}
+					{aiConfig && (
+						<div className="mt-6 rounded-lg bg-blue-50 p-4">
+							<h3 className="font-medium text-blue-900 text-sm">
+								AI Processing Configuration
+							</h3>
+							<div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
+								<div>
+									<dt className="font-medium text-blue-700 text-xs">
+										AI Provider
+									</dt>
+									<dd className="mt-1 text-blue-900 text-sm capitalize">
+										{aiConfig.currentProvider}
+									</dd>
+								</div>
+								<div>
+									<dt className="font-medium text-blue-700 text-xs">Model</dt>
+									<dd className="mt-1 text-blue-900 text-sm">
+										{aiConfig.currentModel}
+									</dd>
+								</div>
+								<div>
+									<dt className="font-medium text-blue-700 text-xs">
+										Temperature
+									</dt>
+									<dd className="mt-1 text-blue-900 text-sm">
+										{aiConfig.temperature}
+									</dd>
+								</div>
+							</div>
+							{(project.metadata as any)?.vectorProcessing && (
+								<div className="mt-3 text-blue-800 text-xs">
+									Vector embeddings:{" "}
+									{(project.metadata as any).vectorProcessing.chunksCount}{" "}
+									chunks, ~
+									{(project.metadata as any).vectorProcessing.estimatedTokens}{" "}
+									tokens processed
+								</div>
+							)}
+						</div>
+					)}
+				</div>
+
+				{/* Progress Tracker */}
+				<div className="mb-8 rounded-lg bg-white p-6 shadow">
+					<h2 className="mb-6 font-semibold text-gray-900 text-lg">
+						Processing Progress
+					</h2>
+					<ProgressTracker
+						projectId={projectId}
+						stages={
+							(project as any).stages?.map((stage: any) => ({
+								id: stage.id,
+								stageNumber: stage.stageNumber,
+								stageName: stage.stageName,
+								status: stage.status,
+								errorMessage: stage.errorMessage,
+								startedAt: stage.startedAt,
+								completedAt: stage.completedAt,
+							})) || []
+						}
+						currentStage={project.currentStage}
+					/>
+				</div>
+
+				{/* Generated Files (if completed) */}
+				{project.status === "COMPLETED" &&
+					project.generatedFiles &&
+					project.generatedFiles.length > 0 && (
+						<div className="rounded-lg bg-white p-6 shadow">
+							<h2 className="mb-4 font-semibold text-gray-900 text-lg">
+								Generated Files
+							</h2>
+							<div className="space-y-2">
+								{project.generatedFiles.map((file) => (
+									<div
+										key={file.id}
+										className="flex items-center justify-between rounded-md border border-gray-200 p-3"
+									>
+										<div className="flex items-center space-x-3">
+											<svg
+												className="h-5 w-5 text-gray-400"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+												/>
+											</svg>
+											<div>
+												<p className="font-medium text-gray-900 text-sm">
+													{file.filePath}
+												</p>
+												<p className="text-gray-500 text-xs">{file.fileType}</p>
+											</div>
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+			</DashboardLayout>
+
+			{/* Delete Confirmation Dialog */}
+			<ConfirmationDialog
+				isOpen={deleteConfirmation}
+				onClose={() => setDeleteConfirmation(false)}
+				onConfirm={handleDelete}
+				title="Delete Project"
+				message={`Are you sure you want to delete "${project.title}"? This action cannot be undone and will permanently remove all associated files and data.`}
+				confirmText="Delete Project"
+				cancelText="Cancel"
+				type="danger"
+				isLoading={deleteProjectMutation.isPending}
+			/>
+		</>
+	);
 }

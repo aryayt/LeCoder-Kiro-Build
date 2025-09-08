@@ -1,93 +1,139 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { auth } from "~/lib/auth";
+"use client";
 
-export default async function DashboardPage() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "~/components/auth/auth-provider";
+import { DashboardLayout } from "~/components/layout/dashboard-layout";
+import { ConfirmationDialog } from "~/components/ui/confirmation-dialog";
+import { DashboardStats } from "~/components/ui/dashboard-stats";
+import { ProjectList } from "~/components/ui/project-list";
+import { StorageLimitWarning } from "~/components/ui/storage-limit-warning";
+import { useProjects } from "~/hooks/use-projects";
+
+export default function DashboardPage() {
+	const router = useRouter();
+	const { session } = useAuth();
+	const [deleteConfirmation, setDeleteConfirmation] = useState<{
+		isOpen: boolean;
+		projectId: string | null;
+		projectTitle: string;
+	}>({
+		isOpen: false,
+		projectId: null,
+		projectTitle: "",
 	});
 
-	if (!session) {
-		redirect("/auth/login");
-	}
+	const {
+		projects,
+		isLoading,
+		handleDeleteProject,
+		handleDownloadProject,
+		deletingProjectId,
+		isDeleting,
+	} = useProjects(session?.user?.id);
+
+	const handleViewProject = (projectId: string) => {
+		router.push(`/projects/${projectId}`);
+	};
+
+	const handleDeleteClick = (projectId: string) => {
+		const project = projects.find((p) => p.id === projectId);
+		setDeleteConfirmation({
+			isOpen: true,
+			projectId,
+			projectTitle: project?.title || "Unknown Project",
+		});
+	};
+
+	const handleConfirmDelete = async () => {
+		if (deleteConfirmation.projectId) {
+			await handleDeleteProject(deleteConfirmation.projectId);
+			setDeleteConfirmation({
+				isOpen: false,
+				projectId: null,
+				projectTitle: "",
+			});
+		}
+	};
+
+	const handleCancelDelete = () => {
+		setDeleteConfirmation({
+			isOpen: false,
+			projectId: null,
+			projectTitle: "",
+		});
+	};
+
+	const title = session?.user?.name
+		? `Welcome back, ${session.user.name}!`
+		: "Dashboard";
 
 	return (
-		<div className="min-h-screen bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-			<div className="mx-auto max-w-7xl">
-				<div className="mb-8">
-					<h1 className="font-bold text-3xl text-gray-900">
-						Welcome back, {session.user.name || session.user.email}!
-					</h1>
-					<p className="mt-2 text-gray-600">
-						Manage your research paper projects and track their progress.
-					</p>
-				</div>
+		<>
+			<DashboardLayout
+				title={title}
+				description="Manage your research paper projects and track their progress."
+			>
+				{/* Storage Limit Warning */}
+				<StorageLimitWarning projects={projects} />
 
-				<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-					<div className="rounded-lg bg-white p-6 shadow">
-						<h3 className="mb-2 font-medium text-gray-900 text-lg">
-							Total Projects
-						</h3>
-						<p className="font-bold text-3xl text-indigo-600">0</p>
-						<p className="text-gray-500 text-sm">No projects yet</p>
-					</div>
+				{/* Stats */}
+				<DashboardStats projects={projects} isLoading={isLoading} />
 
-					<div className="rounded-lg bg-white p-6 shadow">
-						<h3 className="mb-2 font-medium text-gray-900 text-lg">
-							In Progress
-						</h3>
-						<p className="font-bold text-3xl text-yellow-600">0</p>
-						<p className="text-gray-500 text-sm">Currently processing</p>
-					</div>
-
-					<div className="rounded-lg bg-white p-6 shadow">
-						<h3 className="mb-2 font-medium text-gray-900 text-lg">
-							Completed
-						</h3>
-						<p className="font-bold text-3xl text-green-600">0</p>
-						<p className="text-gray-500 text-sm">Ready for download</p>
-					</div>
-				</div>
-
+				{/* Projects List */}
 				<div className="rounded-lg bg-white shadow">
 					<div className="border-gray-200 border-b px-6 py-4">
-						<h2 className="font-semibold text-gray-900 text-xl">
-							Recent Projects
-						</h2>
-					</div>
-					<div className="p-6">
-						<div className="py-12 text-center">
-							<svg
-								className="mx-auto h-12 w-12 text-gray-400"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
+						<div className="flex items-center justify-between">
+							<h2 className="font-semibold text-gray-900 text-xl">
+								Your Projects
+							</h2>
+							<a
+								href="/upload"
+								className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 font-medium text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-								/>
-							</svg>
-							<h3 className="mt-2 font-medium text-gray-900 text-sm">
-								No projects
-							</h3>
-							<p className="mt-1 text-gray-500 text-sm">
-								Get started by uploading your first research paper.
-							</p>
-							<div className="mt-6">
-								<button
-									type="button"
-									className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-sm text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+								<svg
+									className="mr-2 h-4 w-4"
+									fill="none"
+									stroke="currentColor"
+									viewBox="0 0 24 24"
 								>
-									Upload Paper
-								</button>
-							</div>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										strokeWidth={2}
+										d="M12 4v16m8-8H4"
+									/>
+								</svg>
+								Upload Paper
+							</a>
 						</div>
 					</div>
+					<div className="p-6">
+						<ProjectList
+							projects={projects}
+							onView={handleViewProject}
+							onDownload={handleDownloadProject}
+							onDelete={handleDeleteClick}
+							isLoading={isLoading}
+						/>
+					</div>
 				</div>
-			</div>
-		</div>
+			</DashboardLayout>
+
+			{/* Delete Confirmation Dialog */}
+			<ConfirmationDialog
+				isOpen={deleteConfirmation.isOpen}
+				onClose={handleCancelDelete}
+				onConfirm={handleConfirmDelete}
+				title="Delete Project"
+				message={`Are you sure you want to delete "${deleteConfirmation.projectTitle}"? This action cannot be undone and will permanently remove all associated files and data.`}
+				confirmText="Delete Project"
+				cancelText="Cancel"
+				type="danger"
+				isLoading={
+					isDeleting && deletingProjectId === deleteConfirmation.projectId
+				}
+			/>
+		</>
 	);
 }

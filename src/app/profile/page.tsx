@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { ProfileForm } from "~/components/auth/profile-form";
 import { PasswordChangeForm } from "~/components/auth/password-change-form";
+import { ProfileForm } from "~/components/auth/profile-form";
 import { auth } from "~/lib/auth";
 
 export default async function ProfilePage() {
@@ -29,7 +29,7 @@ export default async function ProfilePage() {
 				{/* Password Change */}
 				<div className="rounded-lg bg-white shadow">
 					<div className="px-4 py-5 sm:p-6">
-						<h2 className="mb-6 font-bold text-xl text-gray-900">
+						<h2 className="mb-6 font-bold text-gray-900 text-xl">
 							Change Password
 						</h2>
 						<PasswordChangeForm />

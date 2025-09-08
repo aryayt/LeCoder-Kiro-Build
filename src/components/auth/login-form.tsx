@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "~/lib/auth-client";
-import { loginSchema, type LoginFormData } from "~/lib/auth/validation";
 import { z } from "zod";
+import { signIn } from "~/lib/auth-client";
+import { type LoginFormData, loginSchema } from "~/lib/auth/validation";
 
 export function LoginForm() {
 	const [formData, setFormData] = useState<LoginFormData>({
@@ -77,7 +77,7 @@ export function LoginForm() {
 				callbackURL: "/",
 			});
 		} catch (err) {
-			setError("Google sign-in failed");
+			setGeneralError("Google sign-in failed");
 			setIsLoading(false);
 		}
 	};
@@ -90,7 +90,7 @@ export function LoginForm() {
 				callbackURL: "/",
 			});
 		} catch (err) {
-			setError("GitHub sign-in failed");
+			setGeneralError("GitHub sign-in failed");
 			setIsLoading(false);
 		}
 	};

@@ -1,8 +1,8 @@
+import bcrypt from "bcryptjs";
 import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { auth } from "~/lib/auth";
 import { db } from "~/server/db";
-import bcrypt from "bcryptjs";
 
 const changePasswordSchema = z.object({
 	currentPassword: z.string().min(1, "Current password is required"),

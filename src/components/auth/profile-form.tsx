@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import type { User } from "~/lib/auth";
-import { profileUpdateSchema, type ProfileUpdateData } from "~/lib/auth/validation";
 import { z } from "zod";
+import type { User } from "~/lib/auth";
+import {
+	type ProfileUpdateData,
+	profileUpdateSchema,
+} from "~/lib/auth/validation";
 
 interface ProfileFormProps {
 	user: User;

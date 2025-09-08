@@ -46,10 +46,7 @@ export const profileUpdateSchema = z.object({
 		.min(2, "Name must be at least 2 characters long")
 		.max(100, "Name must be less than 100 characters")
 		.optional(),
-	email: z
-		.string()
-		.email("Please enter a valid email address")
-		.optional(),
+	email: z.string().email("Please enter a valid email address").optional(),
 });
 
 export const passwordResetSchema = z.object({

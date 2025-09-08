@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { forgetPassword } from "~/lib/auth-client";
-import { passwordResetSchema, type PasswordResetData } from "~/lib/auth/validation";
 import { z } from "zod";
+import { forgetPassword } from "~/lib/auth-client";
+import {
+	type PasswordResetData,
+	passwordResetSchema,
+} from "~/lib/auth/validation";
 
 export function PasswordResetForm() {
 	const [formData, setFormData] = useState<PasswordResetData>({

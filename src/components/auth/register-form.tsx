@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { signUp } from "~/lib/auth-client";
-import { registerSchema, type RegisterFormData } from "~/lib/auth/validation";
 import { z } from "zod";
+import { signUp } from "~/lib/auth-client";
+import { type RegisterFormData, registerSchema } from "~/lib/auth/validation";
 
 export function RegisterForm() {
 	const [formData, setFormData] = useState<RegisterFormData>({
@@ -185,7 +185,8 @@ export function RegisterForm() {
 						<p className="mt-1 text-red-600 text-sm">{errors.password}</p>
 					) : (
 						<p className="mt-1 text-gray-500 text-sm">
-							Must contain uppercase, lowercase, and number. At least 8 characters.
+							Must contain uppercase, lowercase, and number. At least 8
+							characters.
 						</p>
 					)}
 				</div>
@@ -201,7 +202,9 @@ export function RegisterForm() {
 						id="confirmPassword"
 						type="password"
 						value={formData.confirmPassword}
-						onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+						onChange={(e) =>
+							handleInputChange("confirmPassword", e.target.value)
+						}
 						className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-2 ${
 							errors.confirmPassword
 								? "border-red-300 focus:border-red-500 focus:ring-red-500"
@@ -211,7 +214,9 @@ export function RegisterForm() {
 						autoComplete="new-password"
 					/>
 					{errors.confirmPassword && (
-						<p className="mt-1 text-red-600 text-sm">{errors.confirmPassword}</p>
+						<p className="mt-1 text-red-600 text-sm">
+							{errors.confirmPassword}
+						</p>
 					)}
 				</div>
 

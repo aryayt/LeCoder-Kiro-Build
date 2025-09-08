@@ -19,6 +19,7 @@ model User {
   accounts      Account[]
   projects      Project[]
   sessions      Session[]
+  apiKeys       UserApiKey[]
 
   @@map("user")
 }
@@ -130,6 +131,23 @@ enum ProjectStatus {
   @@map("project_status")
 }
 
+model UserApiKey {
+  id          String      @id @default(cuid())
+  userId      String
+  provider    AIProvider
+  keyName     String?     // Optional user-friendly name
+  encryptedKey String     // Encrypted API key
+  isActive    Boolean     @default(true)
+  lastUsed    DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("user_api_keys")
+}
+
 enum StageStatus {
   PENDING
   PROCESSING
@@ -138,4 +156,12 @@ enum StageStatus {
   RETRYING
 
   @@map("stage_status")
+}
+
+enum AIProvider {
+  OPENAI
+  GOOGLE
+  ANTHROPIC
+
+  @@map("ai_provider")
 }

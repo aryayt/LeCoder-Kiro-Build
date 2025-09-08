@@ -35,7 +35,8 @@ async function main() {
 		create: {
 			email: "aryateja2106@gmail.com",
 			name: "aryateja",
-			image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+			image:
+				"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
 		},
 	});
 
@@ -172,7 +173,12 @@ async function main() {
 				authors: ["aryateja"],
 				abstract:
 					"This paper explores the application of machine learning algorithms for predictive analytics in business intelligence.",
-				keywords: ["machine learning", "predictive analytics", "random forest", "SVM"],
+				keywords: [
+					"machine learning",
+					"predictive analytics",
+					"random forest",
+					"SVM",
+				],
 			},
 		},
 	});

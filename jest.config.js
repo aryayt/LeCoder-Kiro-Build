@@ -9,7 +9,11 @@ const createJestConfig = nextJest({
 const customJestConfig = {
 	setupFilesAfterEnv: ["<rootDir>/jest.setup.js"],
 	testEnvironment: "jsdom",
-	testPathIgnorePatterns: ["<rootDir>/.next/", "<rootDir>/node_modules/"],
+	testPathIgnorePatterns: [
+		"<rootDir>/.next/",
+		"<rootDir>/node_modules/",
+		"<rootDir>/__tests__/ai/test-utils.ts",
+	],
 	moduleNameMapper: {
 		"^@/(.*)$": "<rootDir>/src/$1",
 		"^~/(.*)$": "<rootDir>/src/$1",
@@ -26,7 +30,7 @@ const customJestConfig = {
 		},
 	},
 	transformIgnorePatterns: [
-		"node_modules/(?!(@t3-oss/env-nextjs|@t3-oss/env-core)/)",
+		"node_modules/(?!(@t3-oss/env-nextjs|@t3-oss/env-core|@ai-sdk|ai|nanostores|better-auth)/)",
 	],
 };
 

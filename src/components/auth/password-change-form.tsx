@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { passwordChangeSchema, type PasswordChangeData } from "~/lib/auth/validation";
 import { z } from "zod";
+import {
+	type PasswordChangeData,
+	passwordChangeSchema,
+} from "~/lib/auth/validation";
 
 export function PasswordChangeForm() {
 	const [formData, setFormData] = useState<PasswordChangeData>({
@@ -15,7 +18,10 @@ export function PasswordChangeForm() {
 	const [message, setMessage] = useState("");
 	const [messageType, setMessageType] = useState<"success" | "error" | "">("");
 
-	const handleInputChange = (field: keyof PasswordChangeData, value: string) => {
+	const handleInputChange = (
+		field: keyof PasswordChangeData,
+		value: string,
+	) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 		// Clear field-specific error when user starts typing
 		if (errors[field]) {
@@ -141,7 +147,8 @@ export function PasswordChangeForm() {
 					<p className="mt-1 text-red-600 text-sm">{errors.newPassword}</p>
 				) : (
 					<p className="mt-1 text-gray-500 text-sm">
-						Must contain uppercase, lowercase, and number. At least 8 characters.
+						Must contain uppercase, lowercase, and number. At least 8
+						characters.
 					</p>
 				)}
 			</div>
@@ -157,7 +164,9 @@ export function PasswordChangeForm() {
 					id="confirmNewPassword"
 					type="password"
 					value={formData.confirmNewPassword}
-					onChange={(e) => handleInputChange("confirmNewPassword", e.target.value)}
+					onChange={(e) =>
+						handleInputChange("confirmNewPassword", e.target.value)
+					}
 					className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-2 ${
 						errors.confirmNewPassword
 							? "border-red-300 focus:border-red-500 focus:ring-red-500"
@@ -167,7 +176,9 @@ export function PasswordChangeForm() {
 					autoComplete="new-password"
 				/>
 				{errors.confirmNewPassword && (
-					<p className="mt-1 text-red-600 text-sm">{errors.confirmNewPassword}</p>
+					<p className="mt-1 text-red-600 text-sm">
+						{errors.confirmNewPassword}
+					</p>
 				)}
 			</div>
 
