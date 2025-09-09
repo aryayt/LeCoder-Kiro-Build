@@ -62,7 +62,7 @@ export function splitTextIntoChunks(
 			const overlapWords = currentChunk
 				.split(/\s+/)
 				.slice(-Math.floor(overlap / 10));
-			currentChunk = overlapWords.join(" ") + " " + word;
+			currentChunk = `${overlapWords.join(" ")} ${word}`;
 			chunkIndex++;
 		} else {
 			currentChunk = testChunk;
@@ -84,9 +84,9 @@ export function splitTextIntoChunks(
 	}
 
 	// Update total chunks count
-	chunks.forEach((chunk) => {
+	for (const chunk of chunks) {
 		chunk.metadata.totalChunks = chunks.length;
-	});
+	}
 
 	return chunks;
 }
@@ -286,7 +286,7 @@ export async function findSimilarChunks(
 class SimpleVectorStore {
 	private store: Map<string, EmbeddedChunk[]> = new Map();
 
-	async store(projectId: string, chunks: EmbeddedChunk[]): Promise<void> {
+	async set(projectId: string, chunks: EmbeddedChunk[]): Promise<void> {
 		this.store.set(projectId, chunks);
 		console.log(
 			`Stored ${chunks.length} embedded chunks for project ${projectId}`,

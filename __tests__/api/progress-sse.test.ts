@@ -4,6 +4,7 @@
 import { NextRequest } from "next/server";
 import { GET } from "~/app/api/projects/[id]/progress/route";
 import { db } from "~/server/db";
+import type { Project } from "~/types/project";
 
 // Mock the database
 jest.mock("~/server/db", () => ({
@@ -47,7 +48,7 @@ describe("/api/projects/[id]/progress SSE Route", () => {
 	});
 
 	it("should create SSE stream for valid project", async () => {
-		const mockProject = {
+		const mockProject: Project = {
 			id: "test-project-id",
 			title: "Test Project",
 			status: "PROCESSING",
@@ -61,11 +62,19 @@ describe("/api/projects/[id]/progress SSE Route", () => {
 					errorMessage: null,
 					startedAt: new Date(),
 					completedAt: null,
+					createdAt: new Date(),
+					projectId: "test-project-id",
+					inputData: null,
+					outputData: null,
 				},
 			],
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			metadata: null,
+			userId: "test-user",
 		};
 
-		mockDb.project.findUnique.mockResolvedValue(mockProject as any); // TODO: Fix type
+		mockDb.project.findUnique.mockResolvedValue(mockProject);
 
 		const request = new NextRequest(
 			"http://localhost/api/projects/test-project-id/progress",
@@ -91,12 +100,12 @@ describe("/api/projects/[id]/progress SSE Route", () => {
 	});
 
 	it("should set correct CORS headers", async () => {
-		const mockProject = {
+		const mockProject: Partial<Project> = {
 			id: "test-project-id",
 			status: "PROCESSING",
 		};
 
-		mockDb.project.findUnique.mockResolvedValue(mockProject as any); // TODO: Fix type
+		mockDb.project.findUnique.mockResolvedValue(mockProject as Project);
 
 		const request = new NextRequest(
 			"http://localhost/api/projects/test-project-id/progress",

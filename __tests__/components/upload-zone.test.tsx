@@ -63,19 +63,21 @@ describe("UploadZone Component", () => {
 			.getByText("Upload your research paper")
 			.closest("div");
 
-		// Simulate drag over
-		fireEvent.dragOver(dropZone!, {
-			dataTransfer: {
-				files: [file],
-			},
-		});
+		if (dropZone) {
+			// Simulate drag over
+			fireEvent.dragOver(dropZone, {
+				dataTransfer: {
+					files: [file],
+				},
+			});
 
-		// Simulate drop
-		fireEvent.drop(dropZone!, {
-			dataTransfer: {
-				files: [file],
-			},
-		});
+			// Simulate drop
+			fireEvent.drop(dropZone, {
+				dataTransfer: {
+					files: [file],
+				},
+			});
+		}
 
 		await waitFor(() => {
 			expect(mockOnFileUpload).toHaveBeenCalledWith(file);

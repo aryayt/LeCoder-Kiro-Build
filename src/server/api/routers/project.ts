@@ -2,6 +2,7 @@ import { z } from "zod";
 import { PipelineService } from "~/lib/ai/pipeline-service";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import { db } from "~/server/db";
+import type { ProjectMetadata } from "~/types/project";
 
 export const projectRouter = createTRPCRouter({
 	// Get all projects for a user (or anonymous projects)
@@ -27,7 +28,7 @@ export const projectRouter = createTRPCRouter({
 			// Transform the projects to match our type expectations
 			return projects.map((project) => ({
 				...project,
-				metadata: project.metadata as any, // Cast JsonValue to our metadata type
+				metadata: project.metadata as ProjectMetadata, // Cast JsonValue to our metadata type
 				createdAt: project.createdAt.toISOString(),
 				updatedAt: project.updatedAt.toISOString(),
 			}));
@@ -58,7 +59,7 @@ export const projectRouter = createTRPCRouter({
 			// Transform the project to match our type expectations
 			return {
 				...project,
-				metadata: project.metadata as any, // Cast JsonValue to our metadata type
+				metadata: project.metadata as ProjectMetadata, // Cast JsonValue to our metadata type
 				createdAt: project.createdAt.toISOString(),
 				updatedAt: project.updatedAt.toISOString(),
 			};

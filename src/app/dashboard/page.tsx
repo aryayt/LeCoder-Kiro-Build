@@ -97,6 +97,7 @@ export default function DashboardPage() {
 									stroke="currentColor"
 									viewBox="0 0 24 24"
 								>
+									<title>Upload Paper</title>
 									<path
 										strokeLinecap="round"
 										strokeLinejoin="round"

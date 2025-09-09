@@ -37,8 +37,9 @@ async function testDirectRegistration() {
 		} else {
 			console.log("❌ Direct registration failed");
 		}
-	} catch (error: any) {
-		console.error("❌ Network error:", error.message);
+	} catch (error: unknown) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.error("❌ Network error:", errorMessage);
 	}
 }
 

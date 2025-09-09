@@ -4,6 +4,7 @@
 import { NextRequest } from "next/server";
 import { GET } from "~/app/api/projects/[id]/websocket/route";
 import { db } from "~/server/db";
+import type { Project } from "~/types/project";
 
 // Mock the database
 jest.mock("~/server/db", () => ({
@@ -51,7 +52,7 @@ describe("/api/projects/[id]/websocket Route", () => {
 	});
 
 	it("should return current project state immediately", async () => {
-		const mockProject = {
+		const mockProject: Project = {
 			id: "test-project-id",
 			title: "Test Project",
 			status: "PROCESSING",
@@ -65,11 +66,19 @@ describe("/api/projects/[id]/websocket Route", () => {
 					errorMessage: null,
 					startedAt: new Date(),
 					completedAt: null,
+					createdAt: new Date(),
+					projectId: "test-project-id",
+					inputData: null,
+					outputData: null,
 				},
 			],
+			createdAt: new Date().toISOString(),
+			updatedAt: new Date().toISOString(),
+			metadata: null,
+			userId: "test-user",
 		};
 
-		mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+		mockDb.project.findUnique.mockResolvedValue(mockProject);
 
 		const request = new NextRequest(
 			"http://localhost/api/projects/test-project-id/websocket",
@@ -90,15 +99,15 @@ describe("/api/projects/[id]/websocket Route", () => {
 		const oldDate = new Date("2023-01-01");
 		const newDate = new Date("2023-01-02");
 
-		const mockProject = {
+		const mockProject: Partial<Project> = {
 			id: "test-project-id",
 			status: "PROCESSING",
 			currentStage: 2,
-			updatedAt: newDate,
+			updatedAt: newDate.toISOString(),
 			stages: [],
 		};
 
-		mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+		mockDb.project.findUnique.mockResolvedValue(mockProject as Project);
 
 		const url = new URL(
 			"http://localhost/api/projects/test-project-id/websocket",
@@ -116,14 +125,14 @@ describe("/api/projects/[id]/websocket Route", () => {
 	});
 
 	it("should return final state for completed projects", async () => {
-		const mockProject = {
+		const mockProject: Partial<Project> = {
 			id: "test-project-id",
 			status: "COMPLETED",
 			currentStage: 6,
 			stages: [],
 		};
 
-		mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+		mockDb.project.findUnique.mockResolvedValue(mockProject as Project);
 
 		const request = new NextRequest(
 			"http://localhost/api/projects/test-project-id/websocket",
@@ -152,14 +161,14 @@ describe("/api/projects/[id]/websocket Route", () => {
 	});
 
 	it("should include timestamp in all responses", async () => {
-		const mockProject = {
+		const mockProject: Partial<Project> = {
 			id: "test-project-id",
 			status: "PROCESSING",
 			currentStage: 1,
 			stages: [],
 		};
 
-		mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+		mockDb.project.findUnique.mockResolvedValue(mockProject as Project);
 
 		const request = new NextRequest(
 			"http://localhost/api/projects/test-project-id/websocket",

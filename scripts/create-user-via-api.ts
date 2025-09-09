@@ -21,13 +21,14 @@ async function createUserViaAPI() {
 			console.log("❌ Failed to create user");
 			console.log("Result:", result);
 		}
-	} catch (error: any) {
-		console.error("❌ Error creating user:", error.message || error);
+	} catch (error: unknown) {
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.error("❌ Error creating user:", errorMessage);
 
 		// If user already exists, that's okay
 		if (
-			error.message?.includes("already exists") ||
-			error.message?.includes("duplicate")
+			errorMessage?.includes("already exists") ||
+			errorMessage?.includes("duplicate")
 		) {
 			console.log("ℹ️ User already exists - you can try logging in");
 		}

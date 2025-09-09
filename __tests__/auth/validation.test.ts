@@ -344,7 +344,7 @@ describe("Authentication Validation Schemas", () => {
 			},
 		];
 
-		testCases.forEach(({ password, valid, description }) => {
+		for (const { password, valid, description } of testCases) {
 			it(`should ${valid ? "accept" : "reject"} ${description}`, () => {
 				const data = {
 					name: "Test User",
@@ -356,6 +356,6 @@ describe("Authentication Validation Schemas", () => {
 				const result = registerSchema.safeParse(data);
 				expect(result.success).toBe(valid);
 			});
-		});
+		}
 	});
 });

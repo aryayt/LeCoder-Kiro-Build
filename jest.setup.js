@@ -11,8 +11,8 @@ jest.mock("next/navigation", () => ({
 }));
 
 // Mock window.location only in jsdom environment
-if (typeof window !== "undefined") {
-	delete window.location;
+	if (typeof window !== "undefined") {
+	window.location = undefined;
 	window.location = { href: "", assign: jest.fn() };
 }
 
@@ -42,7 +42,7 @@ if (typeof globalThis.WritableStream === "undefined") {
 
 // Add TextEncoder/TextDecoder polyfills
 if (typeof globalThis.TextEncoder === "undefined") {
-	const { TextEncoder, TextDecoder } = require("util");
+	const { TextEncoder, TextDecoder } = require("node:util");
 	globalThis.TextEncoder = TextEncoder;
 	globalThis.TextDecoder = TextDecoder;
 }

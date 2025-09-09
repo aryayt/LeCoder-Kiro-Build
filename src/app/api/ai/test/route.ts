@@ -31,16 +31,15 @@ export async function GET() {
 				data: result.data,
 				metadata: result.metadata,
 			});
-		} else {
-			return NextResponse.json(
-				{
-					success: false,
-					error: result.error,
-					metadata: result.metadata,
-				},
-				{ status: 500 },
-			);
 		}
+		return NextResponse.json(
+			{
+				success: false,
+				error: result.error,
+				metadata: result.metadata,
+			},
+			{ status: 500 },
+		);
 	} catch (error) {
 		console.error("AI test endpoint error:", error);
 
@@ -105,16 +104,15 @@ export async function POST(request: NextRequest) {
 				data: result.data,
 				metadata: result.metadata,
 			});
-		} else {
-			return NextResponse.json(
-				{
-					success: false,
-					error: result.error,
-					metadata: result.metadata,
-				},
-				{ status: 500 },
-			);
 		}
+		return NextResponse.json(
+			{
+				success: false,
+				error: result.error,
+				metadata: result.metadata,
+			},
+			{ status: 500 },
+		);
 	} catch (error) {
 		console.error("AI test POST endpoint error:", error);
 

@@ -5,7 +5,7 @@
  * This script sets up the database schema and seeds initial data
  */
 
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 import { disconnect, testConnection } from "../src/lib/db/connection";
 
 async function setupDatabase() {

@@ -73,6 +73,7 @@ export default async function Home() {
 								stroke="currentColor"
 								viewBox="0 0 24 24"
 							>
+								<title>Upload PDF</title>
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"
@@ -95,6 +96,7 @@ export default async function Home() {
 								stroke="currentColor"
 								viewBox="0 0 24 24"
 							>
+								<title>AI Analysis</title>
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"
@@ -118,6 +120,7 @@ export default async function Home() {
 								stroke="currentColor"
 								viewBox="0 0 24 24"
 							>
+								<title>Download Code</title>
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"

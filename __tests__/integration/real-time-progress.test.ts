@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, it } from "@jest/globals";
+import type { Project, Stage } from "@prisma/client";
 /**
  * @jest-environment node
  */
@@ -19,7 +20,7 @@ jest.mock("~/server/db", () => ({
 const mockDb = db as jest.Mocked<typeof db>;
 
 describe("Real-time Progress Integration", () => {
-	const mockProject = {
+	const mockProject: Project & { stages: Stage[] } = {
 		id: "test-project-id",
 		title: "Test Project",
 		status: "PROCESSING",
@@ -34,6 +35,10 @@ describe("Real-time Progress Integration", () => {
 				errorMessage: null,
 				startedAt: new Date("2023-01-01T10:00:00Z"),
 				completedAt: new Date("2023-01-01T10:05:00Z"),
+				createdAt: new Date(),
+				projectId: "test-project-id",
+				inputData: {},
+				outputData: {},
 			},
 			{
 				id: "stage-2",
@@ -43,8 +48,16 @@ describe("Real-time Progress Integration", () => {
 				errorMessage: null,
 				startedAt: new Date("2023-01-01T10:05:00Z"),
 				completedAt: null,
+				createdAt: new Date(),
+				projectId: "test-project-id",
+				inputData: {},
+				outputData: {},
 			},
 		],
+		createdAt: new Date(),
+		paperContent: "",
+		metadata: {},
+		userId: null,
 	};
 
 	beforeEach(() => {
@@ -58,7 +71,7 @@ describe("Real-time Progress Integration", () => {
 
 	describe("SSE and WebSocket API Consistency", () => {
 		it("should return consistent data format between SSE and WebSocket APIs", async () => {
-			mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+			mockDb.project.findUnique.mockResolvedValue(mockProject);
 
 			// Test WebSocket API
 			const wsRequest = new NextRequest(
@@ -151,7 +164,7 @@ describe("Real-time Progress Integration", () => {
 				updatedAt: new Date("2023-01-01T10:15:00Z"),
 			};
 
-			mockDb.project.findUnique.mockResolvedValue(updatedProject as any);
+			mockDb.project.findUnique.mockResolvedValue(updatedProject);
 
 			const url = new URL(
 				"http://localhost/api/projects/test-project-id/websocket",
@@ -177,7 +190,7 @@ describe("Real-time Progress Integration", () => {
 				currentStage: 6,
 			};
 
-			mockDb.project.findUnique.mockResolvedValue(completedProject as any);
+			mockDb.project.findUnique.mockResolvedValue(completedProject);
 
 			const url = new URL(
 				"http://localhost/api/projects/test-project-id/websocket",
@@ -200,7 +213,7 @@ describe("Real-time Progress Integration", () => {
 
 	describe("Stage Data Transformation", () => {
 		it("should properly transform stage data for client consumption", async () => {
-			mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+			mockDb.project.findUnique.mockResolvedValue(mockProject);
 
 			const request = new NextRequest(
 				"http://localhost/api/projects/test-project-id/websocket",
@@ -250,11 +263,15 @@ describe("Real-time Progress Integration", () => {
 						errorMessage: "Failed to analyze architecture",
 						startedAt: new Date("2023-01-01T10:10:00Z"),
 						completedAt: null,
+						createdAt: new Date(),
+						projectId: "test-project-id",
+						inputData: {},
+						outputData: {},
 					},
 				],
 			};
 
-			mockDb.project.findUnique.mockResolvedValue(projectWithError as any);
+			mockDb.project.findUnique.mockResolvedValue(projectWithError);
 
 			const request = new NextRequest(
 				"http://localhost/api/projects/test-project-id/websocket",
@@ -264,7 +281,7 @@ describe("Real-time Progress Integration", () => {
 			});
 
 			const data = await response.json();
-			const errorStage = data.stages.find((s: any) => s.status === "ERROR");
+			const errorStage = data.stages.find((s: Stage) => s.status === "ERROR");
 
 			expect(errorStage).toBeDefined();
 			expect(errorStage.errorMessage).toBe("Failed to analyze architecture");
@@ -273,7 +290,7 @@ describe("Real-time Progress Integration", () => {
 
 	describe("Response Headers and CORS", () => {
 		it("should set proper CORS headers for SSE", async () => {
-			mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+			mockDb.project.findUnique.mockResolvedValue(mockProject);
 
 			const request = new NextRequest(
 				"http://localhost/api/projects/test-project-id/progress",
@@ -290,7 +307,7 @@ describe("Real-time Progress Integration", () => {
 		});
 
 		it("should set proper cache headers for SSE", async () => {
-			mockDb.project.findUnique.mockResolvedValue(mockProject as any);
+			mockDb.project.findUnique.mockResolvedValue(mockProject);
 
 			const request = new NextRequest(
 				"http://localhost/api/projects/test-project-id/progress",
@@ -312,7 +329,7 @@ describe("Real-time Progress Integration", () => {
 			);
 
 			// Second call succeeds
-			mockDb.project.findUnique.mockResolvedValueOnce(mockProject as any);
+			mockDb.project.findUnique.mockResolvedValueOnce(mockProject);
 
 			const request1 = new NextRequest(
 				"http://localhost/api/projects/test-project-id/websocket",

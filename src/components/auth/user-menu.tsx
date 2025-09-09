@@ -11,7 +11,7 @@ export function UserMenu() {
 	if (isLoading) {
 		return (
 			<div className="animate-pulse">
-				<div className="h-8 w-8 rounded-full bg-gray-300"></div>
+				<div className="h-8 w-8 rounded-full bg-gray-300" />
 			</div>
 		);
 	}
@@ -47,6 +47,7 @@ export function UserMenu() {
 	return (
 		<div className="relative">
 			<button
+				type="button"
 				onClick={() => setIsOpen(!isOpen)}
 				className="flex items-center space-x-2 rounded-md p-2 text-gray-700 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 			>
@@ -73,6 +74,7 @@ export function UserMenu() {
 					viewBox="0 0 24 24"
 					stroke="currentColor"
 				>
+					<title>User menu</title>
 					<path
 						strokeLinecap="round"
 						strokeLinejoin="round"
@@ -100,6 +102,7 @@ export function UserMenu() {
 					</a>
 					<hr className="my-1" />
 					<button
+						type="button"
 						onClick={handleSignOut}
 						className="block w-full px-4 py-2 text-left text-gray-700 text-sm hover:bg-gray-100"
 					>

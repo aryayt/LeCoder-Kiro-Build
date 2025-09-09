@@ -135,12 +135,12 @@ describe("Database Schema", () => {
 				[ProjectStatus.CANCELLED]: [ProjectStatus.PROCESSING],
 			};
 
-			Object.entries(validTransitions).forEach(([from, toStates]) => {
+			for (const [from, toStates] of Object.entries(validTransitions)) {
 				expect(Object.values(ProjectStatus)).toContain(from as ProjectStatus);
-				toStates.forEach((to) => {
+				for (const to of toStates) {
 					expect(Object.values(ProjectStatus)).toContain(to);
-				});
-			});
+				}
+			}
 		});
 
 		it("should validate stage status transitions", () => {
@@ -156,12 +156,12 @@ describe("Database Schema", () => {
 				[StageStatus.RETRYING]: [StageStatus.PROCESSING, StageStatus.ERROR],
 			};
 
-			Object.entries(validTransitions).forEach(([from, toStates]) => {
+			for (const [from, toStates] of Object.entries(validTransitions)) {
 				expect(Object.values(StageStatus)).toContain(from as StageStatus);
-				toStates.forEach((to) => {
+				for (const to of toStates) {
 					expect(Object.values(StageStatus)).toContain(to);
-				});
-			});
+				}
+			}
 		});
 	});
 

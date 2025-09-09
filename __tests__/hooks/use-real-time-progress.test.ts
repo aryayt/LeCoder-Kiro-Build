@@ -26,7 +26,7 @@ class MockEventSource {
 	}
 
 	// Helper method to simulate receiving messages
-	simulateMessage(data: any) {
+	simulateMessage(data: Record<string, unknown>) {
 		if (this.onmessage) {
 			const event = new MessageEvent("message", {
 				data: JSON.stringify(data),
@@ -47,7 +47,7 @@ class MockEventSource {
 global.fetch = jest.fn();
 
 // Replace EventSource with mock
-(global as any).EventSource = MockEventSource;
+(globalThis as unknown as { EventSource: unknown }).EventSource = MockEventSource;
 
 describe("useRealTimeProgress", () => {
 	let mockEventSource: MockEventSource;
@@ -57,7 +57,7 @@ describe("useRealTimeProgress", () => {
 		jest.useFakeTimers();
 
 		// Mock EventSource constructor to capture instance
-		(global as any).EventSource = jest
+		(globalThis as unknown as { EventSource: unknown }).EventSource = jest
 			.fn()
 			.mockImplementation((url: string) => {
 				mockEventSource = new MockEventSource(url);

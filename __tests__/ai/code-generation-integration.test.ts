@@ -724,7 +724,7 @@ describe("Code Generation Integration", () => {
 			expect(architectureResult.data?.architecture).toBeDefined();
 
 			const codeResult = await codeGenerator.generateCode(
-				architectureResult.data!.architecture,
+				architectureResult.data?.architecture,
 				mockAlgorithmSpecs,
 			);
 
@@ -735,8 +735,8 @@ describe("Code Generation Integration", () => {
 
 			const documentationResult =
 				await documentationGenerator.generateDocumentation(
-					codeResult.data!.codebase,
-					architectureResult.data!.architecture,
+					codeResult.data?.codebase,
+					architectureResult.data?.architecture,
 				);
 
 			expect(documentationResult.success).toBe(true);
@@ -746,7 +746,7 @@ describe("Code Generation Integration", () => {
 			expect(mockGenerateText).toHaveBeenCalledTimes(3);
 
 			// Verify architecture contains necessary components
-			const architecture = architectureResult.data!.architecture;
+			const architecture = architectureResult.data?.architecture;
 			expect(architecture.projectStructure.rootDirectory).toBe(
 				"text_classifier",
 			);
@@ -754,28 +754,28 @@ describe("Code Generation Integration", () => {
 			expect(architecture.modules[0].name).toBe("TextClassifier");
 
 			// Verify code is complete and functional
-			const codebase = codeResult.data!.codebase;
+			const codebase = codeResult.data?.codebase;
 			expect(codebase.files.length).toBeGreaterThan(0);
 			expect(codebase.tests.length).toBeGreaterThan(0);
 
 			// Check that main.py contains actual implementation
 			const mainFile = codebase.files.find((f) => f.path === "main.py");
 			expect(mainFile).toBeDefined();
-			expect(mainFile!.content).toContain("def main()");
-			expect(mainFile!.content).not.toContain("TODO");
-			expect(mainFile!.content).not.toContain("placeholder");
+			expect(mainFile?.content).toContain("def main()");
+			expect(mainFile?.content).not.toContain("TODO");
+			expect(mainFile?.content).not.toContain("placeholder");
 
 			// Check that classifier implementation is complete
 			const classifierFile = codebase.files.find((f) =>
 				f.path.includes("text_classifier.py"),
 			);
 			expect(classifierFile).toBeDefined();
-			expect(classifierFile!.content).toContain("class TextClassifier");
-			expect(classifierFile!.content).toContain("def fit(");
-			expect(classifierFile!.content).toContain("def predict(");
+			expect(classifierFile?.content).toContain("class TextClassifier");
+			expect(classifierFile?.content).toContain("def fit(");
+			expect(classifierFile?.content).toContain("def predict(");
 
 			// Verify documentation is comprehensive
-			const documentation = documentationResult.data!.documentation;
+			const documentation = documentationResult.data?.documentation;
 			expect(documentation.readme.title).toContain("Text Classification");
 			expect(documentation.readme.usage.length).toBeGreaterThan(0);
 			expect(documentation.setupGuide.installationSteps.length).toBeGreaterThan(
@@ -833,7 +833,7 @@ describe("Code Generation Integration", () => {
 			expect(architectureResult.success).toBe(true);
 
 			const codeResult = await quickFailCodeGenerator.generateCode(
-				architectureResult.data!.architecture,
+				architectureResult.data?.architecture,
 				mockAlgorithmSpecs,
 			);
 
@@ -980,7 +980,7 @@ describe("Code Generation Integration", () => {
 			expect(architectureResult.success).toBe(true);
 
 			const codeResult = await codeGenerator.generateCode(
-				architectureResult.data!.architecture,
+				architectureResult.data?.architecture,
 				mockAlgorithmSpecs,
 			);
 
@@ -1208,13 +1208,13 @@ describe("Code Generation Integration", () => {
 			);
 
 			const codeResult = await anthropicCoder.generateCode(
-				architectureResult.data!.architecture,
+				architectureResult.data?.architecture,
 				mockAlgorithmSpecs,
 			);
 
 			const documentationResult = await googleDocumenter.generateDocumentation(
-				codeResult.data!.codebase,
-				architectureResult.data!.architecture,
+				codeResult.data?.codebase,
+				architectureResult.data?.architecture,
 			);
 
 			expect(architectureResult.success).toBe(true);

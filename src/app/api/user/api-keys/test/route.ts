@@ -40,15 +40,14 @@ export async function POST(request: NextRequest) {
 				success: true,
 				message: `${provider} API key is working correctly`,
 			});
-		} else {
-			return NextResponse.json(
-				{
-					success: false,
-					error: `${provider} API key test failed. Please check your key and try again.`,
-				},
-				{ status: 400 },
-			);
 		}
+		return NextResponse.json(
+			{
+				success: false,
+				error: `${provider} API key test failed. Please check your key and try again.`,
+			},
+			{ status: 400 },
+		);
 	} catch (error) {
 		console.error("Error testing API key:", error);
 

@@ -6,7 +6,12 @@ import {
 	it,
 	jest,
 } from "@jest/globals";
-import { ProjectStatus, StageStatus } from "@prisma/client";
+import {
+	type Project,
+	ProjectStatus,
+	type Stage,
+	StageStatus,
+} from "@prisma/client";
 import { PipelineContextFactory } from "~/lib/ai/pipeline-context";
 import {
 	PipelineErrorHandler,
@@ -166,7 +171,7 @@ describe("Pipeline Integration Tests", () => {
 	describe("PipelineManager Integration", () => {
 		it("should execute complete pipeline successfully", async () => {
 			// Mock database responses
-			const mockStages = [
+			const mockStages: Stage[] = [
 				{
 					id: "stage-1",
 					projectId: "test-project-id",
@@ -197,8 +202,8 @@ describe("Pipeline Integration Tests", () => {
 			];
 
 			mockGetStagesByProjectId.mockResolvedValue(mockStages);
-			mockUpdateProjectStatus.mockResolvedValue({} as any);
-			mockUpdateStageStatus.mockResolvedValue({} as any);
+			mockUpdateProjectStatus.mockResolvedValue({} as Project);
+			mockUpdateStageStatus.mockResolvedValue({} as Stage);
 			mockCreatePipelineStages.mockResolvedValue(mockStages);
 
 			// Mock AI responses
@@ -322,7 +327,7 @@ describe("Pipeline Integration Tests", () => {
 
 		it("should handle stage failures with retry logic", async () => {
 			// Mock database responses
-			const mockStages = [
+			const mockStages: Stage[] = [
 				{
 					id: "stage-1",
 					projectId: "test-project-id",
@@ -339,8 +344,8 @@ describe("Pipeline Integration Tests", () => {
 			];
 
 			mockGetStagesByProjectId.mockResolvedValue(mockStages);
-			mockUpdateProjectStatus.mockResolvedValue({} as any);
-			mockUpdateStageStatus.mockResolvedValue({} as any);
+			mockUpdateProjectStatus.mockResolvedValue({} as Project);
+			mockUpdateStageStatus.mockResolvedValue({} as Stage);
 
 			// Mock AI failure then success
 			const { generateText } = await import("ai");
@@ -384,8 +389,8 @@ describe("Pipeline Integration Tests", () => {
 		it("should handle pipeline cancellation", async () => {
 			// Mock database responses
 			mockGetStagesByProjectId.mockResolvedValue([]);
-			mockUpdateProjectStatus.mockResolvedValue({} as any);
-			mockUpdateStageStatus.mockResolvedValue({} as any);
+			mockUpdateProjectStatus.mockResolvedValue({} as Project);
+			mockUpdateStageStatus.mockResolvedValue({} as Stage);
 
 			// Cancel pipeline
 			await pipelineManager.cancelPipeline("test-project-id");
@@ -399,7 +404,7 @@ describe("Pipeline Integration Tests", () => {
 
 		it("should get pipeline progress correctly", async () => {
 			// Mock stages with mixed status
-			const mockStages = [
+			const mockStages: Stage[] = [
 				{
 					id: "stage-1",
 					projectId: "test-project-id",
@@ -461,27 +466,24 @@ describe("Pipeline Integration Tests", () => {
 	describe("PipelineService Integration", () => {
 		it("should start pipeline through service", async () => {
 			// Mock project data
-			const mockProject = {
+			const mockProject: Project = {
 				id: "test-project-id",
 				userId: "test-user-id",
 				title: "Test Paper",
-				paperContent: "Test paper content about machine learning",
 				status: ProjectStatus.UPLOADED,
 				currentStage: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				paperContent: "Test paper content about machine learning",
 				metadata: {
 					fileName: "test-paper.pdf",
 					fileSize: 1024000,
 				},
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				user: null,
-				stages: [],
-				generatedFiles: [],
 			};
 
 			mockGetProjectById.mockResolvedValue(mockProject);
 			mockGetStagesByProjectId.mockResolvedValue([]);
-			mockUpdateProjectStatus.mockResolvedValue({} as any);
+			mockUpdateProjectStatus.mockResolvedValue({} as Project);
 
 			// Start pipeline
 			const result = await pipelineService.startPipeline("test-project-id");
@@ -505,7 +507,7 @@ describe("Pipeline Integration Tests", () => {
 
 		it("should get pipeline progress through service", async () => {
 			// Mock stages
-			const mockStages = [
+			const mockStages: Stage[] = [
 				{
 					id: "stage-1",
 					projectId: "test-project-id",
@@ -548,26 +550,24 @@ describe("Pipeline Integration Tests", () => {
 	describe("PipelineContextFactory Integration", () => {
 		it("should create context from project ID", async () => {
 			// Mock project data
-			const mockProject = {
+			const mockProject: Project & { stages: Stage[] } = {
 				id: "test-project-id",
 				userId: "test-user-id",
 				title: "Test Paper",
-				paperContent: "Test paper content",
 				status: ProjectStatus.UPLOADED,
 				currentStage: 0,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+				paperContent: "Test paper content",
 				metadata: {
 					fileName: "test-paper.pdf",
 					fileSize: 1024000,
 					pageCount: 10,
 				},
-				createdAt: new Date(),
-				updatedAt: new Date(),
-				user: null,
 				stages: [],
-				generatedFiles: [],
 			};
 
-			const mockStages = [
+			const mockStages: Stage[] = [
 				{
 					id: "stage-1",
 					projectId: "test-project-id",
@@ -592,10 +592,12 @@ describe("Pipeline Integration Tests", () => {
 
 			// Verify context
 			expect(context).not.toBeNull();
-			expect(context!.projectId).toBe("test-project-id");
-			expect(context!.paperContent).toBe("Test paper content");
-			expect(context!.metadata.fileName).toBe("test-paper.pdf");
-			expect(context!.stages).toHaveLength(1);
+			if (context) {
+				expect(context.projectId).toBe("test-project-id");
+				expect(context.paperContent).toBe("Test paper content");
+				expect(context.metadata.fileName).toBe("test-paper.pdf");
+				expect(context.stages).toHaveLength(1);
+			}
 		});
 
 		it("should validate context correctly", () => {
@@ -612,7 +614,7 @@ describe("Pipeline Integration Tests", () => {
 			expect(validResult.errors).toHaveLength(0);
 
 			// Test invalid context
-			const invalidContext = {
+			const invalidContext: Partial<PipelineContext> = {
 				projectId: "",
 				paperContent: "short",
 				stages: [],
@@ -620,9 +622,11 @@ describe("Pipeline Integration Tests", () => {
 					fileName: "",
 					fileSize: -1,
 				},
-			} as any;
+			};
 
-			const invalidResult = PipelineContextFactory.validate(invalidContext);
+			const invalidResult = PipelineContextFactory.validate(
+				invalidContext as PipelineContext,
+			);
 			expect(invalidResult.valid).toBe(false);
 			expect(invalidResult.errors.length).toBeGreaterThan(0);
 		});
@@ -793,7 +797,11 @@ describe("Pipeline Integration Tests", () => {
 	describe("End-to-End Pipeline Flow", () => {
 		it("should execute complete pipeline flow with real-like data", async () => {
 			// Setup comprehensive test scenario
-			const mockProject = {
+			const mockProject: Project & {
+				stages: Stage[];
+				user: null;
+				generatedFiles: [];
+			} = {
 				id: "e2e-test-project",
 				userId: "test-user",
 				title: "Deep Reinforcement Learning for Autonomous Navigation",
@@ -840,8 +848,8 @@ describe("Pipeline Integration Tests", () => {
 			mockGetProjectById.mockResolvedValue(mockProject);
 			mockGetStagesByProjectId.mockResolvedValue([]);
 			mockCreatePipelineStages.mockResolvedValue([]);
-			mockUpdateProjectStatus.mockResolvedValue({} as any);
-			mockUpdateStageStatus.mockResolvedValue({} as any);
+			mockUpdateProjectStatus.mockResolvedValue({} as Project);
+			mockUpdateStageStatus.mockResolvedValue({} as Stage);
 
 			// Mock AI responses for each stage
 			const { generateText } = await import("ai");
@@ -991,22 +999,24 @@ describe("Pipeline Integration Tests", () => {
 				await PipelineContextFactory.fromProjectId("e2e-test-project");
 			expect(context).not.toBeNull();
 
-			const pipelineResult = await pipelineManager.executePipeline(context!);
+			if (context) {
+				const pipelineResult = await pipelineManager.executePipeline(context);
 
-			// Verify comprehensive results
-			expect(pipelineResult.success).toBe(true);
-			expect(pipelineResult.completedStages).toBe(6);
-			expect(pipelineResult.results.concepts).toEqual(conceptsResponse);
-			expect(pipelineResult.results.algorithms).toEqual(algorithmResponse);
-			expect(pipelineResult.metadata?.totalProcessingTime).toBeGreaterThan(0);
+				// Verify comprehensive results
+				expect(pipelineResult.success).toBe(true);
+				expect(pipelineResult.completedStages).toBe(6);
+				expect(pipelineResult.results.concepts).toEqual(conceptsResponse);
+				expect(pipelineResult.results.algorithms).toEqual(algorithmResponse);
+				expect(pipelineResult.metadata?.totalProcessingTime).toBeGreaterThan(0);
 
-			// Verify all stages were processed
-			expect(mockUpdateStageStatus).toHaveBeenCalledTimes(12); // 6 stages * 2 calls each (processing + completed)
-			expect(mockUpdateProjectStatus).toHaveBeenCalledWith(
-				"e2e-test-project",
-				ProjectStatus.COMPLETED,
-				6,
-			);
+				// Verify all stages were processed
+				expect(mockUpdateStageStatus).toHaveBeenCalledTimes(12); // 6 stages * 2 calls each (processing + completed)
+				expect(mockUpdateProjectStatus).toHaveBeenCalledWith(
+					"e2e-test-project",
+					ProjectStatus.COMPLETED,
+					6,
+				);
+			}
 		});
 	});
 });

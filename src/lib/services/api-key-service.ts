@@ -32,11 +32,11 @@ export interface UpdateApiKeyRequest {
 	isActive?: boolean;
 }
 
-export class ApiKeyService {
+export namespace ApiKeyService {
 	/**
 	 * Store a new API key for a user
 	 */
-	static async createApiKey(
+	export async function createApiKey(
 		request: CreateApiKeyRequest,
 	): Promise<UserApiKeyData> {
 		const { userId, provider, apiKey, keyName } = request;
@@ -86,7 +86,7 @@ export class ApiKeyService {
 	/**
 	 * Get all API keys for a user (without decrypting)
 	 */
-	static async getUserApiKeys(userId: string): Promise<UserApiKeyData[]> {
+	export async function getUserApiKeys(userId: string): Promise<UserApiKeyData[]> {
 		const apiKeys = await db.userApiKey.findMany({
 			where: { userId },
 			orderBy: { createdAt: "desc" },
@@ -106,7 +106,7 @@ export class ApiKeyService {
 	/**
 	 * Get a decrypted API key for use in AI operations
 	 */
-	static async getDecryptedApiKey(
+	export async function getDecryptedApiKey(
 		userId: string,
 		provider: AIProvider,
 	): Promise<string | null> {
@@ -142,7 +142,7 @@ export class ApiKeyService {
 	/**
 	 * Update an existing API key
 	 */
-	static async updateApiKey(
+	export async function updateApiKey(
 		request: UpdateApiKeyRequest,
 	): Promise<UserApiKeyData> {
 		const { keyId, userId, apiKey, keyName, isActive } = request;
@@ -159,7 +159,7 @@ export class ApiKeyService {
 			throw new Error("API key not found or access denied");
 		}
 
-		const updateData: any = {};
+		const updateData: { encryptedKey?: string; keyName?: string; isActive?: boolean; updatedAt?: Date } = {};
 
 		if (apiKey !== undefined) {
 			if (!validateApiKeyFormat(existingKey.provider.toLowerCase(), apiKey)) {
@@ -197,7 +197,7 @@ export class ApiKeyService {
 	/**
 	 * Delete an API key
 	 */
-	static async deleteApiKey(keyId: string, userId: string): Promise<void> {
+	export async function deleteApiKey(keyId: string, userId: string): Promise<void> {
 		const result = await db.userApiKey.deleteMany({
 			where: {
 				id: keyId,
@@ -213,7 +213,7 @@ export class ApiKeyService {
 	/**
 	 * Test an API key by making a simple request
 	 */
-	static async testApiKey(
+	export async function testApiKey(
 		provider: AIProvider,
 		apiKey: string,
 	): Promise<boolean> {
@@ -279,18 +279,18 @@ export class ApiKeyService {
 	/**
 	 * Check if user has a valid API key for a provider
 	 */
-	static async hasValidApiKey(
+	export async function hasValidApiKey(
 		userId: string,
 		provider: AIProvider,
 	): Promise<boolean> {
-		const apiKey = await this.getDecryptedApiKey(userId, provider);
+		const apiKey = await ApiKeyService.getDecryptedApiKey(userId, provider);
 		return apiKey !== null;
 	}
 
 	/**
 	 * Get available providers for a user
 	 */
-	static async getAvailableProviders(userId: string): Promise<AIProvider[]> {
+	export async function getAvailableProviders(userId: string): Promise<AIProvider[]> {
 		const apiKeys = await db.userApiKey.findMany({
 			where: {
 				userId,

@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 		const buffer = await fileToBuffer(file);
 
 		// Extract text from PDF
-		let processingResult;
+		let processingResult: { text: string; metadata: { title?: string; author?: string; pages: number; fileSize: number; fileName: string; } };
 		let vectorProcessingResult = null;
 		let aiProvider: "openai" | "google" = "openai";
 

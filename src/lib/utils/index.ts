@@ -11,16 +11,14 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Format file size in bytes to human readable format
  */
-export function formatFileSize(bytes: number): string {
+	export function formatFileSize(bytes: number): string {
 	if (bytes === 0) return "0 Bytes";
 
 	const k = 1024;
 	const sizes = ["Bytes", "KB", "MB", "GB"];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-	return (
-		Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-	);
+	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -42,7 +40,7 @@ export function generateProjectTitle(paperContent: string): string {
 		const firstSentence = sentences[0].trim();
 		// Limit to 50 characters
 		return firstSentence.length > 50
-			? firstSentence.substring(0, 47) + "..."
+			? `${firstSentence.substring(0, 47)}...`
 			: firstSentence;
 	}
 

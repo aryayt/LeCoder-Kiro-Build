@@ -1,3 +1,4 @@
+import type React from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
@@ -20,7 +21,7 @@ jest.mock("~/hooks/use-projects", () => ({
 
 // Mock components to avoid complex rendering
 jest.mock("~/components/layout/dashboard-layout", () => ({
-	DashboardLayout: ({ children, title, description }: any) => (
+	DashboardLayout: ({ children, title, description }: { children: React.ReactNode; title: string; description: string }) => (
 		<div data-testid="dashboard-layout">
 			<h1>{title}</h1>
 			<p>{description}</p>
@@ -30,7 +31,7 @@ jest.mock("~/components/layout/dashboard-layout", () => ({
 }));
 
 jest.mock("~/components/ui/dashboard-stats", () => ({
-	DashboardStats: ({ projects, isLoading }: any) => (
+	DashboardStats: ({ projects, isLoading }: { projects: unknown[]; isLoading: boolean }) => (
 		<div data-testid="dashboard-stats">
 			{isLoading ? "Loading stats..." : `${projects.length} projects`}
 		</div>
@@ -38,7 +39,7 @@ jest.mock("~/components/ui/dashboard-stats", () => ({
 }));
 
 jest.mock("~/components/ui/storage-limit-warning", () => ({
-	StorageLimitWarning: ({ projects }: any) => (
+	StorageLimitWarning: ({ projects }: { projects: unknown[] }) => (
 		<div data-testid="storage-limit-warning">
 			{projects.length >= 40 ? "Storage warning displayed" : null}
 		</div>
@@ -46,18 +47,18 @@ jest.mock("~/components/ui/storage-limit-warning", () => ({
 }));
 
 jest.mock("~/components/ui/project-list", () => ({
-	ProjectList: ({ projects, onView, onDownload, onDelete, isLoading }: any) => (
+	ProjectList: ({ projects, onView, onDownload, onDelete, isLoading }: { projects: unknown[]; onView: (id: string) => void; onDownload: (id: string) => void; onDelete: (id: string) => void; isLoading: boolean }) => (
 		<div data-testid="project-list">
 			{isLoading ? (
 				"Loading projects..."
 			) : (
 				<div>
-					{projects.map((project: any) => (
+					{projects.map((project: { id: string; title: string }) => (
 						<div key={project.id} data-testid={`project-${project.id}`}>
 							<span>{project.title}</span>
-							<button onClick={() => onView(project.id)}>View</button>
-							<button onClick={() => onDownload(project.id)}>Download</button>
-							<button onClick={() => onDelete(project.id)}>Delete</button>
+							<button type="button" onClick={() => onView(project.id)}>View</button>
+							<button type="button" onClick={() => onDownload(project.id)}>Download</button>
+							<button type="button" onClick={() => onDelete(project.id)}>Delete</button>
 						</div>
 					))}
 				</div>
@@ -73,14 +74,14 @@ jest.mock("~/components/ui/confirmation-dialog", () => ({
 		onClose,
 		title,
 		isLoading,
-	}: any) =>
+	}: { isOpen: boolean; onConfirm: () => void; onClose: () => void; title: string; isLoading: boolean }) =>
 		isOpen ? (
 			<div data-testid="confirmation-dialog">
 				<h2>{title}</h2>
-				<button onClick={onConfirm} disabled={isLoading}>
+				<button type="button" onClick={onConfirm} disabled={isLoading}>
 					{isLoading ? "Deleting..." : "Confirm"}
 				</button>
-				<button onClick={onClose}>Cancel</button>
+				<button type="button" onClick={onClose}>Cancel</button>
 			</div>
 		) : null,
 }));

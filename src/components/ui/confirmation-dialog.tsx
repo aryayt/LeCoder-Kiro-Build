@@ -83,6 +83,7 @@ export function ConfirmationDialog({
 						stroke="currentColor"
 						viewBox="0 0 24 24"
 					>
+						<title>Danger</title>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
@@ -99,6 +100,7 @@ export function ConfirmationDialog({
 						stroke="currentColor"
 						viewBox="0 0 24 24"
 					>
+						<title>Warning</title>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
@@ -115,6 +117,7 @@ export function ConfirmationDialog({
 						stroke="currentColor"
 						viewBox="0 0 24 24"
 					>
+						<title>Info</title>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"

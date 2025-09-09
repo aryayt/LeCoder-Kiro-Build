@@ -15,9 +15,10 @@ async function testRegistration() {
 
 		console.log("✅ Registration test successful!");
 		console.log("Result:", result);
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("❌ Registration test failed:");
-		console.error("Error:", error.message || error);
+		const errorMessage = error instanceof Error ? error.message : String(error);
+		console.error("Error:", errorMessage);
 		console.error("Full error:", error);
 	}
 }

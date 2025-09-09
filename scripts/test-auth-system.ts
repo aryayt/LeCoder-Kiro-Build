@@ -63,9 +63,12 @@ async function testAuthSystem() {
 
 		// Test 5: Password Verification
 		console.log("\n5. Testing password verification...");
+		if (!testUser.password) {
+			throw new Error("User password is not set");
+		}
 		const isPasswordValid = await bcrypt.compare(
 			"TestPassword123",
-			testUser.password!,
+			testUser.password,
 		);
 		console.log("✅ Password verification:", isPasswordValid ? "PASS" : "FAIL");
 

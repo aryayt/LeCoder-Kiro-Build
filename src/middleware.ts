@@ -17,7 +17,7 @@ export async function middleware(request: NextRequest) {
 
 	// Check if the current path is public
 	const isPublicRoute = publicRoutes.some(
-		(route) => pathname === route || pathname.startsWith(route + "/"),
+		(route) => pathname === route || pathname.startsWith(`${route}/`),
 	);
 
 	// If it's a public route, allow access

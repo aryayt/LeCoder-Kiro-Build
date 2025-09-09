@@ -336,7 +336,7 @@ describe("Authentication and User Management", () => {
 				db.user.create({
 					data: {
 						name: "User Without Email",
-					} as any,
+					},
 				}),
 			).rejects.toThrow();
 		});
@@ -357,13 +357,13 @@ describe("Authentication and User Management", () => {
 
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-			validEmails.forEach((email) => {
+			for (const email of validEmails) {
 				expect(emailRegex.test(email)).toBe(true);
-			});
+			}
 
-			invalidEmails.forEach((email) => {
+			for (const email of invalidEmails) {
 				expect(emailRegex.test(email)).toBe(false);
-			});
+			}
 		});
 
 		it("should validate password strength in application logic", () => {
@@ -384,13 +384,13 @@ describe("Authentication and User Management", () => {
 				);
 			};
 
-			strongPasswords.forEach((password) => {
+			for (const password of strongPasswords) {
 				expect(isStrongPassword(password)).toBe(true);
-			});
+			}
 
-			weakPasswords.forEach((password) => {
+			for (const password of weakPasswords) {
 				expect(isStrongPassword(password)).toBe(false);
-			});
+			}
 		});
 	});
 });
