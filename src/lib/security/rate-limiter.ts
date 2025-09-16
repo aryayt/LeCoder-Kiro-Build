@@ -30,7 +30,7 @@ class RateLimiter {
 	private ipStore = new Map<string, RateLimitEntry>();
 	private userStore = new Map<string, RateLimitEntry>();
 
-	private config: RateLimitConfig = {
+	public readonly config: RateLimitConfig = {
 		global: {
 			windowMs: 15 * 60 * 1000, // 15 minutes
 			maxRequests: 1000, // 1000 requests per 15 minutes per IP
@@ -168,7 +168,10 @@ class RateLimiter {
 		const now = Date.now();
 
 		const ipStatus = this.getStatus(ip, rule, now, this.ipStore);
-		const result: any = { ip: ipStatus };
+		const result: {
+			ip: { remaining: number; resetTime: number };
+			user?: { remaining: number; resetTime: number };
+		} = { ip: ipStatus };
 
 		// Get user status for authenticated endpoints
 		if (endpoint === 'authenticated' || endpoint === 'upload' || endpoint === 'ai') {

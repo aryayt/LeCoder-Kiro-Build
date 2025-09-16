@@ -21,7 +21,7 @@ interface ErrorReport {
 		environment: string;
 		version: string;
 		tags?: Record<string, string>;
-		extra?: Record<string, any>;
+		extra?: Record<string, unknown>;
 	};
 	fingerprint: string;
 	count: number;
@@ -81,6 +81,9 @@ export async function POST(request: NextRequest) {
 async function sendToExternalService(_errorReport: ErrorReport) {
 	// Example: Send to Sentry, Vercel Analytics, or other monitoring service
 	try {
+		// TODO: Implement external service integration
+		// await sentryClient.captureException(errorReport);
+		console.info('External service integration not yet implemented');
 	} catch (error) {
 		console.error('Failed to send to external service:', error);
 	}

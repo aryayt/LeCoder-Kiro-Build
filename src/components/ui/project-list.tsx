@@ -18,7 +18,6 @@ type FilterOption = 'all' | 'uploaded' | 'processing' | 'completed' | 'error';
 export function ProjectList({
 	projects,
 	onView,
-	onDownload,
 	onDelete,
 	isLoading = false,
 }: ProjectListProps) {
@@ -96,8 +95,8 @@ export function ProjectList({
 
 				{/* Loading skeleton for project cards */}
 				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{Array.from({ length: 6 }).map((_, i) => (
-						<div key={i} className="animate-pulse">
+					{Array.from({ length: 6 }, (_, i) => `project-skeleton-${i}`).map((key) => (
+						<div key={key} className="animate-pulse">
 							<div className="h-64 w-full rounded-lg bg-gray-200" />
 						</div>
 					))}
@@ -121,7 +120,9 @@ export function ProjectList({
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"
+								aria-label="Search"
 							>
+								<title>Search</title>
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"
@@ -258,7 +259,6 @@ export function ProjectList({
 							key={project.id}
 							project={project}
 							onView={onView}
-							onDownload={onDownload}
 							onDelete={onDelete}
 						/>
 					))}

@@ -172,13 +172,20 @@ export default function ProjectDetailPage() {
 		<div className="flex items-center space-x-3">
 			{project.status === 'UPLOADED' && (
 				<button
+					type="button"
 					onClick={handleStartPipeline}
 					disabled={startPipelineMutation.isPending}
 					className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 font-medium text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
 				>
 					{startPipelineMutation.isPending ? (
 						<>
-							<svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+							<svg
+								className="mr-2 h-4 w-4 animate-spin"
+								fill="none"
+								viewBox="0 0 24 24"
+								aria-label="Loading"
+							>
+								<title>Loading</title>
 								<circle
 									className="opacity-25"
 									cx="12"
@@ -214,13 +221,20 @@ export default function ProjectDetailPage() {
 
 			{project.status === 'PROCESSING' && (
 				<button
+					type="button"
 					onClick={handleCancelPipeline}
 					disabled={cancelPipelineMutation.isPending}
 					className="inline-flex items-center rounded-md border border-red-300 bg-white px-4 py-2 font-medium text-red-700 text-sm hover:bg-red-50 disabled:opacity-50"
 				>
 					{cancelPipelineMutation.isPending ? (
 						<>
-							<svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+							<svg
+								className="mr-2 h-4 w-4 animate-spin"
+								fill="none"
+								viewBox="0 0 24 24"
+								aria-label="Loading"
+							>
+								<title>Loading</title>
 								<circle
 									className="opacity-25"
 									cx="12"
@@ -256,13 +270,20 @@ export default function ProjectDetailPage() {
 
 			{project.status === 'ERROR' && (
 				<button
+					type="button"
 					onClick={handleRetryPipeline}
 					disabled={retryPipelineMutation.isPending}
 					className="inline-flex items-center rounded-md bg-yellow-600 px-4 py-2 font-medium text-sm text-white hover:bg-yellow-700 disabled:opacity-50"
 				>
 					{retryPipelineMutation.isPending ? (
 						<>
-							<svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+							<svg
+								className="mr-2 h-4 w-4 animate-spin"
+								fill="none"
+								viewBox="0 0 24 24"
+								aria-label="Loading"
+							>
+								<title>Loading</title>
 								<circle
 									className="opacity-25"
 									cx="12"
@@ -298,6 +319,7 @@ export default function ProjectDetailPage() {
 
 			{project.status === 'COMPLETED' && (
 				<button
+					type="button"
 					onClick={handleDownload}
 					className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 text-sm hover:bg-gray-50"
 				>
@@ -314,6 +336,7 @@ export default function ProjectDetailPage() {
 				</button>
 			)}
 			<button
+				type="button"
 				onClick={() => setDeleteConfirmation(true)}
 				className="inline-flex items-center rounded-md border border-red-300 bg-white px-4 py-2 font-medium text-red-700 text-sm hover:bg-red-50"
 			>
@@ -350,9 +373,7 @@ export default function ProjectDetailPage() {
 									{project.status}
 								</span>
 							</div>
-							<p className="mt-2 text-gray-600">
-								{(project.metadata as any)?.fileName || 'Unknown file'}
-							</p>
+							<p className="mt-2 text-gray-600">{project.metadata?.fileName || 'Unknown file'}</p>
 						</div>
 					</div>
 
@@ -361,14 +382,12 @@ export default function ProjectDetailPage() {
 						<div>
 							<dt className="font-medium text-gray-500 text-sm">File Size</dt>
 							<dd className="mt-1 text-gray-900 text-sm">
-								{formatFileSize((project.metadata as any)?.fileSize || 0)}
+								{formatFileSize(project.metadata?.fileSize || 0)}
 							</dd>
 						</div>
 						<div>
 							<dt className="font-medium text-gray-500 text-sm">Pages</dt>
-							<dd className="mt-1 text-gray-900 text-sm">
-								{(project.metadata as any)?.pageCount || 0}
-							</dd>
+							<dd className="mt-1 text-gray-900 text-sm">{project.metadata?.pageCount || 0}</dd>
 						</div>
 						<div>
 							<dt className="font-medium text-gray-500 text-sm">Created</dt>
@@ -376,13 +395,13 @@ export default function ProjectDetailPage() {
 								{new Date(project.createdAt).toLocaleDateString()}
 							</dd>
 						</div>
-						{(project.metadata as any)?.authors &&
-							Array.isArray((project.metadata as any).authors) &&
-							(project.metadata as any).authors.length > 0 && (
+						{project.metadata?.authors &&
+							Array.isArray(project.metadata.authors) &&
+							project.metadata.authors.length > 0 && (
 								<div className="sm:col-span-3">
 									<dt className="font-medium text-gray-500 text-sm">Authors</dt>
 									<dd className="mt-1 text-gray-900 text-sm">
-										{(project.metadata as any).authors.join(', ')}
+										{project.metadata.authors.join(', ')}
 									</dd>
 								</div>
 							)}
@@ -408,11 +427,10 @@ export default function ProjectDetailPage() {
 									<dd className="mt-1 text-blue-900 text-sm">{aiConfig.temperature}</dd>
 								</div>
 							</div>
-							{(project.metadata as any)?.vectorProcessing && (
+							{project.metadata?.vectorProcessing && (
 								<div className="mt-3 text-blue-800 text-xs">
-									Vector embeddings: {(project.metadata as any).vectorProcessing.chunksCount}{' '}
-									chunks, ~{(project.metadata as any).vectorProcessing.estimatedTokens} tokens
-									processed
+									Vector embeddings: {project.metadata.vectorProcessing.chunksCount} chunks, ~
+									{project.metadata.vectorProcessing.estimatedTokens} tokens processed
 								</div>
 							)}
 						</div>
@@ -425,11 +443,16 @@ export default function ProjectDetailPage() {
 					<ProgressTracker
 						projectId={projectId}
 						stages={
-							(project as any).stages?.map((stage: any) => ({
+							project.stages?.map((stage) => ({
 								id: stage.id,
 								stageNumber: stage.stageNumber,
 								stageName: stage.stageName,
-								status: stage.status,
+								status: stage.status.toLowerCase() as
+									| 'pending'
+									| 'processing'
+									| 'completed'
+									| 'error'
+									| 'retrying',
 								errorMessage: stage.errorMessage,
 								startedAt: stage.startedAt,
 								completedAt: stage.completedAt,

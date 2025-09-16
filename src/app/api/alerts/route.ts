@@ -7,7 +7,7 @@ interface AlertPayload {
 	type: 'error_threshold' | 'performance_degradation' | 'system_failure' | 'security_incident';
 	severity: 'low' | 'medium' | 'high' | 'critical';
 	message: string;
-	details?: Record<string, any>;
+	details?: Record<string, unknown>;
 	timestamp?: number;
 }
 
@@ -83,9 +83,10 @@ type SlackAttachment = {
 async function logAlert(alert: AlertPayload) {
 	const logLevel = alert.severity === 'critical' || alert.severity === 'high' ? 'error' : 'warn';
 
+	const eventTimestamp = alert.timestamp ?? Date.now();
 	console[logLevel](`[ALERT] ${alert.type.toUpperCase()}: ${alert.message}`, {
 		severity: alert.severity,
-		timestamp: new Date(alert.timestamp!).toISOString(),
+		timestamp: new Date(eventTimestamp).toISOString(),
 		details: alert.details,
 	});
 }
@@ -101,6 +102,7 @@ async function sendSlackAlert(alert: AlertPayload) {
 		const emoji = getSeverityEmoji(alert.severity);
 		const color = getSeverityColor(alert.severity);
 
+		const eventTimestamp = alert.timestamp ?? Date.now();
 		const attachments: SlackAttachment[] = [
 			{
 				color,
@@ -117,7 +119,7 @@ async function sendSlackAlert(alert: AlertPayload) {
 					},
 					{
 						title: 'Time',
-						value: new Date(alert.timestamp!).toISOString(),
+						value: new Date(eventTimestamp).toISOString(),
 						short: true,
 					},
 					{
@@ -157,8 +159,9 @@ async function sendSlackAlert(alert: AlertPayload) {
 async function sendEmailAlert(_alert: AlertPayload) {
 	// This would integrate with your email service (SendGrid, SES, etc.)
 	try {
-		// Actual email sending would go here
+		// TODO: Implement email service integration
 		// await emailService.send({...});
+		console.info('Email service integration not yet implemented');
 	} catch (error) {
 		console.error('Failed to send email alert:', error);
 	}

@@ -93,8 +93,8 @@ export function DashboardStats({ projects, isLoading = false }: DashboardStatsPr
 	if (isLoading) {
 		return (
 			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-				{Array.from({ length: 4 }).map((_, i) => (
-					<div key={i} className="animate-pulse rounded-lg bg-white p-6 shadow">
+				{Array.from({ length: 4 }, (_, i) => `loading-skeleton-${i}`).map((key) => (
+					<div key={key} className="animate-pulse rounded-lg bg-white p-6 shadow">
 						<div className="flex items-center">
 							<div className="h-12 w-12 rounded-lg bg-gray-200" />
 							<div className="ml-4 flex-1">

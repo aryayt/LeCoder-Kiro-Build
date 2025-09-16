@@ -6,7 +6,6 @@ import { Button } from './button';
 
 interface DownloadButtonProps {
 	projectId: string;
-	projectName: string;
 	disabled?: boolean;
 	variant?: 'default' | 'outline' | 'ghost';
 	size?: 'sm' | 'default' | 'lg';
@@ -15,7 +14,6 @@ interface DownloadButtonProps {
 
 export function DownloadButton({
 	projectId,
-	projectName,
 	disabled = false,
 	variant = 'default',
 	size = 'default',
@@ -106,6 +104,7 @@ export function DownloadButton({
 						aria-valuenow={progress.progress}
 						aria-valuemin={0}
 						aria-valuemax={100}
+						tabIndex={0}
 					>
 						<div
 							className={`h-2 rounded-full transition-all duration-300 ${

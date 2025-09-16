@@ -6,7 +6,7 @@ import type {
 	ResearchConcepts,
 	SystemArchitecture,
 } from '~/types/ai';
-import { CacheKeys, CacheTTL, cache } from './redis';
+import { CacheKeys, CacheTTL, cache, getRedisClient } from './redis';
 
 /**
  * Generate cache key for AI requests based on content hash
@@ -118,7 +118,7 @@ export class AICacheManager {
 		projects: number;
 	}> {
 		try {
-			const redis = cache.redis;
+			const redis = getRedisClient();
 			const aiKeys = await redis.keys('ai:response:*');
 			const pdfKeys = await redis.keys('pdf:content:*');
 			const projectKeys = await redis.keys('project:*');

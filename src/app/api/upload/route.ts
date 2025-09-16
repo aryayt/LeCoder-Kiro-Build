@@ -11,7 +11,7 @@ import { db } from '~/server/db';
 export const POST = withSecurity(
 	async (request: NextRequest) => {
 		let userId: string | undefined;
-		let session: any;
+		let session: { user?: { id: string } } | null = null;
 		let file: File | null = null;
 
 		try {

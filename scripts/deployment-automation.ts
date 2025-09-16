@@ -132,8 +132,12 @@ class DeploymentAutomation {
 		}
 
 		// Validate URL format
+		const betterAuthUrl = process.env.BETTER_AUTH_URL;
+		if (!betterAuthUrl) {
+			throw new Error('BETTER_AUTH_URL environment variable is required');
+		}
 		try {
-			new URL(process.env.BETTER_AUTH_URL!);
+			new URL(betterAuthUrl);
 		} catch {
 			throw new Error('BETTER_AUTH_URL is not a valid URL');
 		}
@@ -142,9 +146,14 @@ class DeploymentAutomation {
 	private async runDatabaseMigration() {
 		console.info('🗄️ Running database migration...');
 
+		const databaseUrl = process.env.DATABASE_URL;
+		if (!databaseUrl) {
+			throw new Error('DATABASE_URL environment variable is required');
+		}
+
 		await deployDatabase({
 			environment: this.config.environment,
-			databaseUrl: process.env.DATABASE_URL!,
+			databaseUrl,
 			skipSeed: this.config.environment === 'production',
 			backupBeforeMigration: this.config.environment === 'production',
 		});

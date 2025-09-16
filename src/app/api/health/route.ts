@@ -13,7 +13,10 @@ interface HealthStatus {
 		database: {
 			status: 'healthy' | 'unhealthy';
 			responseTime: number;
-			details?: any;
+			details?: {
+				activeConnections?: number;
+				tableStats?: Record<string, unknown>;
+			};
 		};
 		ai: {
 			status: 'healthy' | 'degraded' | 'unhealthy';

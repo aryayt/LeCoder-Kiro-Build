@@ -10,18 +10,11 @@ import { FilePreview } from './file-preview';
 interface ProjectCardProps {
 	project: Project;
 	onView?: (projectId: string) => void;
-	onDownload?: (projectId: string) => void;
 	onDelete?: (projectId: string) => void;
 	className?: string;
 }
 
-export function ProjectCard({
-	project,
-	onView,
-	onDownload,
-	onDelete,
-	className,
-}: ProjectCardProps) {
+export function ProjectCard({ project, onView, onDelete, className }: ProjectCardProps) {
 	const [showPreview, setShowPreview] = useState(false);
 	const getStatusColor = (status: string) => {
 		switch (status) {
@@ -142,12 +135,7 @@ export function ProjectCard({
 
 					<div className="flex items-center space-x-2">
 						{project.status === 'COMPLETED' && (
-							<DownloadButton
-								projectId={project.id}
-								projectName={project.title}
-								size="sm"
-								variant="outline"
-							/>
+							<DownloadButton projectId={project.id} size="sm" variant="outline" />
 						)}
 
 						<Button

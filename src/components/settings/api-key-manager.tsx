@@ -226,7 +226,7 @@ export function ApiKeyManager() {
 									onChange={(e) =>
 										setFormData({
 											...formData,
-											provider: e.target.value as any,
+											provider: e.target.value as ApiKeyFormData['provider'],
 										})
 									}
 									className="mt-1 w-full rounded-md border border-gray-300 p-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
