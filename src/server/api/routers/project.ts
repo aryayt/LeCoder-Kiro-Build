@@ -168,8 +168,12 @@ export const projectRouter = createTRPCRouter({
 		// For now, allow all operations in anonymous mode
 
 		const updateData: any = { updatedAt: new Date() };
-		if (input.title) updateData.title = input.title;
-		if (input.status) updateData.status = input.status;
+		if (input.title) {
+			updateData.title = input.title;
+		}
+		if (input.status) {
+			updateData.status = input.status;
+		}
 
 		const project = await db.project.update({
 			where: { id: input.id },

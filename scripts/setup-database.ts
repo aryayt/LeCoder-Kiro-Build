@@ -30,7 +30,7 @@ async function setupDatabase() {
 		console.info('\n3. Running database migrations...');
 		try {
 			execSync('npx prisma migrate dev --name init', { stdio: 'inherit' });
-		} catch (error) {
+		} catch (_error) {
 			console.info('⚠️  Migration may have already been applied, continuing...');
 		}
 
@@ -38,7 +38,7 @@ async function setupDatabase() {
 		console.info('\n4. Seeding database with sample data...');
 		try {
 			execSync('npm run db:seed', { stdio: 'inherit' });
-		} catch (error) {
+		} catch (_error) {
 			console.info('⚠️  Seeding failed, but database setup is complete');
 			console.info('You can run seeding manually with: npm run db:seed');
 		}

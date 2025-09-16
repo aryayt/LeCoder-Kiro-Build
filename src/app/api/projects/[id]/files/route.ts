@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { FileService } from '~/lib/services/file-service';
 
-export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
 	try {
 		const { id: projectId } = await context.params;
 

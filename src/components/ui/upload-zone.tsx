@@ -192,7 +192,7 @@ export function UploadZone({
 					'relative rounded-lg border-2 border-dashed p-8 text-center transition-colors',
 					{
 						'border-blue-400 bg-blue-50': isDragOver && !isUploading,
-						'border-gray-300 hover:border-gray-400': !isDragOver && !isUploading,
+						'border-gray-300 hover:border-gray-400': !(isDragOver || isUploading),
 						'border-gray-200 bg-gray-50': isUploading,
 						'border-yellow-300 bg-yellow-50': isClient && !isOnline,
 					}

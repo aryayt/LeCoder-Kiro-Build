@@ -62,7 +62,7 @@ export function LoginForm() {
 				// Redirect will be handled by Better Auth
 				window.location.href = '/dashboard';
 			}
-		} catch (err) {
+		} catch (_err) {
 			setGeneralError('An unexpected error occurred. Please try again.');
 		} finally {
 			setIsLoading(false);
@@ -76,7 +76,7 @@ export function LoginForm() {
 				provider: 'google',
 				callbackURL: '/',
 			});
-		} catch (err) {
+		} catch (_err) {
 			setGeneralError('Google sign-in failed');
 			setIsLoading(false);
 		}
@@ -89,7 +89,7 @@ export function LoginForm() {
 				provider: 'github',
 				callbackURL: '/',
 			});
-		} catch (err) {
+		} catch (_err) {
 			setGeneralError('GitHub sign-in failed');
 			setIsLoading(false);
 		}

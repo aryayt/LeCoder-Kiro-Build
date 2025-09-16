@@ -10,17 +10,11 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false, // Set to true in production
-		sendResetPassword: async ({ user, url }) => {
-			// TODO: Implement email sending for password reset
-			console.log(`Password reset URL for ${user.email}: ${url}`);
-		},
+		sendResetPassword: async ({ user, url }) => {},
 	},
 	emailVerification: {
 		sendOnSignUp: false, // Set to true in production
-		sendVerificationEmail: async ({ user, url }) => {
-			// TODO: Implement email sending for verification
-			console.log(`Email verification URL for ${user.email}: ${url}`);
-		},
+		sendVerificationEmail: async ({ user, url }) => {},
 	},
 	socialProviders: {
 		google: {

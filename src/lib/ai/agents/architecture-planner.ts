@@ -5,13 +5,9 @@ import type {
 	ResearchConcepts,
 	RiskAssessment,
 } from '~/types/ai';
-import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
+import { type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class ArchitecturePlannerAgent extends BaseAIAgent {
-	constructor(config: AIConfig) {
-		super(config);
-	}
-
 	/**
 	 * Plan system architecture based on research concepts and algorithm specifications
 	 */
@@ -465,7 +461,8 @@ Guidelines:
 		concepts: ResearchConcepts,
 		algorithmSpecs: AlgorithmSpecs
 	): Promise<AgentResponse<ArchitecturePlanningResult>> {
-		const systemPrompt = `Create a basic system architecture. Return minimal JSON structure with essential components only.`;
+		const systemPrompt =
+			'Create a basic system architecture. Return minimal JSON structure with essential components only.';
 
 		const messages = [
 			{

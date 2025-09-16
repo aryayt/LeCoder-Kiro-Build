@@ -77,7 +77,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
 				setMessage(error.message || 'Failed to update profile');
 				setMessageType('error');
 			}
-		} catch (error) {
+		} catch (_error) {
 			setMessage('An unexpected error occurred. Please try again.');
 			setMessageType('error');
 		} finally {

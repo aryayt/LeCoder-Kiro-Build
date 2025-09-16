@@ -75,7 +75,9 @@ function ToastContainer({
 	toasts: Toast[];
 	onRemove: (id: string) => void;
 }) {
-	if (toasts.length === 0) return null;
+	if (toasts.length === 0) {
+		return null;
+	}
 
 	return (
 		<div className="fixed top-4 right-4 z-50 max-w-sm space-y-2">

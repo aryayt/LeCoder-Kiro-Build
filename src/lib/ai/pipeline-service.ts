@@ -35,9 +35,15 @@ export class PipelineService {
 		// Determine available providers based on environment variables
 		const availableProviders: AIProvider[] = [];
 
-		if (env.OPENAI_API_KEY) availableProviders.push('openai');
-		if (env.GOOGLE_GENERATIVE_AI_API_KEY) availableProviders.push('google');
-		if (env.ANTHROPIC_API_KEY) availableProviders.push('anthropic');
+		if (env.OPENAI_API_KEY) {
+			availableProviders.push('openai');
+		}
+		if (env.GOOGLE_GENERATIVE_AI_API_KEY) {
+			availableProviders.push('google');
+		}
+		if (env.ANTHROPIC_API_KEY) {
+			availableProviders.push('anthropic');
+		}
 
 		if (availableProviders.length === 0) {
 			throw new Error('No AI providers configured. Please set at least one API key.');
@@ -161,7 +167,6 @@ export class PipelineService {
 			const result = await this.pipelineManager.executePipeline(context);
 
 			if (result.success) {
-				console.log(`Pipeline completed successfully for project ${context.projectId}`);
 			} else {
 				console.error(`Pipeline failed for project ${context.projectId}:`, result.error);
 			}
@@ -304,7 +309,6 @@ export class PipelineService {
 			const result = await this.pipelineManager.retryPipeline(context);
 
 			if (result.success) {
-				console.log(`Pipeline retry completed successfully for project ${context.projectId}`);
 			} else {
 				console.error(`Pipeline retry failed for project ${context.projectId}:`, result.error);
 			}
@@ -326,9 +330,15 @@ export class PipelineService {
 	} {
 		const availableProviders: AIProvider[] = [];
 
-		if (env.OPENAI_API_KEY) availableProviders.push('openai');
-		if (env.GOOGLE_GENERATIVE_AI_API_KEY) availableProviders.push('google');
-		if (env.ANTHROPIC_API_KEY) availableProviders.push('anthropic');
+		if (env.OPENAI_API_KEY) {
+			availableProviders.push('openai');
+		}
+		if (env.GOOGLE_GENERATIVE_AI_API_KEY) {
+			availableProviders.push('google');
+		}
+		if (env.ANTHROPIC_API_KEY) {
+			availableProviders.push('anthropic');
+		}
 
 		return {
 			availableProviders,
@@ -385,7 +395,7 @@ export class PipelineService {
 				details,
 				timestamp: new Date(),
 			};
-		} catch (error) {
+		} catch (_error) {
 			return {
 				status: 'unhealthy',
 				details,

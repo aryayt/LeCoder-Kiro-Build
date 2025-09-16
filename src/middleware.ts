@@ -42,7 +42,7 @@ export async function middleware(request: NextRequest) {
 		if (!rateLimitResult.allowed) {
 			// Log rate limit event
 			await auditLogger.logRateLimitEvent(request, pathname, {
-				limit: rateLimiter['config'][endpoint].maxRequests,
+				limit: rateLimiter.config[endpoint].maxRequests,
 				remaining: rateLimitResult.remaining,
 				resetTime: rateLimitResult.resetTime,
 			});
@@ -58,7 +58,7 @@ export async function middleware(request: NextRequest) {
 					headers: {
 						'Content-Type': 'application/json',
 						'Retry-After': Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000).toString(),
-						'X-RateLimit-Limit': rateLimiter['config'][endpoint].maxRequests.toString(),
+						'X-RateLimit-Limit': rateLimiter.config[endpoint].maxRequests.toString(),
 						'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
 						'X-RateLimit-Reset': rateLimitResult.resetTime.toString(),
 						...Object.fromEntries(response.headers.entries()),
@@ -68,10 +68,7 @@ export async function middleware(request: NextRequest) {
 		}
 
 		// Add rate limit headers
-		response.headers.set(
-			'X-RateLimit-Limit',
-			rateLimiter['config'][endpoint].maxRequests.toString()
-		);
+		response.headers.set('X-RateLimit-Limit', rateLimiter.config[endpoint].maxRequests.toString());
 		response.headers.set('X-RateLimit-Remaining', rateLimitResult.remaining.toString());
 		response.headers.set('X-RateLimit-Reset', rateLimitResult.resetTime.toString());
 	}

@@ -509,7 +509,7 @@ export function withAuditLog(
 	getResourceId?: (args: any[]) => string | undefined
 ) {
 	return <T extends any[], R>(
-		target: any,
+		_target: any,
 		propertyKey: string,
 		descriptor: TypedPropertyDescriptor<(...args: T) => Promise<R>>
 	) => {

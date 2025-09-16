@@ -3,7 +3,7 @@ import { env } from '~/env.js';
 import { auth } from '~/lib/auth';
 import { extractTextFromPdf, fileToBuffer, validatePdfFile } from '~/lib/pdf/processor';
 import { auditLogger } from '~/lib/security/audit-logger';
-import { FileQuarantine, scanFileContent, validateFileUpload } from '~/lib/security/file-security';
+import { FileQuarantine, validateFileUpload } from '~/lib/security/file-security';
 import { withSecurity } from '~/lib/security/headers';
 import { processPdfForVectorStorage } from '~/lib/vector/embeddings';
 import { db } from '~/server/db';
@@ -68,20 +68,24 @@ export const POST = withSecurity(
 
 			// Security scanning is now handled in validateFileUpload for binary content
 			// We don't need to scan raw binary data here as it produces false positives
-			const contentScanResult = { 
+			const contentScanResult = {
 				threats: [] as Array<{
-					type: 'malicious_pattern' | 'suspicious_content' | 'embedded_script' | 'external_reference';
+					type:
+						| 'malicious_pattern'
+						| 'suspicious_content'
+						| 'embedded_script'
+						| 'external_reference';
 					description: string;
 					severity: 'low' | 'medium' | 'high';
 					pattern?: string;
-				}>, 
+				}>,
 				isSafe: true,
 				contentAnalysis: {
 					hasJavaScript: false,
 					hasEmbeddedFiles: false,
 					hasForms: false,
 					hasExternalReferences: false,
-				}
+				},
 			};
 			const highSeverityThreats = contentScanResult.threats.filter((t) => t.severity === 'high');
 
@@ -170,19 +174,16 @@ export const POST = withSecurity(
 
 			try {
 				processingResult = await extractTextFromPdf(buffer, file.name);
-				console.log('PDF processing successful for:', file.name);
 
 				// Process for vector storage if we have meaningful content
 				if (processingResult.text.trim().length > 100) {
 					try {
-						console.log('Processing PDF for vector storage...');
 						vectorProcessingResult = await processPdfForVectorStorage(
 							processingResult.text,
 							'temp-id', // Will be updated after project creation
 							file.name,
 							aiProvider
 						);
-						console.log('Vector processing successful:', vectorProcessingResult);
 					} catch (vectorError) {
 						console.error('Vector processing failed:', vectorError);
 						// Continue without vector storage - not critical for basic functionality
@@ -210,8 +211,6 @@ Error details: ${error instanceof Error ? error.message : 'Unknown error'}`,
 						fileName: file.name,
 					},
 				};
-
-				console.log('Using fallback processing result for:', file.name);
 			}
 
 			// Create project in database
@@ -250,7 +249,6 @@ Error details: ${error instanceof Error ? error.message : 'Unknown error'}`,
 						file.name,
 						aiProvider
 					);
-					console.log(`Updated vector storage with project ID: ${project.id}`);
 				} catch (error) {
 					console.error('Failed to update vector storage with project ID:', error);
 				}

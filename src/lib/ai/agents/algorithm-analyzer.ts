@@ -4,13 +4,9 @@ import type {
 	ResearchConcepts,
 	SystemRequirements,
 } from '~/types/ai';
-import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
+import { type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class AlgorithmAnalyzerAgent extends BaseAIAgent {
-	constructor(config: AIConfig) {
-		super(config);
-	}
-
 	/**
 	 * Analyze algorithms and technical requirements from research concepts
 	 */
@@ -375,7 +371,8 @@ Guidelines:
 	private async analyzeBasicAlgorithms(
 		concepts: ResearchConcepts
 	): Promise<AgentResponse<AlgorithmAnalysisResult>> {
-		const systemPrompt = `Provide a basic algorithm analysis. Return JSON with minimal required structure for algorithms and system requirements.`;
+		const systemPrompt =
+			'Provide a basic algorithm analysis. Return JSON with minimal required structure for algorithms and system requirements.';
 
 		const messages = [
 			{

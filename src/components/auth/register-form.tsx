@@ -69,7 +69,7 @@ export function RegisterForm() {
 					window.location.href = '/dashboard';
 				}, 1500);
 			}
-		} catch (err) {
+		} catch (_err) {
 			setGeneralError('An unexpected error occurred. Please try again.');
 		} finally {
 			setIsLoading(false);

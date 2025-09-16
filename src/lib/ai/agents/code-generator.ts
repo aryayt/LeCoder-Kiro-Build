@@ -6,13 +6,9 @@ import type {
 	GeneratedFile,
 	SystemArchitecture,
 } from '~/types/ai';
-import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
+import { type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class CodeGeneratorAgent extends BaseAIAgent {
-	constructor(config: AIConfig) {
-		super(config);
-	}
-
 	/**
 	 * Generate complete executable code based on architecture and algorithm specifications
 	 */
@@ -534,7 +530,8 @@ Guidelines:
 		architecture: SystemArchitecture,
 		algorithmSpecs: AlgorithmSpecs
 	): Promise<AgentResponse<CodeGenerationResult>> {
-		const systemPrompt = `Generate basic but complete code implementation. Ensure no TODOs or placeholders. Return minimal but functional JSON structure.`;
+		const systemPrompt =
+			'Generate basic but complete code implementation. Ensure no TODOs or placeholders. Return minimal but functional JSON structure.';
 
 		const messages = [
 			{

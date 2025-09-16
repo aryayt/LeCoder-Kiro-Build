@@ -7,7 +7,7 @@ import { ApiKeyService } from '~/lib/services/api-key-service';
  * DELETE /api/user/api-keys/[keyId] - Delete an API key
  */
 export async function DELETE(
-	request: NextRequest,
+	_request: NextRequest,
 	{ params }: { params: Promise<{ keyId: string }> }
 ) {
 	try {

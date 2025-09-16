@@ -175,7 +175,9 @@ export class PipelineStatusUtils {
 	 * Calculate pipeline progress percentage
 	 */
 	static calculateProgress(stages: PipelineStage[]): number {
-		if (stages.length === 0) return 0;
+		if (stages.length === 0) {
+			return 0;
+		}
 
 		const completedStages = stages.filter((stage) => stage.status === 'completed').length;
 		return Math.round((completedStages / stages.length) * 100);
@@ -219,8 +221,8 @@ export class PipelineStatusUtils {
 		const processing = stages.filter((s) => s.status === 'processing').length;
 		const pending = stages.filter((s) => s.status === 'pending').length;
 		const error = stages.filter((s) => s.status === 'error').length;
-		const progress = this.calculateProgress(stages);
-		const status = this.determineProjectStatus(stages);
+		const progress = PipelineStatusUtils.calculateProgress(stages);
+		const status = PipelineStatusUtils.determineProjectStatus(stages);
 
 		return {
 			total,
@@ -242,7 +244,7 @@ export class PipelineTimingUtils {
 	 * Calculate stage duration
 	 */
 	static calculateStageDuration(stage: PipelineStage): number | null {
-		if (!stage.startTime || !stage.endTime) {
+		if (!(stage.startTime && stage.endTime)) {
 			return null;
 		}
 		return stage.endTime.getTime() - stage.startTime.getTime();
@@ -293,7 +295,7 @@ export class PipelineTimingUtils {
 
 		// Calculate average duration of completed stages
 		const durations = completedStages
-			.map((stage) => this.calculateStageDuration(stage))
+			.map((stage) => PipelineTimingUtils.calculateStageDuration(stage))
 			.filter((duration) => duration !== null) as number[];
 
 		if (durations.length === 0) {
@@ -315,11 +317,11 @@ export class PipelineTimingUtils {
 
 		if (hours > 0) {
 			return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
-		} else if (minutes > 0) {
-			return `${minutes}m ${seconds % 60}s`;
-		} else {
-			return `${seconds}s`;
 		}
+		if (minutes > 0) {
+			return `${minutes}m ${seconds % 60}s`;
+		}
+		return `${seconds}s`;
 	}
 }
 
@@ -377,9 +379,7 @@ export class PipelineValidationUtils {
 			for (let i = 0; i < sortedStages.length; i++) {
 				const stage = sortedStages[i];
 				if (stage && stage.id !== i + 1) {
-					warnings.push(
-						`Stage sequence may be incorrect: expected ${i + 1}, got ${stage.id}`
-					);
+					warnings.push(`Stage sequence may be incorrect: expected ${i + 1}, got ${stage.id}`);
 				}
 			}
 		}
@@ -570,7 +570,7 @@ export class PipelineDataUtils {
 			progress: summary.progress,
 			status: summary.status,
 			totalDuration: totalDuration ? PipelineTimingUtils.formatDuration(totalDuration) : undefined,
-			stages: context.stages.map((stage) => this.createStageSummary(stage)),
+			stages: context.stages.map((stage) => PipelineDataUtils.createStageSummary(stage)),
 		};
 	}
 }

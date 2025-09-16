@@ -4,7 +4,6 @@
 
 import { createGoogleGenerativeAI, google } from '@ai-sdk/google';
 import { createOpenAI, openai } from '@ai-sdk/openai';
-import type { AIProvider } from '~/lib/ai/base-agent';
 import { embed, embedMany } from 'ai';
 import { env } from '~/env.js';
 import { ApiKeyService } from '~/lib/services/api-key-service';
@@ -101,31 +100,31 @@ async function generateHuggingFaceEmbeddings(
 	model = 'google/embeddinggemma-300m'
 ): Promise<number[][]> {
 	const embeddings: number[][] = [];
-	
+
 	for (const text of texts) {
 		const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
 			method: 'POST',
 			headers: {
-				'Authorization': `Bearer ${apiKey}`,
+				Authorization: `Bearer ${apiKey}`,
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
 				inputs: text,
-				options: { wait_for_model: true }
+				options: { wait_for_model: true },
 			}),
 		});
-		
+
 		if (!response.ok) {
 			throw new Error(`Hugging Face API error: ${response.statusText}`);
 		}
-		
+
 		const result = await response.json();
 		embeddings.push(result);
-		
+
 		// Rate limiting for Hugging Face API
-		await new Promise(resolve => setTimeout(resolve, 100));
+		await new Promise((resolve) => setTimeout(resolve, 100));
 	}
-	
+
 	return embeddings;
 }
 
@@ -136,8 +135,6 @@ export async function generateEmbeddings(
 	customApiKey?: string
 ): Promise<EmbeddedChunk[]> {
 	try {
-		console.log(`Generating embeddings for ${chunks.length} chunks using ${provider}`);
-
 		const texts = chunks.map((chunk) => chunk.content);
 		let embeddings: number[][];
 
@@ -187,7 +184,9 @@ export async function generateEmbeddings(
 		} else if (provider === 'huggingface') {
 			const key = apiKey || env.HUGGINGFACE_API_KEY;
 			if (!key) {
-				throw new Error('Hugging Face API key not configured. Please add your API key in settings.');
+				throw new Error(
+					'Hugging Face API key not configured. Please add your API key in settings.'
+				);
 			}
 
 			embeddings = await generateHuggingFaceEmbeddings(texts, key);
@@ -198,15 +197,15 @@ export async function generateEmbeddings(
 		const embeddedChunks: EmbeddedChunk[] = chunks
 			.map((chunk, index) => {
 				const embedding = embeddings[index];
-				if (!embedding) return null;
+				if (!embedding) {
+					return null;
+				}
 				return {
 					...chunk,
 					embedding,
 				};
 			})
 			.filter((chunk): chunk is EmbeddedChunk => chunk !== null);
-
-		console.log(`Successfully generated ${embeddedChunks.length} embeddings`);
 		return embeddedChunks;
 	} catch (error) {
 		console.error('Error generating embeddings:', error);
@@ -290,7 +289,9 @@ export async function findSimilarChunks(
 		} else if (provider === 'huggingface') {
 			const key = apiKey || env.HUGGINGFACE_API_KEY;
 			if (!key) {
-				throw new Error('Hugging Face API key not configured. Please add your API key in settings.');
+				throw new Error(
+					'Hugging Face API key not configured. Please add your API key in settings.'
+				);
 			}
 
 			const embeddings = await generateHuggingFaceEmbeddings([queryText], key);
@@ -324,7 +325,6 @@ class SimpleVectorStore {
 
 	async set(projectId: string, chunks: EmbeddedChunk[]): Promise<void> {
 		this.store.set(projectId, chunks);
-		console.log(`Stored ${chunks.length} embedded chunks for project ${projectId}`);
 	}
 
 	async retrieve(projectId: string): Promise<EmbeddedChunk[]> {
@@ -333,7 +333,6 @@ class SimpleVectorStore {
 
 	async delete(projectId: string): Promise<void> {
 		this.store.delete(projectId);
-		console.log(`Deleted embeddings for project ${projectId}`);
 	}
 
 	async search(
@@ -372,11 +371,8 @@ export async function processPdfForVectorStorage(
 	totalTokensEstimate: number;
 }> {
 	try {
-		console.log(`Processing PDF for vector storage: ${fileName}`);
-
 		// Split text into chunks
 		const chunks = splitTextIntoChunks(text, projectId, fileName);
-		console.log(`Split text into ${chunks.length} chunks`);
 
 		// Generate embeddings
 		const embeddedChunks = await generateEmbeddings(chunks, provider, userId, customApiKey);

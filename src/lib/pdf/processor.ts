@@ -28,11 +28,9 @@ export async function extractTextFromPdf(
 	try {
 		// Dynamic import for server-side only
 		if (!pdfParse) {
-            const pdfParseModule = await import('pdf-parse');
-            pdfParse = pdfParseModule.default || pdfParseModule; // Handle potential different export structures
+			const pdfParseModule = await import('pdf-parse');
+			pdfParse = pdfParseModule.default || pdfParseModule; // Handle potential different export structures
 		}
-
-		console.log(`Starting PDF extraction for ${fileName}, buffer size: ${buffer.length} bytes`);
 
 		// Add timeout and options for better reliability
 		const data = await pdfParse(buffer, {
@@ -58,10 +56,6 @@ export async function extractTextFromPdf(
 				`PDF extraction resulted in very short text (${extractedText.length} chars) for ${fileName}`
 			);
 		}
-
-		console.log(
-			`PDF extraction successful for ${fileName}: ${pageCount} pages, ${extractedText.length} characters`
-		);
 
 		return {
 			text: extractedText,
@@ -137,7 +131,7 @@ export async function extractTextFromPdfClient(file: File): Promise<PdfProcessin
  */
 export function validatePdfFile(file: File): PdfProcessingError | null {
 	// Check file type
-	if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+	if (!(file.type.includes('pdf') || file.name.toLowerCase().endsWith('.pdf'))) {
 		return {
 			message: 'Invalid file type. Only PDF files are accepted.',
 			code: 'INVALID_FILE_TYPE',

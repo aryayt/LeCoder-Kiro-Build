@@ -6,13 +6,9 @@ import type {
 	SetupGuide,
 	SystemArchitecture,
 } from '~/types/ai';
-import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
+import { type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class DocumentationGeneratorAgent extends BaseAIAgent {
-	constructor(config: AIConfig) {
-		super(config);
-	}
-
 	/**
 	 * Generate comprehensive documentation for the generated codebase
 	 */
@@ -595,7 +591,7 @@ Guidelines:
 		// Validate usage examples
 		for (let i = 0; i < readme.usage.length; i++) {
 			const usage = readme.usage[i];
-			if (!usage || !usage.title || !usage.description || !usage.code || !usage.language) {
+			if (!(usage?.title && usage.description && usage.code && usage.language)) {
 				return {
 					success: false,
 					error: `Usage example ${i}: missing required fields (title, description, code, language)`,
@@ -629,7 +625,7 @@ Guidelines:
 		// Validate prerequisites
 		for (let i = 0; i < setupGuide.prerequisites.length; i++) {
 			const prereq = setupGuide.prerequisites[i];
-			if (!prereq || !prereq.name || !prereq.description) {
+			if (!(prereq?.name && prereq.description)) {
 				return {
 					success: false,
 					error: `Prerequisite ${i}: missing required fields (name, description)`,
@@ -640,7 +636,7 @@ Guidelines:
 		// Validate installation steps
 		for (let i = 0; i < setupGuide.installationSteps.length; i++) {
 			const step = setupGuide.installationSteps[i];
-			if (!step || !step.title || !step.description || typeof step.order !== 'number') {
+			if (!(step?.title && step.description) || typeof step.order !== 'number') {
 				return {
 					success: false,
 					error: `Installation step ${i}: missing required fields (order, title, description)`,
@@ -686,7 +682,8 @@ Guidelines:
 		codebase: GeneratedCodebase,
 		architecture: SystemArchitecture
 	): Promise<AgentResponse<DocumentationGenerationResult>> {
-		const systemPrompt = `Generate basic but complete documentation. Return minimal but functional JSON structure with all required fields.`;
+		const systemPrompt =
+			'Generate basic but complete documentation. Return minimal but functional JSON structure with all required fields.';
 
 		const messages = [
 			{

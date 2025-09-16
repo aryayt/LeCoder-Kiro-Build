@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 			select: { id: true, password: true },
 		});
 
-		if (!user || !user.password) {
+		if (!user?.password) {
 			return NextResponse.json({ error: 'User not found or no password set' }, { status: 404 });
 		}
 

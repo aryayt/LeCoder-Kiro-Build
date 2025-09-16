@@ -147,7 +147,7 @@ class RateLimiter {
 					const userRule = endpoint === 'authenticated' ? rule : this.config[endpoint];
 					this.recordLimit(session.user.id, userRule, now, this.userStore);
 				}
-			} catch (error) {
+			} catch (_error) {
 				// Silently fail for user recording
 			}
 		}
@@ -181,7 +181,7 @@ class RateLimiter {
 					const userRule = endpoint === 'authenticated' ? rule : this.config[endpoint];
 					result.user = this.getStatus(session.user.id, userRule, now, this.userStore);
 				}
-			} catch (error) {
+			} catch (_error) {
 				// Silently fail
 			}
 		}
@@ -336,7 +336,7 @@ export function withRateLimit(endpoint: keyof RateLimitConfig) {
 						headers: {
 							'Content-Type': 'application/json',
 							'Retry-After': Math.ceil((result.resetTime - Date.now()) / 1000).toString(),
-							'X-RateLimit-Limit': rateLimiter['config'][endpoint].maxRequests.toString(),
+							'X-RateLimit-Limit': rateLimiter.config[endpoint].maxRequests.toString(),
 							'X-RateLimit-Remaining': result.remaining.toString(),
 							'X-RateLimit-Reset': result.resetTime.toString(),
 						},
@@ -354,7 +354,7 @@ export function withRateLimit(endpoint: keyof RateLimitConfig) {
 			// Add rate limit headers to response
 			response.headers.set(
 				'X-RateLimit-Limit',
-				rateLimiter['config'][endpoint].maxRequests.toString()
+				rateLimiter.config[endpoint].maxRequests.toString()
 			);
 			response.headers.set('X-RateLimit-Remaining', result.remaining.toString());
 			response.headers.set('X-RateLimit-Reset', result.resetTime.toString());

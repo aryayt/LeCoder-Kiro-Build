@@ -299,9 +299,8 @@ export class PipelineManager {
 					});
 
 					return result;
-				} else {
-					throw new Error(result.error || 'Stage execution failed');
 				}
+				throw new Error(result.error || 'Stage execution failed');
 			} catch (error) {
 				lastError = error instanceof Error ? error : new Error(String(error));
 
@@ -317,7 +316,7 @@ export class PipelineManager {
 					}
 
 					// Wait before retrying with exponential backoff
-					await this.delay(this.config.retryDelay! * Math.pow(2, attempt - 1));
+					await this.delay(this.config.retryDelay! * 2 ** (attempt - 1));
 				}
 			}
 		}
@@ -394,8 +393,8 @@ export class PipelineManager {
 	 * Stage 3: Architecture Planning (placeholder - to be implemented)
 	 */
 	private async executeArchitecturePlanning(
-		context: PipelineContext,
-		previousResults: PipelineResult['results']
+		_context: PipelineContext,
+		_previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement architecture planning agent
 		return {
@@ -411,8 +410,8 @@ export class PipelineManager {
 	 * Stage 4: Implementation Planning (placeholder - to be implemented)
 	 */
 	private async executeImplementationPlanning(
-		context: PipelineContext,
-		previousResults: PipelineResult['results']
+		_context: PipelineContext,
+		_previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement implementation planning agent
 		return {
@@ -428,8 +427,8 @@ export class PipelineManager {
 	 * Stage 5: Code Generation (placeholder - to be implemented)
 	 */
 	private async executeCodeGeneration(
-		context: PipelineContext,
-		previousResults: PipelineResult['results']
+		_context: PipelineContext,
+		_previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement code generation agent
 		return {
@@ -445,8 +444,8 @@ export class PipelineManager {
 	 * Stage 6: Documentation Generation (placeholder - to be implemented)
 	 */
 	private async executeDocumentationGeneration(
-		context: PipelineContext,
-		previousResults: PipelineResult['results']
+		_context: PipelineContext,
+		_previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement documentation generation agent
 		return {
@@ -492,9 +491,7 @@ export class PipelineManager {
 
 		const completedStages = pipelineStages.filter((s) => s.status === 'completed').length;
 		const hasError = pipelineStages.some((s) => s.status === 'error');
-		const isProcessing = pipelineStages.some(
-			(s) => s.status === 'processing'
-		);
+		const isProcessing = pipelineStages.some((s) => s.status === 'processing');
 
 		let status: ProjectStatus;
 		if (hasError) {

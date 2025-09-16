@@ -51,11 +51,13 @@ export function FilePreview({ projectId, onClose }: FilePreviewProps) {
 	};
 
 	const formatFileSize = (bytes: number): string => {
-		if (bytes === 0) return '0 B';
+		if (bytes === 0) {
+			return '0 B';
+		}
 		const k = 1024;
 		const sizes = ['B', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 	};
 
 	const getFileIcon = (filePath: string): string => {
@@ -84,7 +86,7 @@ export function FilePreview({ projectId, onClose }: FilePreviewProps) {
 		return (
 			<Card className="p-6">
 				<div className="flex h-64 items-center justify-center">
-					<div className="h-8 w-8 animate-spin rounded-full border-blue-600 border-b-2"></div>
+					<div className="h-8 w-8 animate-spin rounded-full border-blue-600 border-b-2" />
 					<span className="ml-2">Loading files...</span>
 				</div>
 			</Card>

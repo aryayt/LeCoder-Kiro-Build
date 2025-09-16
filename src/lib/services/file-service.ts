@@ -1,5 +1,5 @@
-import { type ZipGenerationResult, ZipGenerator } from '~/lib/utils/zip-generator';
 import { ProjectStatus } from '@prisma/client';
+import { type ZipGenerationResult, ZipGenerator } from '~/lib/utils/zip-generator';
 import { db } from '~/server/db';
 
 export interface FilePreview {

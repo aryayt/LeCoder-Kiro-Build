@@ -3,8 +3,6 @@ import { PrismaClient, ProjectStatus, StageStatus } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-	console.log('🌱 Starting database seeding...');
-
 	// Create sample users
 	const user1 = await prisma.user.upsert({
 		where: { email: 'researcher@example.com' },
@@ -36,8 +34,6 @@ async function main() {
 			image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
 		},
 	});
-
-	console.log('✅ Created sample users');
 
 	// Create sample projects
 	const project1 = await prisma.project.create({
@@ -164,8 +160,6 @@ async function main() {
 		},
 	});
 
-	console.log('✅ Created sample projects');
-
 	// Create pipeline stages for completed project
 	const stages = [
 		{ name: 'Concept Extraction', number: 1 },
@@ -205,7 +199,9 @@ async function main() {
 	// Create pipeline stages for processing project (partial completion)
 	for (let i = 1; i <= 3; i++) {
 		const stage = stages[i - 1];
-		if (!stage) { continue; }
+		if (!stage) {
+			continue;
+		}
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: project2.id,
@@ -232,7 +228,9 @@ async function main() {
 	// Create remaining pending stages for processing project
 	for (let i = 4; i <= 6; i++) {
 		const stage = stages[i - 1];
-		if (!stage) { continue; }
+		if (!stage) {
+			continue;
+		}
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: project2.id,
@@ -258,7 +256,9 @@ async function main() {
 	// Create pipeline stages for test user project (partial completion)
 	for (let i = 1; i <= 2; i++) {
 		const stage = stages[i - 1];
-		if (!stage) { continue; }
+		if (!stage) {
+			continue;
+		}
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: testProject.id,
@@ -285,7 +285,9 @@ async function main() {
 	// Create remaining pending stages for test user project
 	for (let i = 3; i <= 6; i++) {
 		const stage = stages[i - 1];
-		if (!stage) { continue; }
+		if (!stage) {
+			continue;
+		}
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: testProject.id,
@@ -295,8 +297,6 @@ async function main() {
 			},
 		});
 	}
-
-	console.log('✅ Created pipeline stages');
 
 	// Create sample generated files for completed project
 	const generatedFiles = [
@@ -502,17 +502,6 @@ If you use this code in your research, please cite:
 			},
 		});
 	}
-
-	console.log('✅ Created sample generated files');
-
-	console.log('🎉 Database seeding completed successfully!');
-	console.log(`
-  Created:
-  - 3 users (including test user: aryateja2106@gmail.com)
-  - 4 projects (1 completed, 2 processing, 1 uploaded)
-  - 24 pipeline stages
-  - 4 generated files
-  `);
 }
 
 main()

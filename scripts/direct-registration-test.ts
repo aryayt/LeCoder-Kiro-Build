@@ -28,7 +28,7 @@ async function testDirectRegistration() {
 			try {
 				const jsonResponse = JSON.parse(responseText);
 				console.info('Parsed response:', jsonResponse);
-			} catch (e) {
+			} catch (_e) {
 				console.info('Response is not JSON');
 			}
 		} else {

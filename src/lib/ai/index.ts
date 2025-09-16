@@ -144,9 +144,15 @@ export function getAvailableProviders(): ('openai' | 'google' | 'anthropic')[] {
 	try {
 		const { env } = require('~/env.js');
 
-		if (env.OPENAI_API_KEY) providers.push('openai');
-		if (env.GOOGLE_GENERATIVE_AI_API_KEY) providers.push('google');
-		if (env.ANTHROPIC_API_KEY) providers.push('anthropic');
+		if (env.OPENAI_API_KEY) {
+			providers.push('openai');
+		}
+		if (env.GOOGLE_GENERATIVE_AI_API_KEY) {
+			providers.push('google');
+		}
+		if (env.ANTHROPIC_API_KEY) {
+			providers.push('anthropic');
+		}
 	} catch {
 		// Fallback if env is not available (client-side)
 		return ['openai']; // Default fallback

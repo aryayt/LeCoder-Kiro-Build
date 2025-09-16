@@ -87,7 +87,7 @@ export function ProgressTracker({
 
 	// Update stages when real-time progress is received
 	useEffect(() => {
-		if (progress && progress.stages) {
+		if (progress?.stages) {
 			const updatedStages = progress.stages.map((stage) => ({
 				id: stage.id,
 				stageNumber: stage.stageNumber,
@@ -168,7 +168,7 @@ export function ProgressTracker({
 					'flex h-8 w-8 items-center justify-center rounded-full font-medium text-sm',
 					{
 						'bg-blue-100 text-blue-600': isActive,
-						'bg-gray-100 text-gray-400': !isActive && !isCompleted,
+						'bg-gray-100 text-gray-400': !(isActive || isCompleted),
 					}
 				)}
 			>
@@ -193,7 +193,6 @@ export function ProgressTracker({
 				return 'Retrying...';
 			case 'error':
 				return 'Error';
-			case 'pending':
 			default:
 				return 'Pending';
 		}
@@ -211,7 +210,7 @@ export function ProgressTracker({
 								className={clsx('h-2 w-2 rounded-full', {
 									'animate-pulse bg-green-400': isConnected,
 									'bg-red-400': !isConnected && connectionError,
-									'bg-yellow-400': !isConnected && !connectionError,
+									'bg-yellow-400': !(isConnected || connectionError),
 								})}
 							/>
 							<span className="text-gray-500 text-xs">
@@ -260,7 +259,7 @@ export function ProgressTracker({
 									<h4
 										className={clsx('font-medium text-sm', {
 											'text-gray-900': isActive || isCompleted,
-											'text-gray-500': !isActive && !isCompleted && !isError,
+											'text-gray-500': !(isActive || isCompleted || isError),
 											'text-red-600': isError,
 										})}
 									>
@@ -271,7 +270,7 @@ export function ProgressTracker({
 											'text-blue-600': isActive,
 											'text-green-600': isCompleted,
 											'text-red-600': isError,
-											'text-gray-400': !isActive && !isCompleted && !isError,
+											'text-gray-400': !(isActive || isCompleted || isError),
 										})}
 									>
 										{getStageStatus(stage)}

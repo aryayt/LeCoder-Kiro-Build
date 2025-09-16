@@ -24,10 +24,10 @@ export const env = createEnv({
 		OPENAI_API_KEY: z.string().optional(),
 		GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
 		ANTHROPIC_API_KEY: z.string().optional(),
-		
+
 		// Hugging Face for Embeddings
 		HUGGINGFACE_API_KEY: z.string().optional(),
-		
+
 		// Redis for caching
 		REDIS_URL: z.string().optional(),
 	},
@@ -64,10 +64,10 @@ export const env = createEnv({
 		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 		GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
 		ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-		
+
 		// Hugging Face for Embeddings
 		HUGGINGFACE_API_KEY: process.env.HUGGINGFACE_API_KEY,
-		
+
 		// Redis for caching
 		REDIS_URL: process.env.REDIS_URL,
 	},

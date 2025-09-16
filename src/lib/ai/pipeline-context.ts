@@ -150,7 +150,7 @@ export class PipelineContextFactory {
 			// Validate stage structure
 			for (let i = 0; i < context.stages.length; i++) {
 				const stage = context.stages[i];
-				
+
 				if (!stage) {
 					errors.push(`Stage ${i}: Missing stage data`);
 					continue;
@@ -265,7 +265,9 @@ export class PipelineContextFactory {
 	 * Get pipeline progress percentage
 	 */
 	static getPipelineProgress(context: PipelineContext): number {
-		if (context.stages.length === 0) return 0;
+		if (context.stages.length === 0) {
+			return 0;
+		}
 
 		const completedStages = context.stages.filter((stage) => stage.status === 'completed').length;
 		return Math.round((completedStages / context.stages.length) * 100);

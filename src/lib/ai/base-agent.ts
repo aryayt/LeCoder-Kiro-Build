@@ -25,7 +25,7 @@ export const AIProviderUtils = {
 				throw new Error(`Unknown provider: ${provider}`);
 		}
 	},
-	
+
 	fromPrisma: (provider: PrismaAIProvider): AIProvider => {
 		switch (provider) {
 			case 'OPENAI':
@@ -37,7 +37,7 @@ export const AIProviderUtils = {
 			default:
 				throw new Error(`Unknown Prisma provider: ${provider}`);
 		}
-	}
+	},
 };
 
 export interface AIConfig {
@@ -107,10 +107,9 @@ export abstract class BaseAIAgent {
 					// Use custom client with user's API key
 					const client = createOpenAI({ apiKey: key });
 					return client(model);
-				} else {
-					// Use default client with env API key
-					return openai(model);
 				}
+				// Use default client with env API key
+				return openai(model);
 			}
 
 			case 'google': {
@@ -123,10 +122,9 @@ export abstract class BaseAIAgent {
 					// Use custom client with user's API key
 					const client = createGoogleGenerativeAI({ apiKey: key });
 					return client(model);
-				} else {
-					// Use default client with env API key
-					return google(model);
 				}
+				// Use default client with env API key
+				return google(model);
 			}
 
 			case 'anthropic': {
@@ -139,10 +137,9 @@ export abstract class BaseAIAgent {
 					// Use custom client with user's API key
 					const client = createAnthropic({ apiKey: key });
 					return client(model);
-				} else {
-					// Use default client with env API key
-					return anthropic(model);
 				}
+				// Use default client with env API key
+				return anthropic(model);
 			}
 
 			default:
@@ -202,9 +199,6 @@ export abstract class BaseAIAgent {
 
 				// Log token usage for monitoring
 				if (result.usage?.totalTokens) {
-					console.log(
-						`AI Request completed: ${this.config.provider}/${this.config.model} - ${result.usage.totalTokens} tokens in ${processingTime}ms`
-					);
 				}
 
 				return {
@@ -232,7 +226,7 @@ export abstract class BaseAIAgent {
 
 				// Wait before retrying (exponential backoff)
 				if (attempt < this.config.retryAttempts!) {
-					await this.delay(this.config.retryDelay! * Math.pow(2, attempt - 1));
+					await this.delay(this.config.retryDelay! * 2 ** (attempt - 1));
 				}
 			}
 		}

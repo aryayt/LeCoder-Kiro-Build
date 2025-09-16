@@ -19,7 +19,9 @@ export function useNetworkStatus(): NetworkStatus {
 
 	useEffect(() => {
 		setIsClient(true);
-		if (typeof window === 'undefined') return;
+		if (typeof window === 'undefined') {
+			return;
+		}
 
 		const updateNetworkStatus = () => {
 			const connection =

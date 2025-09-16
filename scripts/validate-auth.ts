@@ -63,7 +63,7 @@ async function validateAuth() {
 		});
 		console.info('   ✅ User creation successful');
 
-		const foundUser = await db.user.findUnique({
+		const _foundUser = await db.user.findUnique({
 			where: { id: testUser.id },
 		});
 		console.info('   ✅ User retrieval successful');

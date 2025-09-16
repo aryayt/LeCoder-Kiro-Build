@@ -31,7 +31,7 @@ async function createAuthUser() {
 		}
 
 		// Hash the password using bcryptjs (same as Better Auth)
-		const hashedPassword = await hash(password, 12);
+		const _hashedPassword = await hash(password, 12);
 
 		// Check if account already exists
 		const existingAccount = await prisma.account.findFirst({

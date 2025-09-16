@@ -33,7 +33,6 @@ export function ProjectCard({
 				return 'bg-red-100 text-red-800';
 			case 'CANCELLED':
 				return 'bg-gray-100 text-gray-800';
-			case 'UPLOADED':
 			default:
 				return 'bg-yellow-100 text-yellow-800';
 		}
@@ -49,18 +48,19 @@ export function ProjectCard({
 				return 'Error';
 			case 'CANCELLED':
 				return 'Cancelled';
-			case 'UPLOADED':
 			default:
 				return 'Uploaded';
 		}
 	};
 
 	const formatFileSize = (bytes: number) => {
-		if (bytes === 0) return '0 Bytes';
+		if (bytes === 0) {
+			return '0 Bytes';
+		}
 		const k = 1024;
 		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 	};
 
 	const completedStages =

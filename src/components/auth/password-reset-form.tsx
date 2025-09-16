@@ -61,7 +61,7 @@ export function PasswordResetForm() {
 			} else {
 				setSuccess(true);
 			}
-		} catch (err) {
+		} catch (_err) {
 			setGeneralError('An unexpected error occurred. Please try again.');
 		} finally {
 			setIsLoading(false);

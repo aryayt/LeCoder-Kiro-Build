@@ -20,7 +20,9 @@ export class OfflineQueue {
 	}
 
 	private loadFromStorage() {
-		if (typeof window === 'undefined') return;
+		if (typeof window === 'undefined') {
+			return;
+		}
 
 		try {
 			const stored = localStorage.getItem(this.storageKey);
@@ -33,7 +35,9 @@ export class OfflineQueue {
 	}
 
 	private saveToStorage() {
-		if (typeof window === 'undefined') return;
+		if (typeof window === 'undefined') {
+			return;
+		}
 
 		try {
 			localStorage.setItem(this.storageKey, JSON.stringify(this.queue));
@@ -43,7 +47,9 @@ export class OfflineQueue {
 	}
 
 	private setupNetworkListeners() {
-		if (typeof window === 'undefined') return;
+		if (typeof window === 'undefined') {
+			return;
+		}
 
 		window.addEventListener('online', () => {
 			this.processQueue();

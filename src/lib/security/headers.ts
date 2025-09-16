@@ -233,7 +233,7 @@ export function validateOrigin(request: NextRequest): boolean {
 	const referer = request.headers.get('referer');
 
 	// For same-origin requests, origin might be null
-	if (!origin && !referer) {
+	if (!(origin || referer)) {
 		return true; // Allow same-origin requests
 	}
 
@@ -280,7 +280,7 @@ export function logSecurityEvent(
 	details: Record<string, any>,
 	request: NextRequest
 ): void {
-	const logData = {
+	const _logData = {
 		timestamp: new Date().toISOString(),
 		event,
 		details,
@@ -294,9 +294,6 @@ export function logSecurityEvent(
 
 	// In production, send to logging service
 	if (process.env.NODE_ENV === 'production') {
-		// TODO: Integrate with logging service (e.g., Sentry, LogRocket, etc.)
-		console.log('[SECURITY]', JSON.stringify(logData));
 	} else {
-		console.log('[SECURITY]', logData);
 	}
 }

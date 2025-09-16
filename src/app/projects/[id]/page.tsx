@@ -144,11 +144,13 @@ export default function ProjectDetailPage() {
 	}
 
 	const formatFileSize = (bytes: number) => {
-		if (bytes === 0) return '0 Bytes';
+		if (bytes === 0) {
+			return '0 Bytes';
+		}
 		const k = 1024;
 		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 	};
 
 	const getStatusColor = (status: string) => {
@@ -161,7 +163,6 @@ export default function ProjectDetailPage() {
 				return 'bg-red-100 text-red-800';
 			case 'CANCELLED':
 				return 'bg-gray-100 text-gray-800';
-			case 'UPLOADED':
 			default:
 				return 'bg-yellow-100 text-yellow-800';
 		}
@@ -185,12 +186,12 @@ export default function ProjectDetailPage() {
 									r="10"
 									stroke="currentColor"
 									strokeWidth="4"
-								></circle>
+								/>
 								<path
 									className="opacity-75"
 									fill="currentColor"
 									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-								></path>
+								/>
 							</svg>
 							Starting...
 						</>
@@ -227,12 +228,12 @@ export default function ProjectDetailPage() {
 									r="10"
 									stroke="currentColor"
 									strokeWidth="4"
-								></circle>
+								/>
 								<path
 									className="opacity-75"
 									fill="currentColor"
 									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-								></path>
+								/>
 							</svg>
 							Cancelling...
 						</>
@@ -269,12 +270,12 @@ export default function ProjectDetailPage() {
 									r="10"
 									stroke="currentColor"
 									strokeWidth="4"
-								></circle>
+								/>
 								<path
 									className="opacity-75"
 									fill="currentColor"
 									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-								></path>
+								/>
 							</svg>
 							Retrying...
 						</>

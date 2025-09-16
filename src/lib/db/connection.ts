@@ -30,7 +30,6 @@ export { prisma };
 export async function testConnection(): Promise<boolean> {
 	try {
 		await prisma.$queryRaw`SELECT 1`;
-		console.log('✅ Database connection successful');
 		return true;
 	} catch (error) {
 		console.error('❌ Database connection failed:', error);
@@ -51,7 +50,7 @@ export async function disconnect(): Promise<void> {
 export function getConnectionInfo() {
 	return {
 		url: process.env.DATABASE_URL?.replace(/:[^:@]*@/, ':***@'), // Hide password
-		connected: prisma ? true : false,
+		connected: !!prisma,
 		environment: process.env.NODE_ENV,
 	};
 }

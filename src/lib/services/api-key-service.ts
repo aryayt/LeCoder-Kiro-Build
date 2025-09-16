@@ -118,7 +118,7 @@ export namespace ApiKeyService {
 			},
 		});
 
-		if (!userApiKey || !userApiKey.isActive) {
+		if (!userApiKey?.isActive) {
 			return null;
 		}
 
@@ -216,7 +216,10 @@ export namespace ApiKeyService {
 	/**
 	 * Test an API key by making a simple request
 	 */
-	export async function testApiKey(provider: AIProvider | 'huggingface', apiKey: string): Promise<boolean> {
+	export async function testApiKey(
+		provider: AIProvider | 'huggingface',
+		apiKey: string
+	): Promise<boolean> {
 		try {
 			// Import AI SDK dynamically to avoid circular dependencies
 			const { createGoogleGenerativeAI } = await import('@ai-sdk/google');
@@ -265,17 +268,20 @@ export namespace ApiKeyService {
 
 				case 'huggingface': {
 					// Test Hugging Face API by making a simple embedding request
-					const response = await fetch('https://api-inference.huggingface.co/models/google/embeddinggemma-300m', {
-						method: 'POST',
-						headers: {
-							'Authorization': `Bearer ${apiKey}`,
-							'Content-Type': 'application/json',
-						},
-						body: JSON.stringify({
-							inputs: 'test',
-							options: { wait_for_model: true }
-						}),
-					});
+					const response = await fetch(
+						'https://api-inference.huggingface.co/models/google/embeddinggemma-300m',
+						{
+							method: 'POST',
+							headers: {
+								Authorization: `Bearer ${apiKey}`,
+								'Content-Type': 'application/json',
+							},
+							body: JSON.stringify({
+								inputs: 'test',
+								options: { wait_for_model: true },
+							}),
+						}
+					);
 
 					return response.ok;
 				}

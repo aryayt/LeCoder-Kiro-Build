@@ -188,9 +188,15 @@ export async function updateStageStatus(
 			updateData.completedAt = new Date();
 		}
 
-		if (data?.inputData) updateData.inputData = data.inputData;
-		if (data?.outputData) updateData.outputData = data.outputData;
-		if (data?.errorMessage) updateData.errorMessage = data.errorMessage;
+		if (data?.inputData) {
+			updateData.inputData = data.inputData;
+		}
+		if (data?.outputData) {
+			updateData.outputData = data.outputData;
+		}
+		if (data?.errorMessage) {
+			updateData.errorMessage = data.errorMessage;
+		}
 
 		const stage = await db.pipelineStage.update({
 			where: { id: stageId },

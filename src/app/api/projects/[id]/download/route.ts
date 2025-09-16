@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { FileService } from '~/lib/services/file-service';
 
-export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
 	try {
 		const { id: projectId } = await context.params;
 
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 		// Generate ZIP file
 		const result = await fileService.generateProjectZip(projectId);
 
-		if (!result.success || !result.buffer) {
+		if (!(result.success && result.buffer)) {
 			return NextResponse.json(
 				{ error: result.error || 'Failed to generate download' },
 				{ status: 500 }
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
 }
 
 // Handle HEAD requests for download info without generating the file
-export async function HEAD(request: NextRequest, context: { params: Promise<{ id: string }> }) {
+export async function HEAD(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
 	try {
 		const { id: projectId } = await context.params;
 

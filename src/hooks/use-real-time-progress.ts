@@ -94,7 +94,7 @@ export function useRealTimeProgress({
 
 			if (reconnectAttemptsRef.current < maxReconnectAttempts) {
 				reconnectAttemptsRef.current++;
-				const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
+				const delay = reconnectDelay * 2 ** (reconnectAttemptsRef.current - 1);
 
 				reconnectTimeoutRef.current = setTimeout(() => {
 					if (enabled) {
@@ -111,7 +111,9 @@ export function useRealTimeProgress({
 
 	// Connect using Server-Sent Events
 	const connectSSE = useCallback(() => {
-		if (!enabled || !projectId) return;
+		if (!(enabled && projectId)) {
+			return;
+		}
 
 		cleanup();
 
@@ -144,14 +146,16 @@ export function useRealTimeProgress({
 			eventSource.onerror = () => {
 				handleConnectionError('SSE connection failed');
 			};
-		} catch (err) {
+		} catch (_err) {
 			handleConnectionError('Failed to create SSE connection');
 		}
 	}, [enabled, projectId, cleanup, handleConnectionError]);
 
 	// Connect using WebSocket fallback (long polling)
 	const connectWebSocket = useCallback(() => {
-		if (!enabled || !projectId) return;
+		if (!(enabled && projectId)) {
+			return;
+		}
 
 		cleanup();
 		setConnectionType('websocket');
@@ -189,7 +193,7 @@ export function useRealTimeProgress({
 				// Retry with exponential backoff
 				if (reconnectAttemptsRef.current < maxReconnectAttempts && enabled) {
 					reconnectAttemptsRef.current++;
-					const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
+					const delay = reconnectDelay * 2 ** (reconnectAttemptsRef.current - 1);
 					pollingIntervalRef.current = setTimeout(poll, delay);
 				} else {
 					// Fall back to regular polling
@@ -203,7 +207,9 @@ export function useRealTimeProgress({
 
 	// Connect using regular polling as final fallback
 	const connectPolling = useCallback(() => {
-		if (!enabled || !projectId) return;
+		if (!(enabled && projectId)) {
+			return;
+		}
 
 		cleanup();
 		setConnectionType('polling');
@@ -264,7 +270,7 @@ export function useRealTimeProgress({
 
 	// Initialize connection
 	useEffect(() => {
-		if (!enabled || !projectId) {
+		if (!(enabled && projectId)) {
 			cleanup();
 			return;
 		}

@@ -42,7 +42,7 @@ export function useProjects(filters?: {
 	});
 
 	// Get download URL query (we'll use it manually)
-	const getDownloadUrl = api.project.getDownloadUrl;
+	const _getDownloadUrl = api.project.getDownloadUrl;
 
 	const handleDeleteProject = useCallback(
 		async (projectId: string) => {

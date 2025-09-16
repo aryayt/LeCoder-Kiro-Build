@@ -14,7 +14,7 @@ async function setupTestAccount() {
 			console.info('ℹ️ User already exists, updating...');
 
 			// Hash the password
-			const hashedPassword = await hash('aryateja5', 12);
+			const _hashedPassword = await hash('aryateja5', 12);
 
 			// Check if account already exists
 			const existingAccount = await db.account.findFirst({

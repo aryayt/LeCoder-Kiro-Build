@@ -50,7 +50,7 @@ async function createAuthTestUser() {
 			throw new Error(`Registration failed: ${response.status} - ${errorData}`);
 		}
 
-		const userData = await response.json();
+		const _userData = await response.json();
 		console.info('✅ User created through Better Auth');
 
 		// Now get the created user from database

@@ -147,7 +147,7 @@ export function useDownload(options: UseDownloadOptions = {}) {
 				// Get file info from headers
 				const fileCount = response.headers.get('X-File-Count');
 				const totalSize = response.headers.get('X-Total-Size');
-				const contentLength = response.headers.get('Content-Length');
+				const _contentLength = response.headers.get('Content-Length');
 
 				updateProgress({
 					fileCount: fileCount ? Number.parseInt(fileCount) : undefined,

@@ -83,7 +83,7 @@ export function ApiKeyManager() {
 			} else {
 				toast.error('Failed to load API keys');
 			}
-		} catch (error) {
+		} catch (_error) {
 			toast.error('Failed to load API keys');
 		} finally {
 			setLoading(false);
@@ -113,7 +113,7 @@ export function ApiKeyManager() {
 			} else {
 				toast.error(data.error || 'Failed to save API key');
 			}
-		} catch (error) {
+		} catch (_error) {
 			toast.error('Failed to save API key');
 		} finally {
 			setSubmitting(false);
@@ -138,7 +138,7 @@ export function ApiKeyManager() {
 			} else {
 				toast.error(data.error || 'Failed to delete API key');
 			}
-		} catch (error) {
+		} catch (_error) {
 			toast.error('Failed to delete API key');
 		}
 	};
@@ -162,7 +162,7 @@ export function ApiKeyManager() {
 			} else {
 				toast.error(`${provider} API key test failed: ${data.error}`);
 			}
-		} catch (error) {
+		} catch (_error) {
 			toast.error('Failed to test API key');
 		} finally {
 			setTesting(null);
@@ -172,7 +172,7 @@ export function ApiKeyManager() {
 	if (loading) {
 		return (
 			<div className="flex items-center justify-center p-8">
-				<div className="h-8 w-8 animate-spin rounded-full border-blue-600 border-b-2"></div>
+				<div className="h-8 w-8 animate-spin rounded-full border-blue-600 border-b-2" />
 			</div>
 		);
 	}

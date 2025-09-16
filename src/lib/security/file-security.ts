@@ -158,7 +158,7 @@ export async function validateFileUpload(
 					.join('');
 			} else {
 				// Fallback for test environment
-				hash = 'test-hash-' + Math.random().toString(36).substring(2, 15);
+				hash = `test-hash-${Math.random().toString(36).substring(2, 15)}`;
 			}
 
 			// Only scan content if it's already a string (extracted text)
@@ -189,11 +189,11 @@ export async function validateFileUpload(
 			} else {
 				// For binary content (ArrayBuffer), perform basic PDF structure validation instead
 				const bufferStr = new TextDecoder('utf-8', { fatal: false }).decode(content);
-				
+
 				// Only check for PDF structure, not for security patterns in binary data
 				const pdfValidation = validatePDFStructure(bufferStr);
 				if (!pdfValidation.isValidPDF) {
-					pdfValidation.errors.forEach(error => {
+					pdfValidation.errors.forEach((error) => {
 						errors.push(`PDF structure error: ${error}`);
 					});
 				}
@@ -224,7 +224,7 @@ export function scanFileContent(content: string): ContentScanResult {
 	const threats: ContentScanResult['threats'] = [];
 
 	// Check for dangerous patterns
-	dangerousPatterns.forEach((pattern, index) => {
+	dangerousPatterns.forEach((pattern, _index) => {
 		const matches = content.match(pattern);
 		if (matches) {
 			threats.push({
@@ -237,7 +237,7 @@ export function scanFileContent(content: string): ContentScanResult {
 	});
 
 	// Check for PDF-specific security issues
-	pdfSecurityPatterns.forEach((pattern, index) => {
+	pdfSecurityPatterns.forEach((pattern, _index) => {
 		const matches = content.match(pattern);
 		if (matches) {
 			const severity =
@@ -405,7 +405,7 @@ export class FileQuarantine {
 	>();
 
 	static quarantineFile(fileHash: string, reason: string, metadata: any = {}): void {
-		this.quarantinedFiles.set(fileHash, {
+		FileQuarantine.quarantinedFiles.set(fileHash, {
 			reason,
 			timestamp: Date.now(),
 			metadata,
@@ -415,23 +415,23 @@ export class FileQuarantine {
 	}
 
 	static isQuarantined(fileHash: string): boolean {
-		return this.quarantinedFiles.has(fileHash);
+		return FileQuarantine.quarantinedFiles.has(fileHash);
 	}
 
 	static getQuarantineReason(fileHash: string): string | null {
-		const entry = this.quarantinedFiles.get(fileHash);
+		const entry = FileQuarantine.quarantinedFiles.get(fileHash);
 		return entry ? entry.reason : null;
 	}
 
 	static releaseFromQuarantine(fileHash: string): boolean {
-		return this.quarantinedFiles.delete(fileHash);
+		return FileQuarantine.quarantinedFiles.delete(fileHash);
 	}
 
 	static cleanupExpiredQuarantine(maxAge: number = 7 * 24 * 60 * 60 * 1000): void {
 		const now = Date.now();
-		for (const [hash, entry] of this.quarantinedFiles.entries()) {
+		for (const [hash, entry] of FileQuarantine.quarantinedFiles.entries()) {
 			if (now - entry.timestamp > maxAge) {
-				this.quarantinedFiles.delete(hash);
+				FileQuarantine.quarantinedFiles.delete(hash);
 			}
 		}
 	}

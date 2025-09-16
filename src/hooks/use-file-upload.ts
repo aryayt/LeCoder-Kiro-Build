@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 // Client-side validation function
 function validatePdfFile(file: File): { message: string; code: string } | null {
 	// Check file type
-	if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
+	if (!(file.type.includes('pdf') || file.name.toLowerCase().endsWith('.pdf'))) {
 		return {
 			message: 'Invalid file type. Only PDF files are accepted.',
 			code: 'INVALID_FILE_TYPE',

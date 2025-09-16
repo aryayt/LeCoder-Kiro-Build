@@ -82,7 +82,7 @@ export function PasswordChangeForm() {
 				setMessage(error.message || 'Failed to change password');
 				setMessageType('error');
 			}
-		} catch (error) {
+		} catch (_error) {
 			setMessage('An unexpected error occurred. Please try again.');
 			setMessageType('error');
 		} finally {

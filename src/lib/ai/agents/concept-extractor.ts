@@ -1,11 +1,7 @@
 import type { ConceptExtractionResult, ResearchConcepts } from '~/types/ai';
-import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
+import { type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class ConceptExtractorAgent extends BaseAIAgent {
-	constructor(config: AIConfig) {
-		super(config);
-	}
-
 	/**
 	 * Extract research concepts from academic paper content
 	 */
