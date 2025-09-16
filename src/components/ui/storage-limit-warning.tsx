@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import type { Project } from "~/types/project";
+import { useState } from 'react';
+import type { Project } from '~/types/project';
 
 interface StorageLimitWarningProps {
 	projects: Project[];
@@ -20,7 +20,7 @@ export function StorageLimitWarning({
 	const currentProjects = projects.length;
 	const currentStorageBytes = projects.reduce(
 		(total, project) => total + (project.metadata?.fileSize || 0),
-		0,
+		0
 	);
 
 	// Calculate percentages
@@ -28,8 +28,7 @@ export function StorageLimitWarning({
 	const storageUsagePercent = (currentStorageBytes / maxStorageBytes) * 100;
 
 	// Determine if we should show warning (80% threshold)
-	const shouldShowWarning =
-		projectUsagePercent >= 80 || storageUsagePercent >= 80;
+	const shouldShowWarning = projectUsagePercent >= 80 || storageUsagePercent >= 80;
 
 	// Determine if we've reached limits (100% threshold)
 	const projectLimitReached = currentProjects >= maxProjects;
@@ -40,52 +39,50 @@ export function StorageLimitWarning({
 	}
 
 	const formatBytes = (bytes: number) => {
-		if (bytes === 0) return "0 Bytes";
+		if (bytes === 0) return '0 Bytes';
 		const k = 1024;
-		const sizes = ["Bytes", "KB", "MB", "GB"];
+		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return (
-			Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-		);
+		return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 	};
 
 	const getWarningType = () => {
 		if (projectLimitReached || storageLimitReached) {
-			return "error";
+			return 'error';
 		}
 		if (projectUsagePercent >= 90 || storageUsagePercent >= 90) {
-			return "warning";
+			return 'warning';
 		}
-		return "info";
+		return 'info';
 	};
 
 	const warningType = getWarningType();
 
 	const getWarningStyles = () => {
 		switch (warningType) {
-			case "error":
+			case 'error':
 				return {
-					container: "border-red-200 bg-red-50",
-					icon: "text-red-400",
-					title: "text-red-800",
-					text: "text-red-700",
-					button: "text-red-800 hover:bg-red-100",
+					container: 'border-red-200 bg-red-50',
+					icon: 'text-red-400',
+					title: 'text-red-800',
+					text: 'text-red-700',
+					button: 'text-red-800 hover:bg-red-100',
 				};
-			case "warning":
+			case 'warning':
 				return {
-					container: "border-yellow-200 bg-yellow-50",
-					icon: "text-yellow-400",
-					title: "text-yellow-800",
-					text: "text-yellow-700",
-					button: "text-yellow-800 hover:bg-yellow-100",
+					container: 'border-yellow-200 bg-yellow-50',
+					icon: 'text-yellow-400',
+					title: 'text-yellow-800',
+					text: 'text-yellow-700',
+					button: 'text-yellow-800 hover:bg-yellow-100',
 				};
 			default:
 				return {
-					container: "border-blue-200 bg-blue-50",
-					icon: "text-blue-400",
-					title: "text-blue-800",
-					text: "text-blue-700",
-					button: "text-blue-800 hover:bg-blue-100",
+					container: 'border-blue-200 bg-blue-50',
+					icon: 'text-blue-400',
+					title: 'text-blue-800',
+					text: 'text-blue-700',
+					button: 'text-blue-800 hover:bg-blue-100',
 				};
 		}
 	};
@@ -94,12 +91,12 @@ export function StorageLimitWarning({
 
 	const getWarningTitle = () => {
 		if (projectLimitReached || storageLimitReached) {
-			return "Storage Limit Reached";
+			return 'Storage Limit Reached';
 		}
 		if (projectUsagePercent >= 90 || storageUsagePercent >= 90) {
-			return "Storage Almost Full";
+			return 'Storage Almost Full';
 		}
-		return "Storage Usage Warning";
+		return 'Storage Usage Warning';
 	};
 
 	const getWarningMessage = () => {
@@ -109,43 +106,32 @@ export function StorageLimitWarning({
 			messages.push(`You've reached the maximum of ${maxProjects} projects.`);
 		} else if (projectUsagePercent >= 80) {
 			messages.push(
-				`You're using ${currentProjects} of ${maxProjects} projects (${Math.round(projectUsagePercent)}%).`,
+				`You're using ${currentProjects} of ${maxProjects} projects (${Math.round(projectUsagePercent)}%).`
 			);
 		}
 
 		if (storageLimitReached) {
-			messages.push(
-				`You've reached the storage limit of ${formatBytes(maxStorageBytes)}.`,
-			);
+			messages.push(`You've reached the storage limit of ${formatBytes(maxStorageBytes)}.`);
 		} else if (storageUsagePercent >= 80) {
 			messages.push(
-				`You're using ${formatBytes(currentStorageBytes)} of ${formatBytes(maxStorageBytes)} storage (${Math.round(storageUsagePercent)}%).`,
+				`You're using ${formatBytes(currentStorageBytes)} of ${formatBytes(maxStorageBytes)} storage (${Math.round(storageUsagePercent)}%).`
 			);
 		}
 
 		if (projectLimitReached || storageLimitReached) {
-			messages.push(
-				"Please delete some projects to free up space before uploading new papers.",
-			);
+			messages.push('Please delete some projects to free up space before uploading new papers.');
 		} else {
-			messages.push(
-				"Consider deleting old or unnecessary projects to free up space.",
-			);
+			messages.push('Consider deleting old or unnecessary projects to free up space.');
 		}
 
-		return messages.join(" ");
+		return messages.join(' ');
 	};
 
 	const getIcon = () => {
 		switch (warningType) {
-			case "error":
+			case 'error':
 				return (
-					<svg
-						className="h-5 w-5"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
@@ -154,14 +140,9 @@ export function StorageLimitWarning({
 						/>
 					</svg>
 				);
-			case "warning":
+			case 'warning':
 				return (
-					<svg
-						className="h-5 w-5"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
@@ -172,12 +153,7 @@ export function StorageLimitWarning({
 				);
 			default:
 				return (
-					<svg
-						className="h-5 w-5"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
@@ -196,9 +172,7 @@ export function StorageLimitWarning({
 					<div className={styles.icon}>{getIcon()}</div>
 				</div>
 				<div className="ml-3 flex-1">
-					<h3 className={`font-medium text-sm ${styles.title}`}>
-						{getWarningTitle()}
-					</h3>
+					<h3 className={`font-medium text-sm ${styles.title}`}>{getWarningTitle()}</h3>
 					<div className={`mt-2 text-sm ${styles.text}`}>
 						<p>{getWarningMessage()}</p>
 					</div>

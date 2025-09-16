@@ -1,16 +1,13 @@
-import type { NextRequest } from "next/server";
-import { db } from "~/server/db";
+import type { NextRequest } from 'next/server';
+import { db } from '~/server/db';
 
-export const runtime = "nodejs";
+export const runtime = 'nodejs';
 
-export async function GET(
-	request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	const { id: projectId } = await params;
 
 	if (!projectId) {
-		return new Response("Project ID is required", { status: 400 });
+		return new Response('Project ID is required', { status: 400 });
 	}
 
 	// Verify project exists
@@ -20,11 +17,11 @@ export async function GET(
 		});
 
 		if (!project) {
-			return new Response("Project not found", { status: 404 });
+			return new Response('Project not found', { status: 404 });
 		}
 	} catch (error) {
-		console.error("Database error in SSE route:", error);
-		return new Response("Database error", { status: 500 });
+		console.error('Database error in SSE route:', error);
+		return new Response('Database error', { status: 500 });
 	}
 
 	// Create SSE response
@@ -34,7 +31,7 @@ export async function GET(
 		start(controller) {
 			// Send initial connection message
 			const initialData = JSON.stringify({
-				type: "connected",
+				type: 'connected',
 				projectId,
 				timestamp: new Date().toISOString(),
 			});
@@ -49,7 +46,7 @@ export async function GET(
 						where: { id: projectId },
 						include: {
 							stages: {
-								orderBy: { stageNumber: "asc" },
+								orderBy: { stageNumber: 'asc' },
 							},
 						},
 					});
@@ -61,7 +58,7 @@ export async function GET(
 
 					// Send progress update
 					const progressData = JSON.stringify({
-						type: "progress",
+						type: 'progress',
 						projectId,
 						status: currentProject.status,
 						currentStage: currentProject.currentStage,
@@ -80,14 +77,12 @@ export async function GET(
 					controller.enqueue(encoder.encode(`data: ${progressData}\n\n`));
 
 					// Stop polling if project is completed, error, or cancelled
-					if (
-						["COMPLETED", "ERROR", "CANCELLED"].includes(currentProject.status)
-					) {
+					if (['COMPLETED', 'ERROR', 'CANCELLED'].includes(currentProject.status)) {
 						clearInterval(intervalId);
 
 						// Send final status
 						const finalData = JSON.stringify({
-							type: "final",
+							type: 'final',
 							projectId,
 							status: currentProject.status,
 							timestamp: new Date().toISOString(),
@@ -98,12 +93,12 @@ export async function GET(
 						controller.close();
 					}
 				} catch (error) {
-					console.error("SSE polling error:", error);
+					console.error('SSE polling error:', error);
 
 					const errorData = JSON.stringify({
-						type: "error",
+						type: 'error',
 						projectId,
-						error: "Failed to fetch progress",
+						error: 'Failed to fetch progress',
 						timestamp: new Date().toISOString(),
 					});
 
@@ -112,7 +107,7 @@ export async function GET(
 			}, 1000); // Poll every second
 
 			// Clean up on close
-			request.signal.addEventListener("abort", () => {
+			request.signal.addEventListener('abort', () => {
 				clearInterval(intervalId);
 				controller.close();
 			});
@@ -121,12 +116,12 @@ export async function GET(
 
 	return new Response(stream, {
 		headers: {
-			"Content-Type": "text/event-stream",
-			"Cache-Control": "no-cache",
-			Connection: "keep-alive",
-			"Access-Control-Allow-Origin": "*",
-			"Access-Control-Allow-Methods": "GET",
-			"Access-Control-Allow-Headers": "Cache-Control",
+			'Content-Type': 'text/event-stream',
+			'Cache-Control': 'no-cache',
+			Connection: 'keep-alive',
+			'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Methods': 'GET',
+			'Access-Control-Allow-Headers': 'Cache-Control',
 		},
 	});
 }

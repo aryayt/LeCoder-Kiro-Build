@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { RegisterForm } from "~/components/auth/register-form";
+import Link from 'next/link';
+import { RegisterForm } from '~/components/auth/register-form';
 
 export default function RegisterPage() {
 	return (
@@ -10,11 +10,8 @@ export default function RegisterPage() {
 						Create your account
 					</h2>
 					<p className="mt-2 text-center text-gray-600 text-sm">
-						Or{" "}
-						<Link
-							href="/auth/login"
-							className="font-medium text-indigo-600 hover:text-indigo-500"
-						>
+						Or{' '}
+						<Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
 							sign in to your existing account
 						</Link>
 					</p>

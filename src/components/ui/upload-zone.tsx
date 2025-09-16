@@ -1,31 +1,86 @@
-"use client";
+'use client';
 
-import { clsx } from "clsx";
-import { type DragEvent, useCallback, useState } from "react";
+import { clsx } from 'clsx';
+import { type DragEvent, useCallback, useState } from 'react';
+import { useErrorHandler } from '~/hooks/use-error-handler';
+import { useNetworkStatus } from '~/hooks/use-network-status';
+import { offlineQueue } from '~/lib/utils/offline-queue';
+import { UploadErrorRecovery } from './error-recovery';
+import { useToast } from './toast';
 
-interface UploadZoneProps {
+export interface UploadZoneProps {
+	/** Callback function called when a file is uploaded */
 	onFileUpload: (file: File) => Promise<void>;
+	/** Whether an upload is currently in progress */
 	isUploading: boolean;
+	/** Array of accepted file types (default: [".pdf"]) */
 	acceptedTypes?: string[];
-	maxSize?: number; // in MB
+	/** Maximum file size in MB (default: 50) */
+	maxSize?: number;
+	/** Additional CSS classes to apply */
 	className?: string;
 }
 
+/**
+ * A drag-and-drop file upload zone component with validation and error handling.
+ *
+ * Supports offline queuing, progress tracking, and comprehensive file validation.
+ * Provides visual feedback for drag states and upload progress.
+ *
+ * @param props - The upload zone configuration
+ * @returns JSX element for the upload zone
+ *
+ * @example
+ * ```tsx
+ * function UploadPage() {
+ *   const [isUploading, setIsUploading] = useState(false);
+ *
+ *   const handleFileUpload = async (file: File) => {
+ *     setIsUploading(true);
+ *     try {
+ *       await uploadFile(file);
+ *     } finally {
+ *       setIsUploading(false);
+ *     }
+ *   };
+ *
+ *   return (
+ *     <UploadZone
+ *       onFileUpload={handleFileUpload}
+ *       isUploading={isUploading}
+ *       maxSize={25}
+ *     />
+ *   );
+ * }
+ * ```
+ */
 export function UploadZone({
 	onFileUpload,
 	isUploading,
-	acceptedTypes = [".pdf"],
+	acceptedTypes = ['.pdf'],
 	maxSize = 50,
 	className,
 }: UploadZoneProps) {
 	const [isDragOver, setIsDragOver] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const [uploadProgress, setUploadProgress] = useState(0);
+	const { isOnline, isClient } = useNetworkStatus();
+	const { addToast } = useToast();
+	const { error, handleError, clearError, withErrorHandling } = useErrorHandler({
+		showToast: true,
+		logError: true,
+	});
 
+	/**
+	 * Validates an uploaded file against type, size, and content requirements.
+	 *
+	 * @param file - The file to validate
+	 * @returns Error message if validation fails, null if valid
+	 */
 	const validateFile = useCallback(
 		(file: File): string | null => {
 			// Check file type
-			if (!file.type.includes("pdf")) {
-				return "Only PDF files are accepted";
+			if (!file.type.includes('pdf')) {
+				return 'Only PDF files are accepted';
 			}
 
 			// Check file size (convert MB to bytes)
@@ -34,29 +89,51 @@ export function UploadZone({
 				return `File size must be less than ${maxSize}MB`;
 			}
 
+			// Check if file is empty
+			if (file.size === 0) {
+				return 'The selected file appears to be empty';
+			}
+
 			return null;
 		},
-		[maxSize],
+		[maxSize]
 	);
 
-	const handleFile = useCallback(
-		async (file: File) => {
-			setError(null);
+	const handleFile = withErrorHandling(async (file: File) => {
+		const validationError = validateFile(file);
+		if (validationError) {
+			throw new Error(validationError);
+		}
 
-			const validationError = validateFile(file);
-			if (validationError) {
-				setError(validationError);
-				return;
-			}
+		clearError();
+		setUploadProgress(0);
 
-			try {
-				await onFileUpload(file);
-			} catch (err) {
-				setError(err instanceof Error ? err.message : "Upload failed");
-			}
-		},
-		[onFileUpload, validateFile],
-	);
+		if (isClient && !isOnline) {
+			// Queue for offline processing
+			const formData = new FormData();
+			formData.append('file', file);
+
+			offlineQueue.addOperation('upload', { formData });
+			addToast({
+				type: 'info',
+				title: 'Queued for Upload',
+				description: 'File will be uploaded when connection is restored.',
+			});
+			return;
+		}
+
+		try {
+			await onFileUpload(file);
+			addToast({
+				type: 'success',
+				title: 'Upload Successful',
+				description: 'Your paper is being processed.',
+			});
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Upload failed';
+			throw new Error(errorMessage);
+		}
+	}, 'file upload');
 
 	const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
 		e.preventDefault();
@@ -78,7 +155,7 @@ export function UploadZone({
 				handleFile(files[0]);
 			}
 		},
-		[handleFile],
+		[handleFile]
 	);
 
 	const handleFileInput = useCallback(
@@ -88,20 +165,37 @@ export function UploadZone({
 				handleFile(files[0]);
 			}
 		},
-		[handleFile],
+		[handleFile]
 	);
 
+	const handleRetry = useCallback(() => {
+		clearError();
+		// Reset file input to allow re-selection
+		const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+		if (fileInput) {
+			fileInput.value = '';
+		}
+	}, [clearError]);
+
+	if (error) {
+		return (
+			<div className={clsx('w-full', className)}>
+				<UploadErrorRecovery error={error.message} onRetry={handleRetry} />
+			</div>
+		);
+	}
+
 	return (
-		<div className={clsx("w-full", className)}>
+		<div className={clsx('w-full', className)}>
 			<div
 				className={clsx(
-					"relative rounded-lg border-2 border-dashed p-8 text-center transition-colors",
+					'relative rounded-lg border-2 border-dashed p-8 text-center transition-colors',
 					{
-						"border-blue-400 bg-blue-50": isDragOver && !isUploading,
-						"border-gray-300 hover:border-gray-400":
-							!isDragOver && !isUploading,
-						"border-gray-200 bg-gray-50": isUploading,
-					},
+						'border-blue-400 bg-blue-50': isDragOver && !isUploading,
+						'border-gray-300 hover:border-gray-400': !isDragOver && !isUploading,
+						'border-gray-200 bg-gray-50': isUploading,
+						'border-yellow-300 bg-yellow-50': isClient && !isOnline,
+					}
 				)}
 				onDragOver={handleDragOver}
 				onDragLeave={handleDragLeave}
@@ -109,7 +203,7 @@ export function UploadZone({
 			>
 				<input
 					type="file"
-					accept={acceptedTypes.join(",")}
+					accept={acceptedTypes.join(',')}
 					onChange={handleFileInput}
 					disabled={isUploading}
 					className="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
@@ -120,12 +214,7 @@ export function UploadZone({
 						{isUploading ? (
 							<div className="h-12 w-12 animate-spin rounded-full border-blue-600 border-b-2" />
 						) : (
-							<svg
-								className="h-12 w-12"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
+							<svg className="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									strokeLinecap="round"
 									strokeLinejoin="round"
@@ -138,22 +227,33 @@ export function UploadZone({
 
 					<div>
 						<p className="font-medium text-gray-900 text-lg">
-							{isUploading ? "Processing..." : "Upload your research paper"}
+							{isUploading ? 'Processing...' : 'Upload your research paper'}
 						</p>
 						<p className="mt-1 text-gray-500 text-sm">
 							{isUploading
-								? "Please wait while we process your PDF"
+								? 'Please wait while we process your PDF'
 								: `Drag and drop a PDF file here, or click to select (max ${maxSize}MB)`}
 						</p>
+						{isClient && !isOnline && (
+							<p className="mt-2 text-sm text-yellow-700">
+								⚠️ Offline mode: Files will be queued for upload
+							</p>
+						)}
 					</div>
+
+					{isUploading && uploadProgress > 0 && (
+						<div className="space-y-2">
+							<div className="h-2 w-full rounded-full bg-gray-200">
+								<div
+									className="h-2 rounded-full bg-blue-600 transition-all duration-300"
+									style={{ width: `${uploadProgress}%` }}
+								/>
+							</div>
+							<p className="text-gray-600 text-sm">{Math.round(uploadProgress)}% complete</p>
+						</div>
+					)}
 				</div>
 			</div>
-
-			{error && (
-				<div className="mt-3 rounded-md border border-red-200 bg-red-50 p-3">
-					<p className="text-red-600 text-sm">{error}</p>
-				</div>
-			)}
 		</div>
 	);
 }

@@ -23,17 +23,16 @@ export interface PdfProcessingError {
  */
 export async function extractTextFromPdf(
 	buffer: Buffer,
-	fileName: string,
+	fileName: string
 ): Promise<PdfProcessingResult> {
 	try {
 		// Dynamic import for server-side only
 		if (!pdfParse) {
-			pdfParse = (await import("pdf-parse")).default;
+            const pdfParseModule = await import('pdf-parse');
+            pdfParse = pdfParseModule.default || pdfParseModule; // Handle potential different export structures
 		}
 
-		console.log(
-			`Starting PDF extraction for ${fileName}, buffer size: ${buffer.length} bytes`,
-		);
+		console.log(`Starting PDF extraction for ${fileName}, buffer size: ${buffer.length} bytes`);
 
 		// Add timeout and options for better reliability
 		const data = await pdfParse(buffer, {
@@ -47,7 +46,7 @@ export async function extractTextFromPdf(
 		});
 
 		// Ensure we have valid data
-		let extractedText = data.text || "";
+		let extractedText = data.text || '';
 		const pageCount = data.numpages || 1;
 
 		// Clean up the extracted text
@@ -56,18 +55,18 @@ export async function extractTextFromPdf(
 		// Validate that we actually extracted meaningful content
 		if (extractedText.trim().length < 100) {
 			console.warn(
-				`PDF extraction resulted in very short text (${extractedText.length} chars) for ${fileName}`,
+				`PDF extraction resulted in very short text (${extractedText.length} chars) for ${fileName}`
 			);
 		}
 
 		console.log(
-			`PDF extraction successful for ${fileName}: ${pageCount} pages, ${extractedText.length} characters`,
+			`PDF extraction successful for ${fileName}: ${pageCount} pages, ${extractedText.length} characters`
 		);
 
 		return {
 			text: extractedText,
 			metadata: {
-				title: data.info?.Title || fileName.replace(".pdf", ""),
+				title: data.info?.Title || fileName.replace('.pdf', ''),
 				author: data.info?.Author,
 				pages: pageCount,
 				fileSize: buffer.length,
@@ -75,7 +74,7 @@ export async function extractTextFromPdf(
 			},
 		};
 	} catch (error) {
-		console.error("PDF parsing error details:", {
+		console.error('PDF parsing error details:', {
 			fileName,
 			bufferSize: buffer.length,
 			error: error instanceof Error ? error.message : String(error),
@@ -83,8 +82,8 @@ export async function extractTextFromPdf(
 		});
 
 		throw {
-			message: "Failed to extract text from PDF",
-			code: "PDF_EXTRACTION_ERROR",
+			message: 'Failed to extract text from PDF',
+			code: 'PDF_EXTRACTION_ERROR',
 			details: error,
 		} as PdfProcessingError;
 	}
@@ -97,11 +96,11 @@ function cleanExtractedText(text: string): string {
 	return (
 		text
 			// Remove excessive whitespace
-			.replace(/\s+/g, " ")
+			.replace(/\s+/g, ' ')
 			// Remove page breaks and form feeds
-			.replace(/[\f\r]/g, "")
+			.replace(/[\f\r]/g, '')
 			// Normalize line breaks
-			.replace(/\n\s*\n/g, "\n\n")
+			.replace(/\n\s*\n/g, '\n\n')
 			// Remove leading/trailing whitespace
 			.trim()
 	);
@@ -111,16 +110,14 @@ function cleanExtractedText(text: string): string {
  * Client-side PDF text extraction fallback
  * This is a simplified version that can be enhanced with libraries like PDF.js
  */
-export async function extractTextFromPdfClient(
-	file: File,
-): Promise<PdfProcessingResult> {
+export async function extractTextFromPdfClient(file: File): Promise<PdfProcessingResult> {
 	try {
 		// For now, we'll return basic metadata and indicate client-side processing
 		// In a full implementation, you would use PDF.js or similar library
 		return {
-			text: "", // Would be extracted using PDF.js
+			text: '', // Would be extracted using PDF.js
 			metadata: {
-				title: file.name.replace(".pdf", ""),
+				title: file.name.replace('.pdf', ''),
 				pages: 0, // Would be determined by PDF.js
 				fileSize: file.size,
 				fileName: file.name,
@@ -128,8 +125,8 @@ export async function extractTextFromPdfClient(
 		};
 	} catch (error) {
 		throw {
-			message: "Client-side PDF processing failed",
-			code: "CLIENT_PDF_ERROR",
+			message: 'Client-side PDF processing failed',
+			code: 'CLIENT_PDF_ERROR',
 			details: error,
 		} as PdfProcessingError;
 	}
@@ -140,10 +137,10 @@ export async function extractTextFromPdfClient(
  */
 export function validatePdfFile(file: File): PdfProcessingError | null {
 	// Check file type
-	if (!file.type.includes("pdf") && !file.name.toLowerCase().endsWith(".pdf")) {
+	if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
 		return {
-			message: "Invalid file type. Only PDF files are accepted.",
-			code: "INVALID_FILE_TYPE",
+			message: 'Invalid file type. Only PDF files are accepted.',
+			code: 'INVALID_FILE_TYPE',
 		};
 	}
 
@@ -151,16 +148,16 @@ export function validatePdfFile(file: File): PdfProcessingError | null {
 	const maxSize = 50 * 1024 * 1024; // 50MB in bytes
 	if (file.size > maxSize) {
 		return {
-			message: "File size exceeds 50MB limit.",
-			code: "FILE_TOO_LARGE",
+			message: 'File size exceeds 50MB limit.',
+			code: 'FILE_TOO_LARGE',
 		};
 	}
 
 	// Check if file is empty
 	if (file.size === 0) {
 		return {
-			message: "File is empty.",
-			code: "EMPTY_FILE",
+			message: 'File is empty.',
+			code: 'EMPTY_FILE',
 		};
 	}
 

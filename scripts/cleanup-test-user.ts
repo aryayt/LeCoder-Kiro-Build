@@ -1,12 +1,12 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function cleanupTestUser() {
-	console.log("🧹 Cleaning up existing test user...");
+	console.info('🧹 Cleaning up existing test user...');
 
 	try {
-		const email = "aryatest1@gmail.com";
+		const email = 'aryatest1@gmail.com';
 
 		// Find existing user
 		const existingUser = await prisma.user.findUnique({
@@ -23,51 +23,51 @@ async function cleanupTestUser() {
 		});
 
 		if (existingUser) {
-			console.log("Found existing user:", existingUser.name);
+			console.info('Found existing user:', existingUser.name);
 
 			// Delete all related data
-			console.log("Deleting pipeline stages...");
+			console.info('Deleting pipeline stages...');
 			for (const project of existingUser.projects) {
 				await prisma.pipelineStage.deleteMany({
 					where: { projectId: project.id },
 				});
 			}
 
-			console.log("Deleting projects...");
+			console.info('Deleting projects...');
 			await prisma.project.deleteMany({
 				where: { userId: existingUser.id },
 			});
 
-			console.log("Deleting sessions...");
+			console.info('Deleting sessions...');
 			await prisma.session.deleteMany({
 				where: { userId: existingUser.id },
 			});
 
-			console.log("Deleting accounts...");
+			console.info('Deleting accounts...');
 			await prisma.account.deleteMany({
 				where: { userId: existingUser.id },
 			});
 
-			console.log("Deleting user...");
+			console.info('Deleting user...');
 			await prisma.user.delete({
 				where: { id: existingUser.id },
 			});
 
-			console.log("✅ User and all related data deleted");
+			console.info('✅ User and all related data deleted');
 		} else {
-			console.log("ℹ️ No existing user found");
+			console.info('ℹ️ No existing user found');
 		}
 
-		console.log("🎉 Cleanup completed!");
-		console.log("");
-		console.log("Now you can register manually:");
-		console.log("1. Go to http://localhost:3000/auth/register");
-		console.log("2. Use these credentials:");
-		console.log("   Email: aryatest1@gmail.com");
-		console.log("   Password: Aryateja@5");
-		console.log("   Name: aryatest1");
+		console.info('🎉 Cleanup completed!');
+		console.info('');
+		console.info('Now you can register manually:');
+		console.info('1. Go to http://localhost:3000/auth/register');
+		console.info('2. Use these credentials:');
+		console.info('   Email: aryatest1@gmail.com');
+		console.info('   Password: Aryateja@5');
+		console.info('   Name: aryatest1');
 	} catch (error) {
-		console.error("❌ Failed to cleanup:", error);
+		console.error('❌ Failed to cleanup:', error);
 	} finally {
 		await prisma.$disconnect();
 	}

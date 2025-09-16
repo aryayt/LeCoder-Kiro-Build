@@ -1,12 +1,12 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function checkUser() {
-	console.log("🔍 Checking user in database...");
+	console.info('🔍 Checking user in database...');
 
 	try {
-		const email = "aryatest1@gmail.com";
+		const email = 'aryatest1@gmail.com';
 
 		const user = await prisma.user.findUnique({
 			where: { email },
@@ -17,32 +17,29 @@ async function checkUser() {
 		});
 
 		if (user) {
-			console.log("✅ User found:");
-			console.log("ID:", user.id);
-			console.log("Email:", user.email);
-			console.log("Name:", user.name);
-			console.log(
-				"Password field:",
-				user.password ? "Has password hash" : "No password",
-			);
-			console.log("Email verified:", user.emailVerified);
-			console.log("Created at:", user.createdAt);
-			console.log("Accounts:", user.accounts.length);
-			console.log("Sessions:", user.sessions.length);
+			console.info('✅ User found:');
+			console.info('ID:', user.id);
+			console.info('Email:', user.email);
+			console.info('Name:', user.name);
+			console.info('Password field:', user.password ? 'Has password hash' : 'No password');
+			console.info('Email verified:', user.emailVerified);
+			console.info('Created at:', user.createdAt);
+			console.info('Accounts:', user.accounts.length);
+			console.info('Sessions:', user.sessions.length);
 
 			if (user.accounts.length > 0) {
-				console.log("Account details:");
+				console.info('Account details:');
 				user.accounts.forEach((account, i) => {
-					console.log(`  Account ${i + 1}:`);
-					console.log(`    Provider: ${account.providerId}`);
-					console.log(`    Account ID: ${account.accountId}`);
+					console.info(`  Account ${i + 1}:`);
+					console.info(`    Provider: ${account.providerId}`);
+					console.info(`    Account ID: ${account.accountId}`);
 				});
 			}
 		} else {
-			console.log("❌ User not found");
+			console.info('❌ User not found');
 		}
 	} catch (error) {
-		console.error("❌ Error:", error);
+		console.error('❌ Error:', error);
 	} finally {
 		await prisma.$disconnect();
 	}

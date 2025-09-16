@@ -1,5 +1,5 @@
-import type { ConceptExtractionResult, ResearchConcepts } from "~/types/ai";
-import { type AIConfig, type AgentResponse, BaseAIAgent } from "../base-agent";
+import type { ConceptExtractionResult, ResearchConcepts } from '~/types/ai';
+import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class ConceptExtractorAgent extends BaseAIAgent {
 	constructor(config: AIConfig) {
@@ -9,9 +9,7 @@ export class ConceptExtractorAgent extends BaseAIAgent {
 	/**
 	 * Extract research concepts from academic paper content
 	 */
-	async extractConcepts(
-		paperContent: string,
-	): Promise<AgentResponse<ConceptExtractionResult>> {
+	async extractConcepts(paperContent: string): Promise<AgentResponse<ConceptExtractionResult>> {
 		const systemPrompt = `You are an expert research analyst specializing in extracting key concepts from academic papers. 
 Your task is to analyze the provided research paper and extract structured information about its core concepts, methods, and technical requirements.
 
@@ -47,7 +45,7 @@ Guidelines:
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Please analyze this research paper and extract the key concepts:\n\n${paperContent}`,
 			},
 		];
@@ -63,17 +61,13 @@ Guidelines:
 		}
 
 		// Parse the JSON response
-		const parseResult = this.parseJsonResponse<ConceptExtractionResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<ConceptExtractionResult>(response.data!);
 		if (!parseResult.success) {
 			return parseResult;
 		}
 
 		// Validate the response structure
-		const validationResult = this.validateConceptExtractionResult(
-			parseResult.data!,
-		);
+		const validationResult = this.validateConceptExtractionResult(parseResult.data!);
 		if (!validationResult.success) {
 			return validationResult;
 		}
@@ -89,31 +83,28 @@ Guidelines:
 	 * Validate the concept extraction result
 	 */
 	private validateConceptExtractionResult(
-		data: ConceptExtractionResult,
+		data: ConceptExtractionResult
 	): AgentResponse<ConceptExtractionResult> {
 		// Check if concepts object exists
 		if (!data.concepts) {
 			return {
 				success: false,
-				error: "Missing concepts object in response",
+				error: 'Missing concepts object in response',
 			};
 		}
 
 		// Validate required fields in concepts
 		const requiredConceptFields: (keyof ResearchConcepts)[] = [
-			"mainObjective",
-			"keyMethods",
-			"algorithms",
-			"datasets",
-			"evaluationMetrics",
-			"technicalRequirements",
-			"dependencies",
+			'mainObjective',
+			'keyMethods',
+			'algorithms',
+			'datasets',
+			'evaluationMetrics',
+			'technicalRequirements',
+			'dependencies',
 		];
 
-		const conceptValidation = this.validateResponse(
-			data.concepts,
-			requiredConceptFields,
-		);
+		const conceptValidation = this.validateResponse(data.concepts, requiredConceptFields);
 		if (!conceptValidation.success) {
 			return {
 				success: false,
@@ -122,25 +113,21 @@ Guidelines:
 		}
 
 		// Validate confidence score
-		if (
-			typeof data.confidence !== "number" ||
-			data.confidence < 0 ||
-			data.confidence > 1
-		) {
+		if (typeof data.confidence !== 'number' || data.confidence < 0 || data.confidence > 1) {
 			return {
 				success: false,
-				error: "Confidence score must be a number between 0 and 1",
+				error: 'Confidence score must be a number between 0 and 1',
 			};
 		}
 
 		// Validate that arrays are actually arrays
 		const arrayFields: (keyof ResearchConcepts)[] = [
-			"keyMethods",
-			"algorithms",
-			"datasets",
-			"evaluationMetrics",
-			"technicalRequirements",
-			"dependencies",
+			'keyMethods',
+			'algorithms',
+			'datasets',
+			'evaluationMetrics',
+			'technicalRequirements',
+			'dependencies',
 		];
 
 		for (const field of arrayFields) {
@@ -154,12 +141,12 @@ Guidelines:
 
 		// Validate mainObjective is a non-empty string
 		if (
-			typeof data.concepts.mainObjective !== "string" ||
-			data.concepts.mainObjective.trim() === ""
+			typeof data.concepts.mainObjective !== 'string' ||
+			data.concepts.mainObjective.trim() === ''
 		) {
 			return {
 				success: false,
-				error: "mainObjective must be a non-empty string",
+				error: 'mainObjective must be a non-empty string',
 			};
 		}
 
@@ -170,7 +157,7 @@ Guidelines:
 	 * Extract concepts with fallback to simpler analysis if detailed extraction fails
 	 */
 	async extractConceptsWithFallback(
-		paperContent: string,
+		paperContent: string
 	): Promise<AgentResponse<ConceptExtractionResult>> {
 		// Try detailed extraction first
 		const detailedResult = await this.extractConcepts(paperContent);
@@ -196,7 +183,7 @@ Guidelines:
 	 * Simplified concept extraction as fallback
 	 */
 	private async extractBasicConcepts(
-		paperContent: string,
+		paperContent: string
 	): Promise<AgentResponse<ConceptExtractionResult>> {
 		const systemPrompt = `Extract basic research concepts from this paper. Return only a JSON object with:
 {
@@ -215,7 +202,7 @@ Guidelines:
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Extract basic concepts from: ${paperContent.substring(0, 2000)}...`,
 			},
 		];
@@ -230,9 +217,7 @@ Guidelines:
 			};
 		}
 
-		const parseResult = this.parseJsonResponse<ConceptExtractionResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<ConceptExtractionResult>(response.data!);
 		return parseResult;
 	}
 }

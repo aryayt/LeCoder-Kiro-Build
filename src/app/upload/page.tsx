@@ -1,13 +1,16 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { UploadZone } from "~/components/ui/upload-zone";
-import { useFileUpload } from "~/hooks/use-file-upload";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { UploadZone } from '~/components/ui/upload-zone';
+import { useFileUpload } from '~/hooks/use-file-upload';
 
 export default function UploadPage() {
 	const router = useRouter();
-	const [uploadResult, setUploadResult] = useState<{ success: boolean; project?: { id: string; title: string } } | null>(null);
+	const [uploadResult, setUploadResult] = useState<{
+		success: boolean;
+		project?: { id: string; title: string };
+	} | null>(null);
 
 	const { uploadFile, isUploading, error } = useFileUpload({
 		onSuccess: (result) => {
@@ -20,7 +23,7 @@ export default function UploadPage() {
 			}
 		},
 		onError: (error) => {
-			console.error("Upload failed:", error);
+			console.error('Upload failed:', error);
 		},
 	});
 
@@ -32,30 +35,20 @@ export default function UploadPage() {
 		<div className="min-h-screen bg-gray-50 py-12">
 			<div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
 				<div className="mb-8 text-center">
-					<h1 className="mb-4 font-bold text-3xl text-gray-900">
-						Upload Research Paper
-					</h1>
+					<h1 className="mb-4 font-bold text-3xl text-gray-900">Upload Research Paper</h1>
 					<p className="text-gray-600 text-lg">
 						Transform your academic research into working code automatically
 					</p>
 				</div>
 
 				<div className="rounded-lg bg-white p-8 shadow-sm">
-					<UploadZone
-						onFileUpload={handleFileUpload}
-						isUploading={isUploading}
-						maxSize={50}
-					/>
+					<UploadZone onFileUpload={handleFileUpload} isUploading={isUploading} maxSize={50} />
 
 					{error && (
 						<div className="mt-6 rounded-md border border-red-200 bg-red-50 p-4">
 							<div className="flex">
 								<div className="flex-shrink-0">
-									<svg
-										className="h-5 w-5 text-red-400"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-									>
+									<svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
 										<title>Error</title>
 										<path
 											fillRule="evenodd"
@@ -65,9 +58,7 @@ export default function UploadPage() {
 									</svg>
 								</div>
 								<div className="ml-3">
-									<h3 className="font-medium text-red-800 text-sm">
-										Upload Failed
-									</h3>
+									<h3 className="font-medium text-red-800 text-sm">Upload Failed</h3>
 									<div className="mt-2 text-red-700 text-sm">
 										<p>{error}</p>
 									</div>
@@ -80,11 +71,7 @@ export default function UploadPage() {
 						<div className="mt-6 rounded-md border border-green-200 bg-green-50 p-4">
 							<div className="flex">
 								<div className="flex-shrink-0">
-									<svg
-										className="h-5 w-5 text-green-400"
-										viewBox="0 0 20 20"
-										fill="currentColor"
-									>
+									<svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
 										<title>Success</title>
 										<path
 											fillRule="evenodd"
@@ -94,13 +81,11 @@ export default function UploadPage() {
 									</svg>
 								</div>
 								<div className="ml-3">
-									<h3 className="font-medium text-green-800 text-sm">
-										Upload Successful!
-									</h3>
+									<h3 className="font-medium text-green-800 text-sm">Upload Successful!</h3>
 									<div className="mt-2 text-green-700 text-sm">
 										<p>
-											Your paper "{uploadResult.project?.title}" has been
-											uploaded successfully. Redirecting to processing view...
+											Your paper "{uploadResult.project?.title}" has been uploaded successfully.
+											Redirecting to processing view...
 										</p>
 									</div>
 								</div>
@@ -110,9 +95,7 @@ export default function UploadPage() {
 				</div>
 
 				<div className="mt-8 rounded-lg bg-white p-6 shadow-sm">
-					<h2 className="mb-4 font-semibold text-gray-900 text-lg">
-						What happens next?
-					</h2>
+					<h2 className="mb-4 font-semibold text-gray-900 text-lg">What happens next?</h2>
 					<div className="space-y-3 text-gray-600 text-sm">
 						<div className="flex items-start space-x-3">
 							<div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-medium text-blue-600 text-xs">
@@ -124,9 +107,7 @@ export default function UploadPage() {
 							<div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-medium text-blue-600 text-xs">
 								2
 							</div>
-							<p>
-								AI agents will analyze the research and identify key concepts
-							</p>
+							<p>AI agents will analyze the research and identify key concepts</p>
 						</div>
 						<div className="flex items-start space-x-3">
 							<div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-medium text-blue-600 text-xs">
@@ -138,9 +119,7 @@ export default function UploadPage() {
 							<div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 font-medium text-blue-600 text-xs">
 								4
 							</div>
-							<p>
-								You'll receive a downloadable ZIP file with all project files
-							</p>
+							<p>You'll receive a downloadable ZIP file with all project files</p>
 						</div>
 					</div>
 				</div>

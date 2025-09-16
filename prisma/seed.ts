@@ -1,52 +1,49 @@
-import { PrismaClient, ProjectStatus, StageStatus } from "@prisma/client";
+import { PrismaClient, ProjectStatus, StageStatus } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-	console.log("🌱 Starting database seeding...");
+	console.log('🌱 Starting database seeding...');
 
 	// Create sample users
 	const user1 = await prisma.user.upsert({
-		where: { email: "researcher@example.com" },
+		where: { email: 'researcher@example.com' },
 		update: {},
 		create: {
-			email: "researcher@example.com",
-			name: "Dr. Jane Smith",
-			image:
-				"https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150",
+			email: 'researcher@example.com',
+			name: 'Dr. Jane Smith',
+			image: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150',
 		},
 	});
 
 	const user2 = await prisma.user.upsert({
-		where: { email: "student@example.com" },
+		where: { email: 'student@example.com' },
 		update: {},
 		create: {
-			email: "student@example.com",
-			name: "John Doe",
-			image:
-				"https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150",
+			email: 'student@example.com',
+			name: 'John Doe',
+			image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
 		},
 	});
 
 	// Create test user account
 	const testUser = await prisma.user.upsert({
-		where: { email: "aryateja2106@gmail.com" },
+		where: { email: 'aryateja2106@gmail.com' },
 		update: {},
 		create: {
-			email: "aryateja2106@gmail.com",
-			name: "aryateja",
-			image:
-				"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+			email: 'aryateja2106@gmail.com',
+			name: 'aryateja',
+			image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
 		},
 	});
 
-	console.log("✅ Created sample users");
+	console.log('✅ Created sample users');
 
 	// Create sample projects
 	const project1 = await prisma.project.create({
 		data: {
 			userId: user1.id,
-			title: "Deep Learning for Image Classification",
+			title: 'Deep Learning for Image Classification',
 			paperContent: `
         Abstract: This paper presents a novel approach to image classification using deep convolutional neural networks.
         We propose a new architecture that combines residual connections with attention mechanisms to achieve
@@ -64,18 +61,13 @@ async function main() {
 			status: ProjectStatus.COMPLETED,
 			currentStage: 6,
 			metadata: {
-				fileName: "deep_learning_image_classification.pdf",
+				fileName: 'deep_learning_image_classification.pdf',
 				fileSize: 2048576,
 				pageCount: 12,
-				authors: ["Dr. Jane Smith", "Prof. Alan Turing"],
+				authors: ['Dr. Jane Smith', 'Prof. Alan Turing'],
 				abstract:
-					"This paper presents a novel approach to image classification using deep convolutional neural networks.",
-				keywords: [
-					"deep learning",
-					"image classification",
-					"attention mechanism",
-					"ResNet",
-				],
+					'This paper presents a novel approach to image classification using deep convolutional neural networks.',
+				keywords: ['deep learning', 'image classification', 'attention mechanism', 'ResNet'],
 			},
 		},
 	});
@@ -83,7 +75,7 @@ async function main() {
 	const project2 = await prisma.project.create({
 		data: {
 			userId: user2.id,
-			title: "Natural Language Processing with Transformers",
+			title: 'Natural Language Processing with Transformers',
 			paperContent: `
         Abstract: We explore the application of transformer architectures for various NLP tasks including
         sentiment analysis, named entity recognition, and text summarization.
@@ -100,20 +92,19 @@ async function main() {
 			status: ProjectStatus.PROCESSING,
 			currentStage: 3,
 			metadata: {
-				fileName: "nlp_transformers.pdf",
+				fileName: 'nlp_transformers.pdf',
 				fileSize: 1536000,
 				pageCount: 8,
-				authors: ["John Doe", "Dr. Emily Chen"],
-				abstract:
-					"We explore the application of transformer architectures for various NLP tasks.",
-				keywords: ["NLP", "transformers", "BERT", "sentiment analysis"],
+				authors: ['John Doe', 'Dr. Emily Chen'],
+				abstract: 'We explore the application of transformer architectures for various NLP tasks.',
+				keywords: ['NLP', 'transformers', 'BERT', 'sentiment analysis'],
 			},
 		},
 	});
 
 	const project3 = await prisma.project.create({
 		data: {
-			title: "Reinforcement Learning for Game AI",
+			title: 'Reinforcement Learning for Game AI',
 			paperContent: `
         Abstract: This work presents a reinforcement learning approach for training AI agents
         to play complex strategy games using deep Q-networks and policy gradient methods.
@@ -130,18 +121,13 @@ async function main() {
 			status: ProjectStatus.UPLOADED,
 			currentStage: 0,
 			metadata: {
-				fileName: "rl_game_ai.pdf",
+				fileName: 'rl_game_ai.pdf',
 				fileSize: 3072000,
 				pageCount: 15,
-				authors: ["Anonymous Researcher"],
+				authors: ['Anonymous Researcher'],
 				abstract:
-					"This work presents a reinforcement learning approach for training AI agents to play complex strategy games.",
-				keywords: [
-					"reinforcement learning",
-					"game AI",
-					"DQN",
-					"policy gradient",
-				],
+					'This work presents a reinforcement learning approach for training AI agents to play complex strategy games.',
+				keywords: ['reinforcement learning', 'game AI', 'DQN', 'policy gradient'],
 			},
 		},
 	});
@@ -150,7 +136,7 @@ async function main() {
 	const testProject = await prisma.project.create({
 		data: {
 			userId: testUser.id,
-			title: "Machine Learning for Predictive Analytics",
+			title: 'Machine Learning for Predictive Analytics',
 			paperContent: `
         Abstract: This paper explores the application of machine learning algorithms for predictive analytics
         in business intelligence. We compare various algorithms including Random Forest, SVM, and Neural Networks.
@@ -167,32 +153,27 @@ async function main() {
 			status: ProjectStatus.PROCESSING,
 			currentStage: 2,
 			metadata: {
-				fileName: "ml_predictive_analytics.pdf",
+				fileName: 'ml_predictive_analytics.pdf',
 				fileSize: 1800000,
 				pageCount: 10,
-				authors: ["aryateja"],
+				authors: ['aryateja'],
 				abstract:
-					"This paper explores the application of machine learning algorithms for predictive analytics in business intelligence.",
-				keywords: [
-					"machine learning",
-					"predictive analytics",
-					"random forest",
-					"SVM",
-				],
+					'This paper explores the application of machine learning algorithms for predictive analytics in business intelligence.',
+				keywords: ['machine learning', 'predictive analytics', 'random forest', 'SVM'],
 			},
 		},
 	});
 
-	console.log("✅ Created sample projects");
+	console.log('✅ Created sample projects');
 
 	// Create pipeline stages for completed project
 	const stages = [
-		{ name: "Concept Extraction", number: 1 },
-		{ name: "Algorithm Analysis", number: 2 },
-		{ name: "Architecture Planning", number: 3 },
-		{ name: "Implementation Planning", number: 4 },
-		{ name: "Code Generation", number: 5 },
-		{ name: "Documentation Generation", number: 6 },
+		{ name: 'Concept Extraction', number: 1 },
+		{ name: 'Algorithm Analysis', number: 2 },
+		{ name: 'Architecture Planning', number: 3 },
+		{ name: 'Implementation Planning', number: 4 },
+		{ name: 'Code Generation', number: 5 },
+		{ name: 'Documentation Generation', number: 6 },
 	];
 
 	for (const stage of stages) {
@@ -209,11 +190,10 @@ async function main() {
 				outputData: {
 					stage: stage.number,
 					result: `Completed ${stage.name} successfully`,
-					concepts:
-						stage.number === 1 ? ["CNN", "ResNet", "Attention"] : undefined,
+					concepts: stage.number === 1 ? ['CNN', 'ResNet', 'Attention'] : undefined,
 					algorithms:
 						stage.number === 2
-							? ["Convolutional Neural Network", "Residual Connections"]
+							? ['Convolutional Neural Network', 'Residual Connections']
 							: undefined,
 				},
 				startedAt: new Date(Date.now() - (6 - stage.number) * 60000),
@@ -225,7 +205,7 @@ async function main() {
 	// Create pipeline stages for processing project (partial completion)
 	for (let i = 1; i <= 3; i++) {
 		const stage = stages[i - 1];
-		if (!stage) continue;
+		if (!stage) { continue; }
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: project2.id,
@@ -244,8 +224,7 @@ async function main() {
 							}
 						: undefined,
 				startedAt: new Date(Date.now() - (4 - i) * 60000),
-				completedAt:
-					i < 3 ? new Date(Date.now() - (4 - i) * 60000 + 30000) : undefined,
+				completedAt: i < 3 ? new Date(Date.now() - (4 - i) * 60000 + 30000) : undefined,
 			},
 		});
 	}
@@ -253,7 +232,7 @@ async function main() {
 	// Create remaining pending stages for processing project
 	for (let i = 4; i <= 6; i++) {
 		const stage = stages[i - 1];
-		if (!stage) continue;
+		if (!stage) { continue; }
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: project2.id,
@@ -279,7 +258,7 @@ async function main() {
 	// Create pipeline stages for test user project (partial completion)
 	for (let i = 1; i <= 2; i++) {
 		const stage = stages[i - 1];
-		if (!stage) continue;
+		if (!stage) { continue; }
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: testProject.id,
@@ -298,8 +277,7 @@ async function main() {
 							}
 						: undefined,
 				startedAt: new Date(Date.now() - (3 - i) * 60000),
-				completedAt:
-					i < 2 ? new Date(Date.now() - (3 - i) * 60000 + 30000) : undefined,
+				completedAt: i < 2 ? new Date(Date.now() - (3 - i) * 60000 + 30000) : undefined,
 			},
 		});
 	}
@@ -307,7 +285,7 @@ async function main() {
 	// Create remaining pending stages for test user project
 	for (let i = 3; i <= 6; i++) {
 		const stage = stages[i - 1];
-		if (!stage) continue;
+		if (!stage) { continue; }
 		await prisma.pipelineStage.create({
 			data: {
 				projectId: testProject.id,
@@ -318,12 +296,12 @@ async function main() {
 		});
 	}
 
-	console.log("✅ Created pipeline stages");
+	console.log('✅ Created pipeline stages');
 
 	// Create sample generated files for completed project
 	const generatedFiles = [
 		{
-			filePath: "src/models/resnet.py",
+			filePath: 'src/models/resnet.py',
 			fileContent: `import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -389,10 +367,10 @@ class ResNet(nn.Module):
         x = self.fc(x)
         
         return x`,
-			fileType: "python",
+			fileType: 'python',
 		},
 		{
-			filePath: "src/models/attention.py",
+			filePath: 'src/models/attention.py',
 			fileContent: `import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -429,10 +407,10 @@ class SpatialAttention(nn.Module):
         x_cat = torch.cat([avg_out, max_out], dim=1)
         x_cat = self.conv1(x_cat)
         return x * self.sigmoid(x_cat)`,
-			fileType: "python",
+			fileType: 'python',
 		},
 		{
-			filePath: "requirements.txt",
+			filePath: 'requirements.txt',
 			fileContent: `torch>=2.0.0
 torchvision>=0.15.0
 numpy>=1.21.0
@@ -441,10 +419,10 @@ matplotlib>=3.5.0
 scikit-learn>=1.0.0
 tqdm>=4.62.0
 tensorboard>=2.8.0`,
-			fileType: "text",
+			fileType: 'text',
 		},
 		{
-			filePath: "README.md",
+			filePath: 'README.md',
 			fileContent: `# Deep Learning for Image Classification
 
 This repository contains the implementation of a novel deep learning approach for image classification using ResNet with attention mechanisms.
@@ -510,7 +488,7 @@ If you use this code in your research, please cite:
   year={2024}
 }
 \`\`\``,
-			fileType: "markdown",
+			fileType: 'markdown',
 		},
 	];
 
@@ -525,9 +503,9 @@ If you use this code in your research, please cite:
 		});
 	}
 
-	console.log("✅ Created sample generated files");
+	console.log('✅ Created sample generated files');
 
-	console.log("🎉 Database seeding completed successfully!");
+	console.log('🎉 Database seeding completed successfully!');
 	console.log(`
   Created:
   - 3 users (including test user: aryateja2106@gmail.com)
@@ -542,7 +520,7 @@ main()
 		await prisma.$disconnect();
 	})
 	.catch(async (e) => {
-		console.error("❌ Seeding failed:", e);
+		console.error('❌ Seeding failed:', e);
 		await prisma.$disconnect();
 		process.exit(1);
 	});

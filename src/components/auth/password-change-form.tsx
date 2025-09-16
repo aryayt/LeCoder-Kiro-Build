@@ -1,36 +1,30 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { z } from "zod";
-import {
-	type PasswordChangeData,
-	passwordChangeSchema,
-} from "~/lib/auth/validation";
+import { useState } from 'react';
+import { z } from 'zod';
+import { type PasswordChangeData, passwordChangeSchema } from '~/lib/auth/validation';
 
 export function PasswordChangeForm() {
 	const [formData, setFormData] = useState<PasswordChangeData>({
-		currentPassword: "",
-		newPassword: "",
-		confirmNewPassword: "",
+		currentPassword: '',
+		newPassword: '',
+		confirmNewPassword: '',
 	});
 	const [isLoading, setIsLoading] = useState(false);
 	const [errors, setErrors] = useState<Partial<PasswordChangeData>>({});
-	const [message, setMessage] = useState("");
-	const [messageType, setMessageType] = useState<"success" | "error" | "">("");
+	const [message, setMessage] = useState('');
+	const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
 
-	const handleInputChange = (
-		field: keyof PasswordChangeData,
-		value: string,
-	) => {
+	const handleInputChange = (field: keyof PasswordChangeData, value: string) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 		// Clear field-specific error when user starts typing
 		if (errors[field]) {
-			setErrors((prev) => ({ ...prev, [field]: "" }));
+			setErrors((prev) => ({ ...prev, [field]: '' }));
 		}
 		// Clear general message when user makes changes
 		if (message) {
-			setMessage("");
-			setMessageType("");
+			setMessage('');
+			setMessageType('');
 		}
 	};
 
@@ -54,7 +48,7 @@ export function PasswordChangeForm() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setMessage("");
+		setMessage('');
 
 		if (!validateForm()) {
 			return;
@@ -63,10 +57,10 @@ export function PasswordChangeForm() {
 		setIsLoading(true);
 
 		try {
-			const response = await fetch("/api/user/change-password", {
-				method: "POST",
+			const response = await fetch('/api/user/change-password', {
+				method: 'POST',
 				headers: {
-					"Content-Type": "application/json",
+					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
 					currentPassword: formData.currentPassword,
@@ -75,22 +69,22 @@ export function PasswordChangeForm() {
 			});
 
 			if (response.ok) {
-				setMessage("Password changed successfully!");
-				setMessageType("success");
+				setMessage('Password changed successfully!');
+				setMessageType('success');
 				// Reset form
 				setFormData({
-					currentPassword: "",
-					newPassword: "",
-					confirmNewPassword: "",
+					currentPassword: '',
+					newPassword: '',
+					confirmNewPassword: '',
 				});
 			} else {
 				const error = await response.json();
-				setMessage(error.message || "Failed to change password");
-				setMessageType("error");
+				setMessage(error.message || 'Failed to change password');
+				setMessageType('error');
 			}
 		} catch (error) {
-			setMessage("An unexpected error occurred. Please try again.");
-			setMessageType("error");
+			setMessage('An unexpected error occurred. Please try again.');
+			setMessageType('error');
 		} finally {
 			setIsLoading(false);
 		}
@@ -99,21 +93,18 @@ export function PasswordChangeForm() {
 	return (
 		<form onSubmit={handleSubmit} className="space-y-6">
 			<div>
-				<label
-					htmlFor="currentPassword"
-					className="block font-medium text-gray-700 text-sm"
-				>
+				<label htmlFor="currentPassword" className="block font-medium text-gray-700 text-sm">
 					Current Password
 				</label>
 				<input
 					id="currentPassword"
 					type="password"
 					value={formData.currentPassword}
-					onChange={(e) => handleInputChange("currentPassword", e.target.value)}
+					onChange={(e) => handleInputChange('currentPassword', e.target.value)}
 					className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-2 ${
 						errors.currentPassword
-							? "border-red-300 focus:border-red-500 focus:ring-red-500"
-							: "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+							? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+							: 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
 					}`}
 					disabled={isLoading}
 					autoComplete="current-password"
@@ -124,21 +115,18 @@ export function PasswordChangeForm() {
 			</div>
 
 			<div>
-				<label
-					htmlFor="newPassword"
-					className="block font-medium text-gray-700 text-sm"
-				>
+				<label htmlFor="newPassword" className="block font-medium text-gray-700 text-sm">
 					New Password
 				</label>
 				<input
 					id="newPassword"
 					type="password"
 					value={formData.newPassword}
-					onChange={(e) => handleInputChange("newPassword", e.target.value)}
+					onChange={(e) => handleInputChange('newPassword', e.target.value)}
 					className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-2 ${
 						errors.newPassword
-							? "border-red-300 focus:border-red-500 focus:ring-red-500"
-							: "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+							? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+							: 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
 					}`}
 					disabled={isLoading}
 					autoComplete="new-password"
@@ -147,57 +135,45 @@ export function PasswordChangeForm() {
 					<p className="mt-1 text-red-600 text-sm">{errors.newPassword}</p>
 				) : (
 					<p className="mt-1 text-gray-500 text-sm">
-						Must contain uppercase, lowercase, and number. At least 8
-						characters.
+						Must contain uppercase, lowercase, and number. At least 8 characters.
 					</p>
 				)}
 			</div>
 
 			<div>
-				<label
-					htmlFor="confirmNewPassword"
-					className="block font-medium text-gray-700 text-sm"
-				>
+				<label htmlFor="confirmNewPassword" className="block font-medium text-gray-700 text-sm">
 					Confirm New Password
 				</label>
 				<input
 					id="confirmNewPassword"
 					type="password"
 					value={formData.confirmNewPassword}
-					onChange={(e) =>
-						handleInputChange("confirmNewPassword", e.target.value)
-					}
+					onChange={(e) => handleInputChange('confirmNewPassword', e.target.value)}
 					className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-2 ${
 						errors.confirmNewPassword
-							? "border-red-300 focus:border-red-500 focus:ring-red-500"
-							: "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+							? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+							: 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
 					}`}
 					disabled={isLoading}
 					autoComplete="new-password"
 				/>
 				{errors.confirmNewPassword && (
-					<p className="mt-1 text-red-600 text-sm">
-						{errors.confirmNewPassword}
-					</p>
+					<p className="mt-1 text-red-600 text-sm">{errors.confirmNewPassword}</p>
 				)}
 			</div>
 
 			{message && (
 				<div
 					className={`rounded-md p-4 ${
-						messageType === "success"
-							? "border border-green-200 bg-green-50"
-							: "border border-red-200 bg-red-50"
+						messageType === 'success'
+							? 'border border-green-200 bg-green-50'
+							: 'border border-red-200 bg-red-50'
 					}`}
 				>
 					<div className="flex">
 						<div className="flex-shrink-0">
-							{messageType === "success" ? (
-								<svg
-									className="h-5 w-5 text-green-400"
-									viewBox="0 0 20 20"
-									fill="currentColor"
-								>
+							{messageType === 'success' ? (
+								<svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
 									<title>Success</title>
 									<path
 										fillRule="evenodd"
@@ -206,11 +182,7 @@ export function PasswordChangeForm() {
 									/>
 								</svg>
 							) : (
-								<svg
-									className="h-5 w-5 text-red-400"
-									viewBox="0 0 20 20"
-									fill="currentColor"
-								>
+								<svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
 									<title>Error</title>
 									<path
 										fillRule="evenodd"
@@ -223,7 +195,7 @@ export function PasswordChangeForm() {
 						<div className="ml-3">
 							<p
 								className={`text-sm ${
-									messageType === "success" ? "text-green-800" : "text-red-800"
+									messageType === 'success' ? 'text-green-800' : 'text-red-800'
 								}`}
 							>
 								{message}
@@ -239,7 +211,7 @@ export function PasswordChangeForm() {
 					disabled={isLoading}
 					className="rounded-md bg-indigo-600 px-4 py-2 font-medium text-sm text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
 				>
-					{isLoading ? "Changing Password..." : "Change Password"}
+					{isLoading ? 'Changing Password...' : 'Change Password'}
 				</button>
 			</div>
 		</form>

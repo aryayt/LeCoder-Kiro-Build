@@ -1,58 +1,85 @@
 # LeCodeR MVP
 
-LeCodeR is an open-source web application that automatically transforms academic research papers into working code repositories using AI.
+Transform research papers into functional code with AI-powered analysis and generation. **Now deployment-ready for Vercel + Supabase!**
 
-## 🚀 Features
+## ✨ Features
 
-- **PDF Upload & Processing**: Drag-and-drop interface with text extraction
-- **6-Stage AI Pipeline**: Comprehensive analysis from concepts to code
-- **Real-time Progress Tracking**: Live updates during processing
-- **Complete Code Generation**: Executable repositories with no placeholders
-- **Project Management**: Dashboard for tracking and downloading projects
-- **Multi-LLM Support**: OpenAI, Google Gemini, and Claude integration
+- 📄 **PDF Upload**: Upload research papers for AI analysis
+- 🤖 **AI Pipeline**: Multi-stage processing with concept extraction, algorithm analysis, and code generation
+- 🔑 **BYOK (Bring Your Own Key)**: Users can add their own API keys for AI providers
+- 🎯 **EmbeddingGemma**: Latest Google embeddings via Hugging Face
+- 📊 **Real-time Progress**: WebSocket-based progress tracking
+- 💾 **Supabase Integration**: Managed PostgreSQL database
+- 🔒 **Anonymous Usage**: No registration required
+- 📦 **Code Export**: Download generated code as ZIP packages
+
+🚀 **Quick Deploy**
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/lecoder-mvp)
 
 ## 🛠️ Tech Stack
 
-- **Frontend**: Next.js 15, React 19, TypeScript, Tailwind CSS v4
-- **Backend**: tRPC, Prisma ORM, PostgreSQL
-- **Authentication**: Better Auth with Google/GitHub OAuth
-- **AI**: Vercel AI SDK with multiple providers
-- **Code Quality**: Biome (formatting & linting)
-- **Build System**: Turborepo
-- **Documentation**: Fumadocs
-- **Testing**: Jest, React Testing Library
+- **Framework**: Next.js 15 with App Router
+- **Database**: Supabase (PostgreSQL)
+- **ORM**: Prisma
+- **Authentication**: Better Auth
+- **AI SDK**: Vercel AI SDK
+- **Embeddings**: Hugging Face EmbeddingGemma
+- **Styling**: Tailwind CSS
+- **Deployment**: Vercel
 
-## 📋 Prerequisites
+## 🌐 Production Deployment
 
-- Node.js 18+ and npm
-- PostgreSQL database
-- API keys for AI services (OpenAI, Google AI, Anthropic)
+### Required Environment Variables
+```bash
+# Database (Supabase)
+DATABASE_URL="postgresql://..."
 
-## 🏃‍♂️ Quick Start
+# App Configuration  
+BETTER_AUTH_SECRET="your-secret-key"
+BETTER_AUTH_URL="https://your-app.vercel.app"
+
+# Hugging Face (Required for embeddings)
+HUGGINGFACE_API_KEY="hf_your-token-here"
+```
+
+### Deploy to Vercel
+```bash
+npm i -g vercel
+vercel --prod
+```
+
+📖 **See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment guide**
+
+## 🛠 Local Development
 
 ```bash
-# 1. Clone the repository
-git clone https://github.com/aryayt/LeCoder-Kiro-Build.git
-cd LeCoder-Kiro-Build
-
-# 2. Install dependencies
+# Clone and install
+git clone <repo-url>
+cd lecoder-mvp
 npm install
 
-# 3. Set up environment (see setup guide for details)
+# Set up environment
 cp .env.example .env
-# Edit .env with your configuration
+# Edit with your config
 
-# 4. Start database and set up schema
-./start-database.sh
-npm run db:setup
+# Database setup
+npx prisma generate
+npx prisma db push
 
-# 5. Start development server
+# Start development
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) to see the application.
+## 🚀 Build & Deployment
 
-📖 **For detailed setup instructions including environment variables, see [Local Development Setup Guide](./docs/local-development-setup.md)**
+```bash
+# Standard Next.js production build
+npm run build
+
+# Turbo-powered build with caching
+npm run turbo:build
+```
 
 ## 🧪 Testing
 

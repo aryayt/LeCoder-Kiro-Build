@@ -1,12 +1,5 @@
-import {
-	type GeneratedFile,
-	type PipelineStage,
-	PrismaClient,
-	type Project,
-	ProjectStatus,
-	StageStatus,
-} from "@prisma/client";
-import { db } from "~/server/db";
+import { ProjectStatus, StageStatus } from '@prisma/client';
+import { db } from '~/server/db';
 
 /**
  * Database operations for LeCodeR application
@@ -29,15 +22,15 @@ export async function createProject(data: {
 			include: {
 				user: true,
 				stages: {
-					orderBy: { stageNumber: "asc" },
+					orderBy: { stageNumber: 'asc' },
 				},
 			},
 		});
 
 		return project;
 	} catch (error) {
-		console.error("Error creating project:", error);
-		throw new Error("Failed to create project");
+		console.error('Error creating project:', error);
+		throw new Error('Failed to create project');
 	}
 }
 
@@ -48,7 +41,7 @@ export async function getProjectById(id: string) {
 			include: {
 				user: true,
 				stages: {
-					orderBy: { stageNumber: "asc" },
+					orderBy: { stageNumber: 'asc' },
 				},
 				generatedFiles: {
 					select: {
@@ -63,16 +56,12 @@ export async function getProjectById(id: string) {
 
 		return project;
 	} catch (error) {
-		console.error("Error fetching project:", error);
-		throw new Error("Failed to fetch project");
+		console.error('Error fetching project:', error);
+		throw new Error('Failed to fetch project');
 	}
 }
 
-export async function getProjectsByUserId(
-	userId: string,
-	limit = 10,
-	offset = 0,
-) {
+export async function getProjectsByUserId(userId: string, limit = 10, offset = 0) {
 	try {
 		const projects = await db.project.findMany({
 			where: { userId },
@@ -83,7 +72,7 @@ export async function getProjectsByUserId(
 						stageName: true,
 						status: true,
 					},
-					orderBy: { stageNumber: "asc" },
+					orderBy: { stageNumber: 'asc' },
 				},
 				_count: {
 					select: {
@@ -91,22 +80,22 @@ export async function getProjectsByUserId(
 					},
 				},
 			},
-			orderBy: { createdAt: "desc" },
+			orderBy: { createdAt: 'desc' },
 			take: limit,
 			skip: offset,
 		});
 
 		return projects;
 	} catch (error) {
-		console.error("Error fetching user projects:", error);
-		throw new Error("Failed to fetch user projects");
+		console.error('Error fetching user projects:', error);
+		throw new Error('Failed to fetch user projects');
 	}
 }
 
 export async function updateProjectStatus(
 	id: string,
 	status: ProjectStatus,
-	currentStage?: number,
+	currentStage?: number
 ) {
 	try {
 		const project = await db.project.update({
@@ -120,8 +109,8 @@ export async function updateProjectStatus(
 
 		return project;
 	} catch (error) {
-		console.error("Error updating project status:", error);
-		throw new Error("Failed to update project status");
+		console.error('Error updating project status:', error);
+		throw new Error('Failed to update project status');
 	}
 }
 
@@ -142,20 +131,20 @@ export async function deleteProject(id: string) {
 
 		return project;
 	} catch (error) {
-		console.error("Error deleting project:", error);
-		throw new Error("Failed to delete project");
+		console.error('Error deleting project:', error);
+		throw new Error('Failed to delete project');
 	}
 }
 
 // Pipeline Stage Operations
 export async function createPipelineStages(projectId: string) {
 	const stages = [
-		{ name: "Concept Extraction", number: 1 },
-		{ name: "Algorithm Analysis", number: 2 },
-		{ name: "Architecture Planning", number: 3 },
-		{ name: "Implementation Planning", number: 4 },
-		{ name: "Code Generation", number: 5 },
-		{ name: "Documentation Generation", number: 6 },
+		{ name: 'Concept Extraction', number: 1 },
+		{ name: 'Algorithm Analysis', number: 2 },
+		{ name: 'Architecture Planning', number: 3 },
+		{ name: 'Implementation Planning', number: 4 },
+		{ name: 'Code Generation', number: 5 },
+		{ name: 'Documentation Generation', number: 6 },
 	];
 
 	try {
@@ -168,14 +157,14 @@ export async function createPipelineStages(projectId: string) {
 						stageName: stage.name,
 						status: StageStatus.PENDING,
 					},
-				}),
-			),
+				})
+			)
 		);
 
 		return createdStages;
 	} catch (error) {
-		console.error("Error creating pipeline stages:", error);
-		throw new Error("Failed to create pipeline stages");
+		console.error('Error creating pipeline stages:', error);
+		throw new Error('Failed to create pipeline stages');
 	}
 }
 
@@ -186,7 +175,7 @@ export async function updateStageStatus(
 		inputData?: any;
 		outputData?: any;
 		errorMessage?: string;
-	},
+	}
 ) {
 	try {
 		const updateData: any = {
@@ -195,10 +184,7 @@ export async function updateStageStatus(
 
 		if (status === StageStatus.PROCESSING) {
 			updateData.startedAt = new Date();
-		} else if (
-			status === StageStatus.COMPLETED ||
-			status === StageStatus.ERROR
-		) {
+		} else if (status === StageStatus.COMPLETED || status === StageStatus.ERROR) {
 			updateData.completedAt = new Date();
 		}
 
@@ -213,8 +199,8 @@ export async function updateStageStatus(
 
 		return stage;
 	} catch (error) {
-		console.error("Error updating stage status:", error);
-		throw new Error("Failed to update stage status");
+		console.error('Error updating stage status:', error);
+		throw new Error('Failed to update stage status');
 	}
 }
 
@@ -222,13 +208,13 @@ export async function getStagesByProjectId(projectId: string) {
 	try {
 		const stages = await db.pipelineStage.findMany({
 			where: { projectId },
-			orderBy: { stageNumber: "asc" },
+			orderBy: { stageNumber: 'asc' },
 		});
 
 		return stages;
 	} catch (error) {
-		console.error("Error fetching stages:", error);
-		throw new Error("Failed to fetch stages");
+		console.error('Error fetching stages:', error);
+		throw new Error('Failed to fetch stages');
 	}
 }
 
@@ -246,8 +232,8 @@ export async function createGeneratedFile(data: {
 
 		return file;
 	} catch (error) {
-		console.error("Error creating generated file:", error);
-		throw new Error("Failed to create generated file");
+		console.error('Error creating generated file:', error);
+		throw new Error('Failed to create generated file');
 	}
 }
 
@@ -257,7 +243,7 @@ export async function createGeneratedFiles(
 		filePath: string;
 		fileContent: string;
 		fileType: string;
-	}>,
+	}>
 ) {
 	try {
 		const createdFiles = await db.generatedFile.createMany({
@@ -266,8 +252,8 @@ export async function createGeneratedFiles(
 
 		return createdFiles;
 	} catch (error) {
-		console.error("Error creating generated files:", error);
-		throw new Error("Failed to create generated files");
+		console.error('Error creating generated files:', error);
+		throw new Error('Failed to create generated files');
 	}
 }
 
@@ -275,13 +261,13 @@ export async function getGeneratedFilesByProjectId(projectId: string) {
 	try {
 		const files = await db.generatedFile.findMany({
 			where: { projectId },
-			orderBy: { filePath: "asc" },
+			orderBy: { filePath: 'asc' },
 		});
 
 		return files;
 	} catch (error) {
-		console.error("Error fetching generated files:", error);
-		throw new Error("Failed to fetch generated files");
+		console.error('Error fetching generated files:', error);
+		throw new Error('Failed to fetch generated files');
 	}
 }
 
@@ -301,8 +287,8 @@ export async function getUserById(id: string) {
 
 		return user;
 	} catch (error) {
-		console.error("Error fetching user:", error);
-		throw new Error("Failed to fetch user");
+		console.error('Error fetching user:', error);
+		throw new Error('Failed to fetch user');
 	}
 }
 
@@ -314,8 +300,8 @@ export async function getUserByEmail(email: string) {
 
 		return user;
 	} catch (error) {
-		console.error("Error fetching user by email:", error);
-		throw new Error("Failed to fetch user by email");
+		console.error('Error fetching user by email:', error);
+		throw new Error('Failed to fetch user by email');
 	}
 }
 
@@ -348,8 +334,8 @@ export async function getProjectStats(userId?: string) {
 			error,
 		};
 	} catch (error) {
-		console.error("Error fetching project stats:", error);
-		throw new Error("Failed to fetch project stats");
+		console.error('Error fetching project stats:', error);
+		throw new Error('Failed to fetch project stats');
 	}
 }
 
@@ -364,14 +350,14 @@ export async function getRecentProjects(limit = 5) {
 					},
 				},
 			},
-			orderBy: { createdAt: "desc" },
+			orderBy: { createdAt: 'desc' },
 			take: limit,
 		});
 
 		return projects;
 	} catch (error) {
-		console.error("Error fetching recent projects:", error);
-		throw new Error("Failed to fetch recent projects");
+		console.error('Error fetching recent projects:', error);
+		throw new Error('Failed to fetch recent projects');
 	}
 }
 
@@ -379,12 +365,12 @@ export async function getRecentProjects(limit = 5) {
 export async function checkDatabaseConnection() {
 	try {
 		await db.$queryRaw`SELECT 1`;
-		return { status: "healthy", timestamp: new Date() };
+		return { status: 'healthy', timestamp: new Date() };
 	} catch (error) {
-		console.error("Database health check failed:", error);
+		console.error('Database health check failed:', error);
 		return {
-			status: "unhealthy",
-			error: error instanceof Error ? error.message : "Unknown error",
+			status: 'unhealthy',
+			error: error instanceof Error ? error.message : 'Unknown error',
 			timestamp: new Date(),
 		};
 	}

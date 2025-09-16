@@ -1,13 +1,44 @@
-import { anthropic, createAnthropic } from "@ai-sdk/anthropic";
-import { createGoogleGenerativeAI, google } from "@ai-sdk/google";
-import { createOpenAI, openai } from "@ai-sdk/openai";
-import type { AIProvider as PrismaAIProvider } from "@prisma/client";
-import { type CoreMessage, generateText } from "ai";
-import { env } from "~/env.js";
-import { ApiKeyService } from "~/lib/services/api-key-service";
-import { rateLimiter } from "./rate-limiter";
+import { anthropic, createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI, google } from '@ai-sdk/google';
+import { createOpenAI, openai } from '@ai-sdk/openai';
+import type { AIProvider as PrismaAIProvider } from '@prisma/client';
+import { type CoreMessage, generateText } from 'ai';
+import { env } from '~/env.js';
+import { ApiKeyService } from '~/lib/services/api-key-service';
+import { rateLimiter } from './rate-limiter';
 
-export type AIProvider = "openai" | "google" | "anthropic";
+export type AIProvider = 'openai' | 'google' | 'anthropic';
+
+/**
+ * Utility functions to convert between AI provider types
+ */
+export const AIProviderUtils = {
+	toPrisma: (provider: AIProvider): PrismaAIProvider => {
+		switch (provider) {
+			case 'openai':
+				return 'OPENAI';
+			case 'google':
+				return 'GOOGLE';
+			case 'anthropic':
+				return 'ANTHROPIC';
+			default:
+				throw new Error(`Unknown provider: ${provider}`);
+		}
+	},
+	
+	fromPrisma: (provider: PrismaAIProvider): AIProvider => {
+		switch (provider) {
+			case 'OPENAI':
+				return 'openai';
+			case 'GOOGLE':
+				return 'google';
+			case 'ANTHROPIC':
+				return 'anthropic';
+			default:
+				throw new Error(`Unknown Prisma provider: ${provider}`);
+		}
+	}
+};
 
 export interface AIConfig {
 	provider: AIProvider;
@@ -28,6 +59,8 @@ export interface AgentResponse<T = any> {
 		provider: AIProvider;
 		model: string;
 		tokensUsed?: number;
+		promptTokens?: number;
+		completionTokens?: number;
 		processingTime?: number;
 	};
 }
@@ -60,17 +93,14 @@ export abstract class BaseAIAgent {
 		if (customApiKey) {
 			apiKey = customApiKey;
 		} else if (userId) {
-			const prismaProvider = this.mapToPrismaProvider(provider);
-			apiKey = await ApiKeyService.getDecryptedApiKey(userId, prismaProvider);
+			apiKey = await ApiKeyService.getDecryptedApiKey(userId, provider);
 		}
 
 		switch (provider) {
-			case "openai": {
+			case 'openai': {
 				const key = apiKey || env.OPENAI_API_KEY;
 				if (!key) {
-					throw new Error(
-						"OpenAI API key not configured. Please add your API key in settings.",
-					);
+					throw new Error('OpenAI API key not configured. Please add your API key in settings.');
 				}
 
 				if (apiKey) {
@@ -83,12 +113,10 @@ export abstract class BaseAIAgent {
 				}
 			}
 
-			case "google": {
+			case 'google': {
 				const key = apiKey || env.GOOGLE_GENERATIVE_AI_API_KEY;
 				if (!key) {
-					throw new Error(
-						"Google AI API key not configured. Please add your API key in settings.",
-					);
+					throw new Error('Google AI API key not configured. Please add your API key in settings.');
 				}
 
 				if (apiKey) {
@@ -101,12 +129,10 @@ export abstract class BaseAIAgent {
 				}
 			}
 
-			case "anthropic": {
+			case 'anthropic': {
 				const key = apiKey || env.ANTHROPIC_API_KEY;
 				if (!key) {
-					throw new Error(
-						"Anthropic API key not configured. Please add your API key in settings.",
-					);
+					throw new Error('Anthropic API key not configured. Please add your API key in settings.');
 				}
 
 				if (apiKey) {
@@ -128,16 +154,7 @@ export abstract class BaseAIAgent {
 	 * Map AI provider string to Prisma enum
 	 */
 	private mapToPrismaProvider(provider: AIProvider): PrismaAIProvider {
-		switch (provider) {
-			case "openai":
-				return "OPENAI";
-			case "google":
-				return "GOOGLE";
-			case "anthropic":
-				return "ANTHROPIC";
-			default:
-				throw new Error(`Unknown provider: ${provider}`);
-		}
+		return AIProviderUtils.toPrisma(provider);
 	}
 
 	/**
@@ -145,16 +162,14 @@ export abstract class BaseAIAgent {
 	 */
 	protected async generateWithRetry(
 		messages: CoreMessage[],
-		systemPrompt?: string,
+		systemPrompt?: string
 	): Promise<AgentResponse<string>> {
 		const startTime = Date.now();
 		let lastError: Error | null = null;
 
 		// Check rate limits before attempting
 		if (!rateLimiter.canMakeRequest(this.config.provider)) {
-			const waitTime = rateLimiter.getTimeUntilNextRequest(
-				this.config.provider,
-			);
+			const waitTime = rateLimiter.getTimeUntilNextRequest(this.config.provider);
 			const waitSeconds = Math.ceil(waitTime / 1000);
 
 			return {
@@ -175,10 +190,9 @@ export abstract class BaseAIAgent {
 				const result = await generateText({
 					model,
 					messages: systemPrompt
-						? [{ role: "system", content: systemPrompt }, ...messages]
+						? [{ role: 'system', content: systemPrompt }, ...messages]
 						: messages,
 					temperature: this.config.temperature,
-					maxTokens: this.config.maxTokens,
 				});
 
 				const processingTime = Date.now() - startTime;
@@ -189,7 +203,7 @@ export abstract class BaseAIAgent {
 				// Log token usage for monitoring
 				if (result.usage?.totalTokens) {
 					console.log(
-						`AI Request completed: ${this.config.provider}/${this.config.model} - ${result.usage.totalTokens} tokens in ${processingTime}ms`,
+						`AI Request completed: ${this.config.provider}/${this.config.model} - ${result.usage.totalTokens} tokens in ${processingTime}ms`
 					);
 				}
 
@@ -200,8 +214,6 @@ export abstract class BaseAIAgent {
 						provider: this.config.provider,
 						model: this.config.model,
 						tokensUsed: result.usage?.totalTokens,
-						promptTokens: result.usage?.promptTokens,
-						completionTokens: result.usage?.completionTokens,
 						processingTime,
 					},
 				};
@@ -227,7 +239,7 @@ export abstract class BaseAIAgent {
 
 		return {
 			success: false,
-			error: lastError?.message || "Unknown error occurred",
+			error: lastError?.message || 'Unknown error occurred',
 			metadata: {
 				provider: this.config.provider,
 				model: this.config.model,
@@ -242,10 +254,10 @@ export abstract class BaseAIAgent {
 	private isNonRetryableError(error: Error): boolean {
 		const message = error.message.toLowerCase();
 		return (
-			message.includes("api key") ||
-			message.includes("authentication") ||
-			message.includes("unauthorized") ||
-			message.includes("not configured")
+			message.includes('api key') ||
+			message.includes('authentication') ||
+			message.includes('unauthorized') ||
+			message.includes('not configured')
 		);
 	}
 
@@ -255,10 +267,10 @@ export abstract class BaseAIAgent {
 	private isRateLimitError(error: Error): boolean {
 		const message = error.message.toLowerCase();
 		return (
-			message.includes("rate limit") ||
-			message.includes("quota") ||
-			message.includes("too many requests") ||
-			message.includes("429")
+			message.includes('rate limit') ||
+			message.includes('quota') ||
+			message.includes('too many requests') ||
+			message.includes('429')
 		);
 	}
 
@@ -279,7 +291,7 @@ export abstract class BaseAIAgent {
 		} catch (error) {
 			return {
 				success: false,
-				error: `Failed to parse JSON response: ${error instanceof Error ? error.message : "Unknown error"}`,
+				error: `Failed to parse JSON response: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			};
 		}
 	}
@@ -289,17 +301,16 @@ export abstract class BaseAIAgent {
 	 */
 	protected validateResponse<T extends Record<string, any>>(
 		data: T,
-		requiredFields: (keyof T)[],
+		requiredFields: (keyof T)[]
 	): AgentResponse<T> {
 		const missingFields = requiredFields.filter(
-			(field) =>
-				data[field] === undefined || data[field] === null || data[field] === "",
+			(field) => data[field] === undefined || data[field] === null || data[field] === ''
 		);
 
 		if (missingFields.length > 0) {
 			return {
 				success: false,
-				error: `Missing required fields: ${missingFields.join(", ")}`,
+				error: `Missing required fields: ${missingFields.join(', ')}`,
 			};
 		}
 

@@ -1,16 +1,9 @@
-"use client";
+'use client';
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export interface ProgressUpdate {
-	type:
-		| "connected"
-		| "progress"
-		| "final"
-		| "error"
-		| "update"
-		| "current"
-		| "timeout";
+	type: 'connected' | 'progress' | 'final' | 'error' | 'update' | 'current' | 'timeout';
 	projectId: string;
 	status?: string;
 	currentStage?: number;
@@ -39,7 +32,7 @@ export interface UseRealTimeProgressOptions {
 export interface UseRealTimeProgressReturn {
 	progress: ProgressUpdate | null;
 	isConnected: boolean;
-	connectionType: "sse" | "websocket" | "polling" | null;
+	connectionType: 'sse' | 'websocket' | 'polling' | null;
 	error: string | null;
 	reconnect: () => void;
 	disconnect: () => void;
@@ -55,9 +48,9 @@ export function useRealTimeProgress({
 }: UseRealTimeProgressOptions): UseRealTimeProgressReturn {
 	const [progress, setProgress] = useState<ProgressUpdate | null>(null);
 	const [isConnected, setIsConnected] = useState(false);
-	const [connectionType, setConnectionType] = useState<
-		"sse" | "websocket" | "polling" | null
-	>(null);
+	const [connectionType, setConnectionType] = useState<'sse' | 'websocket' | 'polling' | null>(
+		null
+	);
 	const [error, setError] = useState<string | null>(null);
 
 	const eventSourceRef = useRef<EventSource | null>(null);
@@ -68,7 +61,7 @@ export function useRealTimeProgress({
 
 	// Check if SSE is supported
 	const isSSESupported = useCallback(() => {
-		return typeof EventSource !== "undefined";
+		return typeof EventSource !== 'undefined';
 	}, []);
 
 	// Clean up connections
@@ -95,14 +88,13 @@ export function useRealTimeProgress({
 	// Handle connection errors and reconnection
 	const handleConnectionError = useCallback(
 		(errorMessage: string) => {
-			console.error("Real-time connection error:", errorMessage);
+			console.error('Real-time connection error:', errorMessage);
 			setError(errorMessage);
 			setIsConnected(false);
 
 			if (reconnectAttemptsRef.current < maxReconnectAttempts) {
 				reconnectAttemptsRef.current++;
-				const delay =
-					reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
+				const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
 
 				reconnectTimeoutRef.current = setTimeout(() => {
 					if (enabled) {
@@ -114,7 +106,7 @@ export function useRealTimeProgress({
 				connectWebSocket();
 			}
 		},
-		[enabled, fallbackToPolling, maxReconnectAttempts, reconnectDelay],
+		[enabled, fallbackToPolling, maxReconnectAttempts, reconnectDelay]
 	);
 
 	// Connect using Server-Sent Events
@@ -124,14 +116,12 @@ export function useRealTimeProgress({
 		cleanup();
 
 		try {
-			const eventSource = new EventSource(
-				`/api/projects/${projectId}/progress`,
-			);
+			const eventSource = new EventSource(`/api/projects/${projectId}/progress`);
 			eventSourceRef.current = eventSource;
 
 			eventSource.onopen = () => {
 				setIsConnected(true);
-				setConnectionType("sse");
+				setConnectionType('sse');
 				setError(null);
 				reconnectAttemptsRef.current = 0;
 			};
@@ -143,19 +133,19 @@ export function useRealTimeProgress({
 					lastUpdateRef.current = data.timestamp;
 
 					// Close connection if final state reached
-					if (data.type === "final") {
+					if (data.type === 'final') {
 						cleanup();
 					}
 				} catch (err) {
-					console.error("Failed to parse SSE message:", err);
+					console.error('Failed to parse SSE message:', err);
 				}
 			};
 
 			eventSource.onerror = () => {
-				handleConnectionError("SSE connection failed");
+				handleConnectionError('SSE connection failed');
 			};
 		} catch (err) {
-			handleConnectionError("Failed to create SSE connection");
+			handleConnectionError('Failed to create SSE connection');
 		}
 	}, [enabled, projectId, cleanup, handleConnectionError]);
 
@@ -164,16 +154,13 @@ export function useRealTimeProgress({
 		if (!enabled || !projectId) return;
 
 		cleanup();
-		setConnectionType("websocket");
+		setConnectionType('websocket');
 
 		const poll = async () => {
 			try {
-				const url = new URL(
-					`/api/projects/${projectId}/websocket`,
-					window.location.origin,
-				);
+				const url = new URL(`/api/projects/${projectId}/websocket`, window.location.origin);
 				if (lastUpdateRef.current) {
-					url.searchParams.set("lastUpdate", lastUpdateRef.current);
+					url.searchParams.set('lastUpdate', lastUpdateRef.current);
 				}
 
 				const response = await fetch(url.toString());
@@ -189,21 +176,20 @@ export function useRealTimeProgress({
 				lastUpdateRef.current = data.timestamp;
 
 				// Continue polling unless final state reached
-				if (data.type !== "final" && enabled) {
+				if (data.type !== 'final' && enabled) {
 					pollingIntervalRef.current = setTimeout(poll, pollingInterval);
 				} else {
 					setIsConnected(false);
 				}
 			} catch (err) {
-				console.error("WebSocket polling error:", err);
-				setError("WebSocket polling failed");
+				console.error('WebSocket polling error:', err);
+				setError('WebSocket polling failed');
 				setIsConnected(false);
 
 				// Retry with exponential backoff
 				if (reconnectAttemptsRef.current < maxReconnectAttempts && enabled) {
 					reconnectAttemptsRef.current++;
-					const delay =
-						reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
+					const delay = reconnectDelay * Math.pow(2, reconnectAttemptsRef.current - 1);
 					pollingIntervalRef.current = setTimeout(poll, delay);
 				} else {
 					// Fall back to regular polling
@@ -213,21 +199,14 @@ export function useRealTimeProgress({
 		};
 
 		poll();
-	}, [
-		enabled,
-		projectId,
-		pollingInterval,
-		maxReconnectAttempts,
-		reconnectDelay,
-		cleanup,
-	]);
+	}, [enabled, projectId, pollingInterval, maxReconnectAttempts, reconnectDelay, cleanup]);
 
 	// Connect using regular polling as final fallback
 	const connectPolling = useCallback(() => {
 		if (!enabled || !projectId) return;
 
 		cleanup();
-		setConnectionType("polling");
+		setConnectionType('polling');
 
 		const poll = async () => {
 			try {
@@ -243,14 +222,14 @@ export function useRealTimeProgress({
 				setError(null);
 
 				// Continue polling unless final state reached
-				if (data.type !== "final" && enabled) {
+				if (data.type !== 'final' && enabled) {
 					pollingIntervalRef.current = setTimeout(poll, pollingInterval);
 				} else {
 					setIsConnected(false);
 				}
 			} catch (err) {
-				console.error("Polling error:", err);
-				setError("Polling failed");
+				console.error('Polling error:', err);
+				setError('Polling failed');
 				setIsConnected(false);
 
 				// Keep trying with regular polling
@@ -275,13 +254,7 @@ export function useRealTimeProgress({
 		} else {
 			connectPolling();
 		}
-	}, [
-		isSSESupported,
-		connectSSE,
-		connectWebSocket,
-		connectPolling,
-		fallbackToPolling,
-	]);
+	}, [isSSESupported, connectSSE, connectWebSocket, connectPolling, fallbackToPolling]);
 
 	// Manual disconnect function
 	const disconnect = useCallback(() => {

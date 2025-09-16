@@ -1,13 +1,9 @@
-import { env } from "~/env.js";
-import type { PipelineContext } from "~/types/ai";
-import type { AIProvider } from "./base-agent";
-import { PipelineContextFactory } from "./pipeline-context";
-import { PipelineErrorHandler, PipelineErrorType } from "./pipeline-errors";
-import {
-	type PipelineConfig,
-	PipelineManager,
-	type PipelineResult,
-} from "./pipeline-manager";
+import { env } from '~/env.js';
+import type { PipelineContext } from '~/types/ai';
+import type { AIProvider } from './base-agent';
+import { PipelineContextFactory } from './pipeline-context';
+import { PipelineErrorHandler, PipelineErrorType } from './pipeline-errors';
+import { type PipelineConfig, PipelineManager } from './pipeline-manager';
 
 /**
  * Service class for managing pipeline operations
@@ -39,30 +35,28 @@ export class PipelineService {
 		// Determine available providers based on environment variables
 		const availableProviders: AIProvider[] = [];
 
-		if (env.OPENAI_API_KEY) availableProviders.push("openai");
-		if (env.GOOGLE_GENERATIVE_AI_API_KEY) availableProviders.push("google");
-		if (env.ANTHROPIC_API_KEY) availableProviders.push("anthropic");
+		if (env.OPENAI_API_KEY) availableProviders.push('openai');
+		if (env.GOOGLE_GENERATIVE_AI_API_KEY) availableProviders.push('google');
+		if (env.ANTHROPIC_API_KEY) availableProviders.push('anthropic');
 
 		if (availableProviders.length === 0) {
-			throw new Error(
-				"No AI providers configured. Please set at least one API key.",
-			);
+			throw new Error('No AI providers configured. Please set at least one API key.');
 		}
 
 		// Use the first available provider as default
-		const defaultProvider = availableProviders[0];
+		const defaultProvider = availableProviders[0]!;
 
 		// Get model names based on provider
 		const getModelName = (provider: AIProvider): string => {
 			switch (provider) {
-				case "openai":
-					return "gpt-4o-mini";
-				case "google":
-					return "gemini-1.5-flash";
-				case "anthropic":
-					return "claude-3-haiku-20240307";
+				case 'openai':
+					return 'gpt-4o-mini';
+				case 'google':
+					return 'gemini-1.5-flash';
+				case 'anthropic':
+					return 'claude-3-haiku-20240307';
 				default:
-					return "gpt-4o-mini";
+					return 'gpt-4o-mini';
 			}
 		};
 
@@ -107,15 +101,15 @@ export class PipelineService {
 			if (!context) {
 				const error = PipelineErrorHandler.createError(
 					PipelineErrorType.CONTEXT_ERROR,
-					"Project not found or invalid",
-					{ projectId },
+					'Project not found or invalid',
+					{ projectId }
 				);
 
 				PipelineErrorHandler.logError(error);
 
 				return {
 					success: false,
-					message: "Failed to start pipeline",
+					message: 'Failed to start pipeline',
 					error: PipelineErrorHandler.formatErrorForUser(error),
 				};
 			}
@@ -125,15 +119,15 @@ export class PipelineService {
 			if (!validation.valid) {
 				const error = PipelineErrorHandler.createError(
 					PipelineErrorType.VALIDATION_ERROR,
-					`Context validation failed: ${validation.errors.join(", ")}`,
-					{ projectId },
+					`Context validation failed: ${validation.errors.join(', ')}`,
+					{ projectId }
 				);
 
 				PipelineErrorHandler.logError(error);
 
 				return {
 					success: false,
-					message: "Failed to start pipeline",
+					message: 'Failed to start pipeline',
 					error: PipelineErrorHandler.formatErrorForUser(error),
 				};
 			}
@@ -143,7 +137,7 @@ export class PipelineService {
 
 			return {
 				success: true,
-				message: "Pipeline started successfully",
+				message: 'Pipeline started successfully',
 			};
 		} catch (error) {
 			const pipelineError = PipelineErrorHandler.parseError(error, {
@@ -153,7 +147,7 @@ export class PipelineService {
 
 			return {
 				success: false,
-				message: "Failed to start pipeline",
+				message: 'Failed to start pipeline',
 				error: PipelineErrorHandler.formatErrorForUser(pipelineError),
 			};
 		}
@@ -167,14 +161,9 @@ export class PipelineService {
 			const result = await this.pipelineManager.executePipeline(context);
 
 			if (result.success) {
-				console.log(
-					`Pipeline completed successfully for project ${context.projectId}`,
-				);
+				console.log(`Pipeline completed successfully for project ${context.projectId}`);
 			} else {
-				console.error(
-					`Pipeline failed for project ${context.projectId}:`,
-					result.error,
-				);
+				console.error(`Pipeline failed for project ${context.projectId}:`, result.error);
 			}
 		} catch (error) {
 			const pipelineError = PipelineErrorHandler.parseError(error, {
@@ -207,12 +196,9 @@ export class PipelineService {
 		error?: string;
 	}> {
 		try {
-			const progress =
-				await this.pipelineManager.getPipelineProgress(projectId);
+			const progress = await this.pipelineManager.getPipelineProgress(projectId);
 
-			const progressPercentage = Math.round(
-				(progress.currentStage / progress.totalStages) * 100,
-			);
+			const progressPercentage = Math.round((progress.currentStage / progress.totalStages) * 100);
 
 			return {
 				success: true,
@@ -247,7 +233,7 @@ export class PipelineService {
 
 			return {
 				success: true,
-				message: "Pipeline cancelled successfully",
+				message: 'Pipeline cancelled successfully',
 			};
 		} catch (error) {
 			const pipelineError = PipelineErrorHandler.parseError(error, {
@@ -257,7 +243,7 @@ export class PipelineService {
 
 			return {
 				success: false,
-				message: "Failed to cancel pipeline",
+				message: 'Failed to cancel pipeline',
 				error: PipelineErrorHandler.formatErrorForUser(pipelineError),
 			};
 		}
@@ -278,13 +264,13 @@ export class PipelineService {
 			if (!context) {
 				const error = PipelineErrorHandler.createError(
 					PipelineErrorType.CONTEXT_ERROR,
-					"Project not found for retry",
-					{ projectId },
+					'Project not found for retry',
+					{ projectId }
 				);
 
 				return {
 					success: false,
-					message: "Failed to retry pipeline",
+					message: 'Failed to retry pipeline',
 					error: PipelineErrorHandler.formatErrorForUser(error),
 				};
 			}
@@ -294,7 +280,7 @@ export class PipelineService {
 
 			return {
 				success: true,
-				message: "Pipeline retry started successfully",
+				message: 'Pipeline retry started successfully',
 			};
 		} catch (error) {
 			const pipelineError = PipelineErrorHandler.parseError(error, {
@@ -304,7 +290,7 @@ export class PipelineService {
 
 			return {
 				success: false,
-				message: "Failed to retry pipeline",
+				message: 'Failed to retry pipeline',
 				error: PipelineErrorHandler.formatErrorForUser(pipelineError),
 			};
 		}
@@ -318,14 +304,9 @@ export class PipelineService {
 			const result = await this.pipelineManager.retryPipeline(context);
 
 			if (result.success) {
-				console.log(
-					`Pipeline retry completed successfully for project ${context.projectId}`,
-				);
+				console.log(`Pipeline retry completed successfully for project ${context.projectId}`);
 			} else {
-				console.error(
-					`Pipeline retry failed for project ${context.projectId}:`,
-					result.error,
-				);
+				console.error(`Pipeline retry failed for project ${context.projectId}:`, result.error);
 			}
 		} catch (error) {
 			const pipelineError = PipelineErrorHandler.parseError(error, {
@@ -345,9 +326,9 @@ export class PipelineService {
 	} {
 		const availableProviders: AIProvider[] = [];
 
-		if (env.OPENAI_API_KEY) availableProviders.push("openai");
-		if (env.GOOGLE_GENERATIVE_AI_API_KEY) availableProviders.push("google");
-		if (env.ANTHROPIC_API_KEY) availableProviders.push("anthropic");
+		if (env.OPENAI_API_KEY) availableProviders.push('openai');
+		if (env.GOOGLE_GENERATIVE_AI_API_KEY) availableProviders.push('google');
+		if (env.ANTHROPIC_API_KEY) availableProviders.push('anthropic');
 
 		return {
 			availableProviders,
@@ -369,7 +350,7 @@ export class PipelineService {
 	 * Health check for pipeline service
 	 */
 	async healthCheck(): Promise<{
-		status: "healthy" | "unhealthy";
+		status: 'healthy' | 'unhealthy';
 		details: {
 			configurationValid: boolean;
 			availableProviders: AIProvider[];
@@ -391,7 +372,7 @@ export class PipelineService {
 
 			// Check database connection (simplified check)
 			try {
-				await PipelineContextFactory.fromProjectId("health-check");
+				await PipelineContextFactory.fromProjectId('health-check');
 				details.databaseConnected = true;
 			} catch {
 				details.databaseConnected = false;
@@ -400,13 +381,13 @@ export class PipelineService {
 			const isHealthy = details.configurationValid && details.databaseConnected;
 
 			return {
-				status: isHealthy ? "healthy" : "unhealthy",
+				status: isHealthy ? 'healthy' : 'unhealthy',
 				details,
 				timestamp: new Date(),
 			};
 		} catch (error) {
 			return {
-				status: "unhealthy",
+				status: 'unhealthy',
 				details,
 				timestamp: new Date(),
 			};

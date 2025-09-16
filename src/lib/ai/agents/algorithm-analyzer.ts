@@ -1,11 +1,10 @@
 import type {
 	Algorithm,
 	AlgorithmAnalysisResult,
-	AlgorithmSpecs,
 	ResearchConcepts,
 	SystemRequirements,
-} from "~/types/ai";
-import { type AIConfig, type AgentResponse, BaseAIAgent } from "../base-agent";
+} from '~/types/ai';
+import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class AlgorithmAnalyzerAgent extends BaseAIAgent {
 	constructor(config: AIConfig) {
@@ -17,7 +16,7 @@ export class AlgorithmAnalyzerAgent extends BaseAIAgent {
 	 */
 	async analyzeAlgorithms(
 		concepts: ResearchConcepts,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<AlgorithmAnalysisResult>> {
 		const systemPrompt = `You are an expert software architect and algorithm analyst. Your task is to analyze research concepts and determine detailed algorithm specifications and technical requirements for implementation.
 
@@ -101,7 +100,7 @@ Guidelines:
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Please analyze these research concepts and provide detailed algorithm specifications:\n\n${content}`,
 			},
 		];
@@ -117,17 +116,13 @@ Guidelines:
 		}
 
 		// Parse the JSON response
-		const parseResult = this.parseJsonResponse<AlgorithmAnalysisResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<AlgorithmAnalysisResult>(response.data!);
 		if (!parseResult.success) {
 			return parseResult;
 		}
 
 		// Validate the response structure
-		const validationResult = this.validateAlgorithmAnalysisResult(
-			parseResult.data!,
-		);
+		const validationResult = this.validateAlgorithmAnalysisResult(parseResult.data!);
 		if (!validationResult.success) {
 			return {
 				success: false,
@@ -146,13 +141,13 @@ Guidelines:
 	 * Validate the algorithm analysis result
 	 */
 	private validateAlgorithmAnalysisResult(
-		data: AlgorithmAnalysisResult,
+		data: AlgorithmAnalysisResult
 	): AgentResponse<AlgorithmAnalysisResult> {
 		// Check if specs object exists
 		if (!data.specs) {
 			return {
 				success: false,
-				error: "Missing specs object in response",
+				error: 'Missing specs object in response',
 			};
 		}
 
@@ -160,7 +155,7 @@ Guidelines:
 		if (!Array.isArray(data.specs.algorithms)) {
 			return {
 				success: false,
-				error: "algorithms must be an array",
+				error: 'algorithms must be an array',
 			};
 		}
 
@@ -177,16 +172,13 @@ Guidelines:
 			if (!algorithmValidation.success) {
 				return {
 					success: false,
-					error:
-						algorithmValidation.error || `Algorithm ${i} validation failed`,
+					error: algorithmValidation.error || `Algorithm ${i} validation failed`,
 				};
 			}
 		}
 
 		// Validate system requirements
-		const sysReqValidation = this.validateSystemRequirements(
-			data.specs.systemRequirements,
-		);
+		const sysReqValidation = this.validateSystemRequirements(data.specs.systemRequirements);
 		if (!sysReqValidation.success) {
 			return {
 				success: false,
@@ -195,23 +187,19 @@ Guidelines:
 		}
 
 		// Validate complexity level
-		const validComplexity = ["low", "medium", "high"];
+		const validComplexity = ['low', 'medium', 'high'];
 		if (!validComplexity.includes(data.specs.implementationComplexity)) {
 			return {
 				success: false,
-				error: "implementationComplexity must be low, medium, or high",
+				error: 'implementationComplexity must be low, medium, or high',
 			};
 		}
 
 		// Validate confidence score
-		if (
-			typeof data.confidence !== "number" ||
-			data.confidence < 0 ||
-			data.confidence > 1
-		) {
+		if (typeof data.confidence !== 'number' || data.confidence < 0 || data.confidence > 1) {
 			return {
 				success: false,
-				error: "Confidence score must be a number between 0 and 1",
+				error: 'Confidence score must be a number between 0 and 1',
 			};
 		}
 
@@ -219,14 +207,14 @@ Guidelines:
 		if (!Array.isArray(data.implementationNotes)) {
 			return {
 				success: false,
-				error: "implementationNotes must be an array",
+				error: 'implementationNotes must be an array',
 			};
 		}
 
 		if (!Array.isArray(data.potentialChallenges)) {
 			return {
 				success: false,
-				error: "potentialChallenges must be an array",
+				error: 'potentialChallenges must be an array',
 			};
 		}
 
@@ -236,19 +224,16 @@ Guidelines:
 	/**
 	 * Validate individual algorithm structure
 	 */
-	private validateAlgorithm(
-		algorithm: Algorithm,
-		index: number,
-	): AgentResponse<Algorithm> {
+	private validateAlgorithm(algorithm: Algorithm, index: number): AgentResponse<Algorithm> {
 		const requiredFields: (keyof Algorithm)[] = [
-			"name",
-			"description",
-			"type",
-			"complexity",
-			"inputs",
-			"outputs",
-			"parameters",
-			"dependencies",
+			'name',
+			'description',
+			'type',
+			'complexity',
+			'inputs',
+			'outputs',
+			'parameters',
+			'dependencies',
 		];
 
 		for (const field of requiredFields) {
@@ -262,11 +247,11 @@ Guidelines:
 
 		// Validate algorithm type
 		const validTypes = [
-			"machine_learning",
-			"optimization",
-			"data_processing",
-			"statistical",
-			"other",
+			'machine_learning',
+			'optimization',
+			'data_processing',
+			'statistical',
+			'other',
 		];
 		if (!validTypes.includes(algorithm.type)) {
 			return {
@@ -276,7 +261,7 @@ Guidelines:
 		}
 
 		// Validate complexity
-		const validComplexity = ["low", "medium", "high"];
+		const validComplexity = ['low', 'medium', 'high'];
 		if (!validComplexity.includes(algorithm.complexity)) {
 			return {
 				success: false,
@@ -285,12 +270,7 @@ Guidelines:
 		}
 
 		// Validate arrays
-		const arrayFields: (keyof Algorithm)[] = [
-			"inputs",
-			"outputs",
-			"parameters",
-			"dependencies",
-		];
+		const arrayFields: (keyof Algorithm)[] = ['inputs', 'outputs', 'parameters', 'dependencies'];
 		for (const field of arrayFields) {
 			if (!Array.isArray(algorithm[field])) {
 				return {
@@ -307,14 +287,14 @@ Guidelines:
 	 * Validate system requirements structure
 	 */
 	private validateSystemRequirements(
-		sysReq: SystemRequirements,
+		sysReq: SystemRequirements
 	): AgentResponse<SystemRequirements> {
 		const requiredFields: (keyof SystemRequirements)[] = [
-			"programmingLanguage",
-			"frameworks",
-			"libraries",
-			"minimumHardware",
-			"operatingSystem",
+			'programmingLanguage',
+			'frameworks',
+			'libraries',
+			'minimumHardware',
+			'operatingSystem',
 		];
 
 		for (const field of requiredFields) {
@@ -328,9 +308,9 @@ Guidelines:
 
 		// Validate arrays
 		const arrayFields: (keyof SystemRequirements)[] = [
-			"frameworks",
-			"libraries",
-			"operatingSystem",
+			'frameworks',
+			'libraries',
+			'operatingSystem',
 		];
 		for (const field of arrayFields) {
 			if (!Array.isArray(sysReq[field])) {
@@ -342,18 +322,16 @@ Guidelines:
 		}
 
 		// Validate minimumHardware structure
-		if (!sysReq.minimumHardware || typeof sysReq.minimumHardware !== "object") {
+		if (!sysReq.minimumHardware || typeof sysReq.minimumHardware !== 'object') {
 			return {
 				success: false,
-				error: "SystemRequirements: minimumHardware must be an object",
+				error: 'SystemRequirements: minimumHardware must be an object',
 			};
 		}
 
-		const requiredHardwareFields = ["cpu", "memory", "storage"];
+		const requiredHardwareFields = ['cpu', 'memory', 'storage'];
 		for (const field of requiredHardwareFields) {
-			if (
-				!sysReq.minimumHardware[field as keyof typeof sysReq.minimumHardware]
-			) {
+			if (!sysReq.minimumHardware[field as keyof typeof sysReq.minimumHardware]) {
 				return {
 					success: false,
 					error: `SystemRequirements: minimumHardware missing required field '${field}'`,
@@ -369,7 +347,7 @@ Guidelines:
 	 */
 	async analyzeAlgorithmsWithFallback(
 		concepts: ResearchConcepts,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<AlgorithmAnalysisResult>> {
 		// Try detailed analysis first
 		const detailedResult = await this.analyzeAlgorithms(concepts, paperContent);
@@ -395,13 +373,13 @@ Guidelines:
 	 * Simplified algorithm analysis as fallback
 	 */
 	private async analyzeBasicAlgorithms(
-		concepts: ResearchConcepts,
+		concepts: ResearchConcepts
 	): Promise<AgentResponse<AlgorithmAnalysisResult>> {
 		const systemPrompt = `Provide a basic algorithm analysis. Return JSON with minimal required structure for algorithms and system requirements.`;
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Analyze algorithms from: ${JSON.stringify(concepts)}`,
 			},
 		];
@@ -416,9 +394,7 @@ Guidelines:
 			};
 		}
 
-		const parseResult = this.parseJsonResponse<AlgorithmAnalysisResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<AlgorithmAnalysisResult>(response.data!);
 		return parseResult;
 	}
 }

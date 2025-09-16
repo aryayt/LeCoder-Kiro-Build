@@ -4,23 +4,23 @@ export {
 	type AIConfig,
 	type AIProvider,
 	type AgentResponse,
-} from "./base-agent";
-export { ConceptExtractorAgent } from "./agents/concept-extractor";
-export { AlgorithmAnalyzerAgent } from "./agents/algorithm-analyzer";
-export { ArchitecturePlannerAgent } from "./agents/architecture-planner";
-export { CodeGeneratorAgent } from "./agents/code-generator";
-export { DocumentationGeneratorAgent } from "./agents/documentation-generator";
+} from './base-agent';
+export { ConceptExtractorAgent } from './agents/concept-extractor';
+export { AlgorithmAnalyzerAgent } from './agents/algorithm-analyzer';
+export { ArchitecturePlannerAgent } from './agents/architecture-planner';
+export { CodeGeneratorAgent } from './agents/code-generator';
+export { DocumentationGeneratorAgent } from './agents/documentation-generator';
 
 // Pipeline Management exports
-export { PipelineManager } from "./pipeline-manager";
-export type { PipelineConfig, PipelineResult } from "./pipeline-manager";
+export { PipelineManager } from './pipeline-manager';
+export type { PipelineConfig, PipelineResult } from './pipeline-manager';
 
-export { PipelineService } from "./pipeline-service";
+export { PipelineService } from './pipeline-service';
 
-export { PipelineContextFactory } from "./pipeline-context";
+export { PipelineContextFactory } from './pipeline-context';
 
-export { PipelineErrorHandler, PipelineErrorType } from "./pipeline-errors";
-export type { PipelineError } from "./pipeline-errors";
+export { PipelineErrorHandler, PipelineErrorType } from './pipeline-errors';
+export type { PipelineError } from './pipeline-errors';
 
 export {
 	PipelineStageUtils,
@@ -29,41 +29,41 @@ export {
 	PipelineValidationUtils,
 	PipelineDataUtils,
 	PIPELINE_STAGES,
-} from "./pipeline-utils";
+} from './pipeline-utils';
 
 // Rate limiting
-export { rateLimiter } from "./rate-limiter";
+export { rateLimiter } from './rate-limiter';
 
-import { AlgorithmAnalyzerAgent } from "./agents/algorithm-analyzer";
-import { ArchitecturePlannerAgent } from "./agents/architecture-planner";
-import { CodeGeneratorAgent } from "./agents/code-generator";
+import { AlgorithmAnalyzerAgent } from './agents/algorithm-analyzer';
+import { ArchitecturePlannerAgent } from './agents/architecture-planner';
+import { CodeGeneratorAgent } from './agents/code-generator';
 // Import the classes for factory functions
-import { ConceptExtractorAgent } from "./agents/concept-extractor";
-import { DocumentationGeneratorAgent } from "./agents/documentation-generator";
+import { ConceptExtractorAgent } from './agents/concept-extractor';
+import { DocumentationGeneratorAgent } from './agents/documentation-generator';
 
 // Default AI configurations for different providers
 export const DEFAULT_AI_CONFIGS = {
 	openai: {
-		provider: "openai" as const,
-		model: "gpt-4o",
+		provider: 'openai' as const,
+		model: 'gpt-4o',
 		temperature: 0.7,
 		maxTokens: 4000,
 	},
 	google: {
-		provider: "google" as const,
-		model: "models/gemini-2.0-flash-exp",
+		provider: 'google' as const,
+		model: 'models/gemini-2.0-flash-exp',
 		temperature: 0.7,
 		maxTokens: 4000,
 	},
-	"google-pro": {
-		provider: "google" as const,
-		model: "models/gemini-2.0-flash-thinking-exp",
+	'google-pro': {
+		provider: 'google' as const,
+		model: 'models/gemini-2.0-flash-thinking-exp',
 		temperature: 0.7,
 		maxTokens: 4000,
 	},
 	anthropic: {
-		provider: "anthropic" as const,
-		model: "claude-3-5-sonnet-20241022",
+		provider: 'anthropic' as const,
+		model: 'claude-3-5-sonnet-20241022',
 		temperature: 0.7,
 		maxTokens: 4000,
 	},
@@ -71,9 +71,9 @@ export const DEFAULT_AI_CONFIGS = {
 
 // Factory function to create AI agents with default configurations
 export function createConceptExtractor(
-	provider: "openai" | "google" | "google-pro" | "anthropic" = "google",
+	provider: 'openai' | 'google' | 'google-pro' | 'anthropic' = 'google',
 	userId?: string,
-	customApiKey?: string,
+	customApiKey?: string
 ) {
 	const config = {
 		...DEFAULT_AI_CONFIGS[provider],
@@ -84,9 +84,9 @@ export function createConceptExtractor(
 }
 
 export function createAlgorithmAnalyzer(
-	provider: "openai" | "google" | "google-pro" | "anthropic" = "google",
+	provider: 'openai' | 'google' | 'google-pro' | 'anthropic' = 'google',
 	userId?: string,
-	customApiKey?: string,
+	customApiKey?: string
 ) {
 	const config = {
 		...DEFAULT_AI_CONFIGS[provider],
@@ -97,9 +97,9 @@ export function createAlgorithmAnalyzer(
 }
 
 export function createArchitecturePlanner(
-	provider: "openai" | "google" | "google-pro" | "anthropic" = "google",
+	provider: 'openai' | 'google' | 'google-pro' | 'anthropic' = 'google',
 	userId?: string,
-	customApiKey?: string,
+	customApiKey?: string
 ) {
 	const config = {
 		...DEFAULT_AI_CONFIGS[provider],
@@ -110,9 +110,9 @@ export function createArchitecturePlanner(
 }
 
 export function createCodeGenerator(
-	provider: "openai" | "google" | "google-pro" | "anthropic" = "google",
+	provider: 'openai' | 'google' | 'google-pro' | 'anthropic' = 'google',
 	userId?: string,
-	customApiKey?: string,
+	customApiKey?: string
 ) {
 	const config = {
 		...DEFAULT_AI_CONFIGS[provider],
@@ -123,9 +123,9 @@ export function createCodeGenerator(
 }
 
 export function createDocumentationGenerator(
-	provider: "openai" | "google" | "google-pro" | "anthropic" = "google",
+	provider: 'openai' | 'google' | 'google-pro' | 'anthropic' = 'google',
 	userId?: string,
-	customApiKey?: string,
+	customApiKey?: string
 ) {
 	const config = {
 		...DEFAULT_AI_CONFIGS[provider],
@@ -136,21 +136,21 @@ export function createDocumentationGenerator(
 }
 
 // Utility function to get available providers based on API keys
-export function getAvailableProviders(): ("openai" | "google" | "anthropic")[] {
-	const providers: ("openai" | "google" | "anthropic")[] = [];
+export function getAvailableProviders(): ('openai' | 'google' | 'anthropic')[] {
+	const providers: ('openai' | 'google' | 'anthropic')[] = [];
 
 	// Note: This would need to be called server-side where env is available
 	// For client-side usage, you'd need to check via an API endpoint
 	try {
-		const { env } = require("~/env.js");
+		const { env } = require('~/env.js');
 
-		if (env.OPENAI_API_KEY) providers.push("openai");
-		if (env.GOOGLE_GENERATIVE_AI_API_KEY) providers.push("google");
-		if (env.ANTHROPIC_API_KEY) providers.push("anthropic");
+		if (env.OPENAI_API_KEY) providers.push('openai');
+		if (env.GOOGLE_GENERATIVE_AI_API_KEY) providers.push('google');
+		if (env.ANTHROPIC_API_KEY) providers.push('anthropic');
 	} catch {
 		// Fallback if env is not available (client-side)
-		return ["openai"]; // Default fallback
+		return ['openai']; // Default fallback
 	}
 
-	return providers.length > 0 ? providers : ["openai"];
+	return providers.length > 0 ? providers : ['openai'];
 }

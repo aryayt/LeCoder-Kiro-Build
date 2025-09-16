@@ -1,32 +1,17 @@
-"use client";
+'use client';
 
-import {
-	AlertCircle,
-	Check,
-	Eye,
-	EyeOff,
-	Plus,
-	TestTube,
-	Trash2,
-	X,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Badge } from "~/components/ui/badge";
-import { Button } from "~/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
+import { AlertCircle, Check, Eye, EyeOff, Plus, TestTube, Trash2, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { Badge } from '~/components/ui/badge';
+import { Button } from '~/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card';
+import { Input } from '~/components/ui/input';
+import { Label } from '~/components/ui/label';
 
 interface ApiKey {
 	id: string;
-	provider: "GOOGLE" | "OPENAI" | "ANTHROPIC";
+	provider: 'GOOGLE' | 'OPENAI' | 'ANTHROPIC' | 'HUGGINGFACE';
 	keyName?: string;
 	maskedKey: string;
 	isActive: boolean;
@@ -35,32 +20,39 @@ interface ApiKey {
 }
 
 interface ApiKeyFormData {
-	provider: "GOOGLE" | "OPENAI" | "ANTHROPIC";
+	provider: 'GOOGLE' | 'OPENAI' | 'ANTHROPIC' | 'HUGGINGFACE';
 	apiKey: string;
 	keyName: string;
 }
 
 const PROVIDER_INFO = {
 	GOOGLE: {
-		name: "Google Gemini",
-		description: "Free tier: 5 requests/minute, 25 requests/day",
-		placeholder: "AIzaSy...",
-		helpUrl: "https://makersuite.google.com/app/apikey",
-		color: "bg-blue-100 text-blue-800",
+		name: 'Google Gemini',
+		description: 'Free tier: 5 requests/minute, 25 requests/day',
+		placeholder: 'AIzaSy...',
+		helpUrl: 'https://makersuite.google.com/app/apikey',
+		color: 'bg-blue-100 text-blue-800',
 	},
 	OPENAI: {
-		name: "OpenAI",
-		description: "Pay-per-use pricing",
-		placeholder: "sk-...",
-		helpUrl: "https://platform.openai.com/api-keys",
-		color: "bg-green-100 text-green-800",
+		name: 'OpenAI',
+		description: 'Pay-per-use pricing',
+		placeholder: 'sk-...',
+		helpUrl: 'https://platform.openai.com/api-keys',
+		color: 'bg-green-100 text-green-800',
 	},
 	ANTHROPIC: {
-		name: "Anthropic Claude",
-		description: "Pay-per-use pricing",
-		placeholder: "sk-ant-...",
-		helpUrl: "https://console.anthropic.com/",
-		color: "bg-purple-100 text-purple-800",
+		name: 'Anthropic Claude',
+		description: 'Pay-per-use pricing',
+		placeholder: 'sk-ant-...',
+		helpUrl: 'https://console.anthropic.com/',
+		color: 'bg-purple-100 text-purple-800',
+	},
+	HUGGINGFACE: {
+		name: 'Hugging Face',
+		description: 'For EmbeddingGemma models - Free tier available',
+		placeholder: 'hf_...',
+		helpUrl: 'https://huggingface.co/settings/tokens',
+		color: 'bg-yellow-100 text-yellow-800',
 	},
 };
 
@@ -69,9 +61,9 @@ export function ApiKeyManager() {
 	const [loading, setLoading] = useState(true);
 	const [showForm, setShowForm] = useState(false);
 	const [formData, setFormData] = useState<ApiKeyFormData>({
-		provider: "GOOGLE",
-		apiKey: "",
-		keyName: "",
+		provider: 'GOOGLE',
+		apiKey: '',
+		keyName: '',
 	});
 	const [showApiKey, setShowApiKey] = useState(false);
 	const [testing, setTesting] = useState<string | null>(null);
@@ -83,16 +75,16 @@ export function ApiKeyManager() {
 
 	const fetchApiKeys = async () => {
 		try {
-			const response = await fetch("/api/user/api-keys");
+			const response = await fetch('/api/user/api-keys');
 			const data = await response.json();
 
 			if (data.success) {
 				setApiKeys(data.data);
 			} else {
-				toast.error("Failed to load API keys");
+				toast.error('Failed to load API keys');
 			}
 		} catch (error) {
-			toast.error("Failed to load API keys");
+			toast.error('Failed to load API keys');
 		} finally {
 			setLoading(false);
 		}
@@ -103,10 +95,10 @@ export function ApiKeyManager() {
 		setSubmitting(true);
 
 		try {
-			const response = await fetch("/api/user/api-keys", {
-				method: "POST",
+			const response = await fetch('/api/user/api-keys', {
+				method: 'POST',
 				headers: {
-					"Content-Type": "application/json",
+					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify(formData),
 			});
@@ -114,40 +106,40 @@ export function ApiKeyManager() {
 			const data = await response.json();
 
 			if (data.success) {
-				toast.success("API key saved successfully");
+				toast.success('API key saved successfully');
 				setShowForm(false);
-				setFormData({ provider: "GOOGLE", apiKey: "", keyName: "" });
+				setFormData({ provider: 'GOOGLE', apiKey: '', keyName: '' });
 				fetchApiKeys();
 			} else {
-				toast.error(data.error || "Failed to save API key");
+				toast.error(data.error || 'Failed to save API key');
 			}
 		} catch (error) {
-			toast.error("Failed to save API key");
+			toast.error('Failed to save API key');
 		} finally {
 			setSubmitting(false);
 		}
 	};
 
 	const handleDelete = async (keyId: string) => {
-		if (!confirm("Are you sure you want to delete this API key?")) {
+		if (!confirm('Are you sure you want to delete this API key?')) {
 			return;
 		}
 
 		try {
 			const response = await fetch(`/api/user/api-keys/${keyId}`, {
-				method: "DELETE",
+				method: 'DELETE',
 			});
 
 			const data = await response.json();
 
 			if (data.success) {
-				toast.success("API key deleted successfully");
+				toast.success('API key deleted successfully');
 				fetchApiKeys();
 			} else {
-				toast.error(data.error || "Failed to delete API key");
+				toast.error(data.error || 'Failed to delete API key');
 			}
 		} catch (error) {
-			toast.error("Failed to delete API key");
+			toast.error('Failed to delete API key');
 		}
 	};
 
@@ -155,10 +147,10 @@ export function ApiKeyManager() {
 		setTesting(provider);
 
 		try {
-			const response = await fetch("/api/user/api-keys/test", {
-				method: "POST",
+			const response = await fetch('/api/user/api-keys/test', {
+				method: 'POST',
 				headers: {
-					"Content-Type": "application/json",
+					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({ provider, apiKey }),
 			});
@@ -171,7 +163,7 @@ export function ApiKeyManager() {
 				toast.error(`${provider} API key test failed: ${data.error}`);
 			}
 		} catch (error) {
-			toast.error("Failed to test API key");
+			toast.error('Failed to test API key');
 		} finally {
 			setTesting(null);
 		}
@@ -194,10 +186,7 @@ export function ApiKeyManager() {
 						Securely store your AI provider API keys for personalized access
 					</p>
 				</div>
-				<Button
-					onClick={() => setShowForm(true)}
-					className="flex items-center gap-2"
-				>
+				<Button onClick={() => setShowForm(true)} className="flex items-center gap-2">
 					<Plus className="h-4 w-4" />
 					Add API Key
 				</Button>
@@ -209,13 +198,11 @@ export function ApiKeyManager() {
 					<div className="flex items-start gap-3">
 						<AlertCircle className="mt-0.5 h-5 w-5 text-blue-600" />
 						<div>
-							<h3 className="font-semibold text-blue-900">
-								Bring Your Own Key (BYOK)
-							</h3>
+							<h3 className="font-semibold text-blue-900">Bring Your Own Key (BYOK)</h3>
 							<p className="mt-1 text-blue-800 text-sm">
-								Your API keys are encrypted and stored securely. They are only
-								used for your requests and never shared. We recommend starting
-								with Google Gemini's free tier for testing.
+								Your API keys are encrypted and stored securely. They are only used for your
+								requests and never shared. We recommend starting with Google Gemini's free tier for
+								testing.
 							</p>
 						</div>
 					</div>
@@ -227,9 +214,7 @@ export function ApiKeyManager() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Add New API Key</CardTitle>
-						<CardDescription>
-							Add an API key from one of the supported providers
-						</CardDescription>
+						<CardDescription>Add an API key from one of the supported providers</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={handleSubmit} className="space-y-4">
@@ -261,9 +246,7 @@ export function ApiKeyManager() {
 									type="text"
 									placeholder="e.g., My Gemini Key"
 									value={formData.keyName}
-									onChange={(e) =>
-										setFormData({ ...formData, keyName: e.target.value })
-									}
+									onChange={(e) => setFormData({ ...formData, keyName: e.target.value })}
 								/>
 							</div>
 
@@ -272,12 +255,10 @@ export function ApiKeyManager() {
 								<div className="relative">
 									<Input
 										id="apiKey"
-										type={showApiKey ? "text" : "password"}
+										type={showApiKey ? 'text' : 'password'}
 										placeholder={PROVIDER_INFO[formData.provider].placeholder}
 										value={formData.apiKey}
-										onChange={(e) =>
-											setFormData({ ...formData, apiKey: e.target.value })
-										}
+										onChange={(e) => setFormData({ ...formData, apiKey: e.target.value })}
 										required
 									/>
 									<button
@@ -285,15 +266,11 @@ export function ApiKeyManager() {
 										onClick={() => setShowApiKey(!showApiKey)}
 										className="-translate-y-1/2 absolute top-1/2 right-3 transform text-gray-500 hover:text-gray-700"
 									>
-										{showApiKey ? (
-											<EyeOff className="h-4 w-4" />
-										) : (
-											<Eye className="h-4 w-4" />
-										)}
+										{showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
 									</button>
 								</div>
 								<p className="mt-1 text-gray-600 text-sm">
-									Get your API key from{" "}
+									Get your API key from{' '}
 									<a
 										href={PROVIDER_INFO[formData.provider].helpUrl}
 										target="_blank"
@@ -307,7 +284,7 @@ export function ApiKeyManager() {
 
 							<div className="flex gap-3">
 								<Button type="submit" disabled={submitting}>
-									{submitting ? "Saving..." : "Save API Key"}
+									{submitting ? 'Saving...' : 'Save API Key'}
 								</Button>
 								<Button
 									type="button"
@@ -316,7 +293,7 @@ export function ApiKeyManager() {
 									disabled={!formData.apiKey || testing === formData.provider}
 								>
 									{testing === formData.provider ? (
-										"Testing..."
+										'Testing...'
 									) : (
 										<>
 											<TestTube className="mr-2 h-4 w-4" />
@@ -324,11 +301,7 @@ export function ApiKeyManager() {
 										</>
 									)}
 								</Button>
-								<Button
-									type="button"
-									variant="outline"
-									onClick={() => setShowForm(false)}
-								>
+								<Button type="button" variant="outline" onClick={() => setShowForm(false)}>
 									Cancel
 								</Button>
 							</div>
@@ -361,18 +334,12 @@ export function ApiKeyManager() {
 										</Badge>
 										<div>
 											<p className="font-medium">
-												{key.keyName ||
-													`${PROVIDER_INFO[key.provider].name} Key`}
+												{key.keyName || `${PROVIDER_INFO[key.provider].name} Key`}
 											</p>
 											<p className="text-gray-600 text-sm">
-												{key.maskedKey} • Added{" "}
-												{new Date(key.createdAt).toLocaleDateString()}
+												{key.maskedKey} • Added {new Date(key.createdAt).toLocaleDateString()}
 												{key.lastUsed && (
-													<>
-														{" "}
-														• Last used{" "}
-														{new Date(key.lastUsed).toLocaleDateString()}
-													</>
+													<> • Last used {new Date(key.lastUsed).toLocaleDateString()}</>
 												)}
 											</p>
 										</div>
@@ -380,18 +347,12 @@ export function ApiKeyManager() {
 
 									<div className="flex items-center gap-2">
 										{key.isActive ? (
-											<Badge
-												variant="outline"
-												className="border-green-600 text-green-600"
-											>
+											<Badge variant="outline" className="border-green-600 text-green-600">
 												<Check className="mr-1 h-3 w-3" />
 												Active
 											</Badge>
 										) : (
-											<Badge
-												variant="outline"
-												className="border-gray-600 text-gray-600"
-											>
+											<Badge variant="outline" className="border-gray-600 text-gray-600">
 												<X className="mr-1 h-3 w-3" />
 												Inactive
 											</Badge>

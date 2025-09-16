@@ -1,8 +1,8 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-import { PasswordChangeForm } from "~/components/auth/password-change-form";
-import { ProfileForm } from "~/components/auth/profile-form";
-import { auth } from "~/lib/auth";
+import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
+import { PasswordChangeForm } from '~/components/auth/password-change-form';
+import { ProfileForm } from '~/components/auth/profile-form';
+import { auth } from '~/lib/auth';
 
 export default async function ProfilePage() {
 	const session = await auth.api.getSession({
@@ -10,7 +10,7 @@ export default async function ProfilePage() {
 	});
 
 	if (!session) {
-		redirect("/auth/login");
+		redirect('/auth/login');
 	}
 
 	return (
@@ -19,9 +19,7 @@ export default async function ProfilePage() {
 				{/* Profile Information */}
 				<div className="rounded-lg bg-white shadow">
 					<div className="px-4 py-5 sm:p-6">
-						<h1 className="mb-6 font-bold text-2xl text-gray-900">
-							Profile Settings
-						</h1>
+						<h1 className="mb-6 font-bold text-2xl text-gray-900">Profile Settings</h1>
 						<ProfileForm user={session.user} />
 					</div>
 				</div>
@@ -29,9 +27,7 @@ export default async function ProfilePage() {
 				{/* Password Change */}
 				<div className="rounded-lg bg-white shadow">
 					<div className="px-4 py-5 sm:p-6">
-						<h2 className="mb-6 font-bold text-gray-900 text-xl">
-							Change Password
-						</h2>
+						<h2 className="mb-6 font-bold text-gray-900 text-xl">Change Password</h2>
 						<PasswordChangeForm />
 					</div>
 				</div>

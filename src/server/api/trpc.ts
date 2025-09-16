@@ -6,11 +6,11 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
-import superjson from "superjson";
-import { ZodError } from "zod";
+import { initTRPC } from '@trpc/server';
+import superjson from 'superjson';
+import { ZodError } from 'zod';
 
-import { db } from "~/server/db";
+import { db } from '~/server/db';
 
 /**
  * 1. CONTEXT
@@ -45,8 +45,7 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 			...shape,
 			data: {
 				...shape.data,
-				zodError:
-					error.cause instanceof ZodError ? error.cause.flatten() : null,
+				zodError: error.cause instanceof ZodError ? error.cause.flatten() : null,
 			},
 		};
 	},
@@ -65,6 +64,9 @@ export const createCallerFactory = t.createCallerFactory;
  * These are the pieces you use to build your tRPC API. You should import these a lot in the
  * "/src/server/api/routers" directory.
  */
+
+import { auth } from '~/lib/auth';
+import { auditLogger } from '~/lib/security/audit-logger';
 
 /**
  * This is how you create new routers and sub-routers in your tRPC API.
@@ -97,6 +99,122 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 });
 
 /**
+ * Authentication middleware
+ *
+ * Checks if the user is authenticated and adds user info to context
+ */
+const authMiddleware = t.middleware(async ({ ctx, next }) => {
+	try {
+		const session = await auth.api.getSession({
+			headers: ctx.headers,
+		});
+
+		if (!session?.user) {
+			throw new Error('Unauthorized');
+		}
+
+		return next({
+			ctx: {
+				...ctx,
+				user: session.user,
+				session,
+			},
+		});
+	} catch (error) {
+		throw new Error('Authentication failed');
+	}
+});
+
+/**
+ * Rate limiting middleware for tRPC procedures
+ */
+const rateLimitMiddleware = t.middleware(async ({ ctx, next, path }) => {
+	// For tRPC procedures, we'll implement a simple in-memory rate limiter
+	// In production, this should use Redis or a proper rate limiting service
+
+	const userKey = ctx.headers.get('x-forwarded-for') || 'anonymous';
+	const now = Date.now();
+	const windowMs = 60 * 1000; // 1 minute
+	const maxRequests = 100; // 100 requests per minute per user
+
+	// Simple in-memory store (replace with Redis in production)
+	if (!(global as any).rateLimitStore) {
+		(global as any).rateLimitStore = new Map();
+	}
+
+	const key = `${userKey}:${Math.floor(now / windowMs)}`;
+	const current = (global as any).rateLimitStore.get(key) || 0;
+
+	if (current >= maxRequests) {
+		// Log rate limit event
+		await auditLogger.logAudit({
+			userId: undefined, // No user context available yet
+			action: 'RATE_LIMIT_EXCEEDED',
+			resource: 'trpc',
+			details: { procedure: path, limit: maxRequests },
+			success: false,
+			errorMessage: 'tRPC rate limit exceeded',
+		});
+
+		throw new Error('Rate limit exceeded. Please try again later.');
+	}
+
+	(global as any).rateLimitStore.set(key, current + 1);
+
+	// Clean up old entries
+	if (Math.random() < 0.01) {
+		// 1% chance to clean up
+		for (const [k] of (global as any).rateLimitStore.entries()) {
+			const keyTime = Number.parseInt(k.split(':')[1] || '0');
+			if (now - keyTime * windowMs > windowMs * 2) {
+				(global as any).rateLimitStore.delete(k);
+			}
+		}
+	}
+
+	return next();
+});
+
+/**
+ * Audit logging middleware for tRPC procedures
+ */
+const auditMiddleware = t.middleware(async ({ ctx, next, path, type, input }) => {
+	const startTime = Date.now();
+	let success = true;
+	let errorMessage: string | undefined;
+
+	try {
+		const result = await next();
+		return result;
+	} catch (error) {
+		success = false;
+		errorMessage = error instanceof Error ? error.message : 'Unknown error';
+		throw error;
+	} finally {
+		// Log audit event for mutations and sensitive queries
+		if (type === 'mutation' || path.includes('delete') || path.includes('update')) {
+			try {
+				await auditLogger.logAudit({
+					userId: (ctx as any).user?.id,
+					action: type === 'mutation' ? 'API_KEY_USE' : 'PROJECT_UPDATE', // Map to appropriate action
+					resource: 'trpc',
+					details: {
+						procedure: path,
+						type,
+						duration: Date.now() - startTime,
+						inputSize: JSON.stringify(input || {}).length,
+					},
+					success,
+					errorMessage,
+				});
+			} catch (auditError) {
+				console.error('Failed to log tRPC audit event:', auditError);
+			}
+		}
+	}
+});
+
+/**
  * Public (unauthenticated) procedure
  *
  * This is the base piece you use to build new queries and mutations on your tRPC API. It does not
@@ -104,3 +222,15 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
  * are logged in.
  */
 export const publicProcedure = t.procedure.use(timingMiddleware);
+
+/**
+ * Protected (authenticated) procedure
+ *
+ * If you want a query or mutation to ONLY be accessible to logged in users, use this. It verifies
+ * the session is valid and guarantees `ctx.user` is not null.
+ */
+export const protectedProcedure = t.procedure
+	.use(timingMiddleware)
+	.use(authMiddleware)
+	.use(rateLimitMiddleware)
+	.use(auditMiddleware);

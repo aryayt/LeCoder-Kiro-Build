@@ -2,8 +2,8 @@
  * Utility functions for pipeline operations
  */
 
-import { ProjectStatus, StageStatus } from "@prisma/client";
-import type { PipelineContext, PipelineStage } from "~/types/ai";
+import { ProjectStatus, StageStatus } from '@prisma/client';
+import type { PipelineContext, PipelineStage } from '~/types/ai';
 
 /**
  * Pipeline stage definitions
@@ -11,33 +11,33 @@ import type { PipelineContext, PipelineStage } from "~/types/ai";
 export const PIPELINE_STAGES = [
 	{
 		id: 1,
-		name: "Concept Extraction",
-		description: "Extract research concepts and objectives",
+		name: 'Concept Extraction',
+		description: 'Extract research concepts and objectives',
 	},
 	{
 		id: 2,
-		name: "Algorithm Analysis",
-		description: "Analyze algorithms and technical requirements",
+		name: 'Algorithm Analysis',
+		description: 'Analyze algorithms and technical requirements',
 	},
 	{
 		id: 3,
-		name: "Architecture Planning",
-		description: "Design system architecture and components",
+		name: 'Architecture Planning',
+		description: 'Design system architecture and components',
 	},
 	{
 		id: 4,
-		name: "Implementation Planning",
-		description: "Create detailed implementation plan",
+		name: 'Implementation Planning',
+		description: 'Create detailed implementation plan',
 	},
 	{
 		id: 5,
-		name: "Code Generation",
-		description: "Generate complete executable code",
+		name: 'Code Generation',
+		description: 'Generate complete executable code',
 	},
 	{
 		id: 6,
-		name: "Documentation Generation",
-		description: "Create documentation and setup instructions",
+		name: 'Documentation Generation',
+		description: 'Create documentation and setup instructions',
 	},
 ] as const;
 
@@ -108,35 +108,35 @@ export class PipelineStatusUtils {
 	/**
 	 * Convert StageStatus to pipeline stage status
 	 */
-	static convertStageStatus(status: StageStatus): PipelineStage["status"] {
+	static convertStageStatus(status: StageStatus): PipelineStage['status'] {
 		switch (status) {
 			case StageStatus.PENDING:
-				return "pending";
+				return 'pending';
 			case StageStatus.PROCESSING:
-				return "processing";
+				return 'processing';
 			case StageStatus.COMPLETED:
-				return "completed";
+				return 'completed';
 			case StageStatus.ERROR:
-				return "error";
+				return 'error';
 			case StageStatus.RETRYING:
-				return "processing"; // Treat retrying as processing for UI
+				return 'processing'; // Treat retrying as processing for UI
 			default:
-				return "pending";
+				return 'pending';
 		}
 	}
 
 	/**
 	 * Convert pipeline stage status to StageStatus
 	 */
-	static convertToPrismaStatus(status: PipelineStage["status"]): StageStatus {
+	static convertToPrismaStatus(status: PipelineStage['status']): StageStatus {
 		switch (status) {
-			case "pending":
+			case 'pending':
 				return StageStatus.PENDING;
-			case "processing":
+			case 'processing':
 				return StageStatus.PROCESSING;
-			case "completed":
+			case 'completed':
 				return StageStatus.COMPLETED;
-			case "error":
+			case 'error':
 				return StageStatus.ERROR;
 			default:
 				return StageStatus.PENDING;
@@ -151,20 +151,18 @@ export class PipelineStatusUtils {
 			return ProjectStatus.UPLOADED;
 		}
 
-		const hasError = stages.some((stage) => stage.status === "error");
+		const hasError = stages.some((stage) => stage.status === 'error');
 		if (hasError) {
 			return ProjectStatus.ERROR;
 		}
 
-		const completedStages = stages.filter(
-			(stage) => stage.status === "completed",
-		).length;
+		const completedStages = stages.filter((stage) => stage.status === 'completed').length;
 		if (completedStages === stages.length) {
 			return ProjectStatus.COMPLETED;
 		}
 
 		const isProcessing = stages.some(
-			(stage) => stage.status === "processing" || stage.status === "error",
+			(stage) => stage.status === 'processing' || stage.status === 'error'
 		);
 		if (isProcessing || completedStages > 0) {
 			return ProjectStatus.PROCESSING;
@@ -179,9 +177,7 @@ export class PipelineStatusUtils {
 	static calculateProgress(stages: PipelineStage[]): number {
 		if (stages.length === 0) return 0;
 
-		const completedStages = stages.filter(
-			(stage) => stage.status === "completed",
-		).length;
+		const completedStages = stages.filter((stage) => stage.status === 'completed').length;
 		return Math.round((completedStages / stages.length) * 100);
 	}
 
@@ -190,21 +186,19 @@ export class PipelineStatusUtils {
 	 */
 	static getCurrentStage(stages: PipelineStage[]): PipelineStage | null {
 		// First check for processing stages
-		const processingStage = stages.find(
-			(stage) => stage.status === "processing",
-		);
+		const processingStage = stages.find((stage) => stage.status === 'processing');
 		if (processingStage) {
 			return processingStage;
 		}
 
 		// Then check for error stages
-		const errorStage = stages.find((stage) => stage.status === "error");
+		const errorStage = stages.find((stage) => stage.status === 'error');
 		if (errorStage) {
 			return errorStage;
 		}
 
 		// Finally, get the first pending stage
-		const pendingStage = stages.find((stage) => stage.status === "pending");
+		const pendingStage = stages.find((stage) => stage.status === 'pending');
 		return pendingStage || null;
 	}
 
@@ -221,10 +215,10 @@ export class PipelineStatusUtils {
 		status: ProjectStatus;
 	} {
 		const total = stages.length;
-		const completed = stages.filter((s) => s.status === "completed").length;
-		const processing = stages.filter((s) => s.status === "processing").length;
-		const pending = stages.filter((s) => s.status === "pending").length;
-		const error = stages.filter((s) => s.status === "error").length;
+		const completed = stages.filter((s) => s.status === 'completed').length;
+		const processing = stages.filter((s) => s.status === 'processing').length;
+		const pending = stages.filter((s) => s.status === 'pending').length;
+		const error = stages.filter((s) => s.status === 'error').length;
 		const progress = this.calculateProgress(stages);
 		const status = this.determineProjectStatus(stages);
 
@@ -259,8 +253,7 @@ export class PipelineTimingUtils {
 	 */
 	static calculateTotalDuration(stages: PipelineStage[]): number | null {
 		const completedStages = stages.filter(
-			(stage) =>
-				stage.status === "completed" && stage.startTime && stage.endTime,
+			(stage) => stage.status === 'completed' && stage.startTime && stage.endTime
 		);
 
 		if (completedStages.length === 0) {
@@ -289,11 +282,9 @@ export class PipelineTimingUtils {
 	 * Estimate remaining time
 	 */
 	static estimateRemainingTime(stages: PipelineStage[]): number | null {
-		const completedStages = stages.filter(
-			(stage) => stage.status === "completed",
-		);
+		const completedStages = stages.filter((stage) => stage.status === 'completed');
 		const remainingStages = stages.filter(
-			(stage) => stage.status === "pending" || stage.status === "processing",
+			(stage) => stage.status === 'pending' || stage.status === 'processing'
 		);
 
 		if (completedStages.length === 0 || remainingStages.length === 0) {
@@ -349,44 +340,45 @@ export class PipelineValidationUtils {
 
 		// Validate required fields
 		if (!context.projectId) {
-			errors.push("Project ID is required");
+			errors.push('Project ID is required');
 		}
 
 		if (!context.paperContent) {
-			errors.push("Paper content is required");
+			errors.push('Paper content is required');
 		} else if (context.paperContent.length < 100) {
-			warnings.push("Paper content seems very short");
+			warnings.push('Paper content seems very short');
 		}
 
 		if (!context.metadata) {
-			errors.push("Metadata is required");
+			errors.push('Metadata is required');
 		} else {
 			if (!context.metadata.fileName) {
-				errors.push("File name is required");
+				errors.push('File name is required');
 			}
 
 			if (!context.metadata.fileSize || context.metadata.fileSize <= 0) {
-				errors.push("Valid file size is required");
+				errors.push('Valid file size is required');
 			}
 		}
 
 		// Validate stages
 		if (!Array.isArray(context.stages)) {
-			errors.push("Stages must be an array");
+			errors.push('Stages must be an array');
 		} else {
 			// Check for duplicate stage IDs
 			const stageIds = context.stages.map((stage) => stage.id);
 			const uniqueIds = new Set(stageIds);
 			if (stageIds.length !== uniqueIds.size) {
-				errors.push("Duplicate stage IDs found");
+				errors.push('Duplicate stage IDs found');
 			}
 
 			// Validate stage sequence
 			const sortedStages = [...context.stages].sort((a, b) => a.id - b.id);
 			for (let i = 0; i < sortedStages.length; i++) {
-				if (sortedStages[i].id !== i + 1) {
+				const stage = sortedStages[i];
+				if (stage && stage.id !== i + 1) {
 					warnings.push(
-						`Stage sequence may be incorrect: expected ${i + 1}, got ${sortedStages[i].id}`,
+						`Stage sequence may be incorrect: expected ${i + 1}, got ${stage.id}`
 					);
 				}
 			}
@@ -403,17 +395,14 @@ export class PipelineValidationUtils {
 	 * Validate stage transition
 	 */
 	static validateStageTransition(
-		fromStatus: PipelineStage["status"],
-		toStatus: PipelineStage["status"],
+		fromStatus: PipelineStage['status'],
+		toStatus: PipelineStage['status']
 	): { valid: boolean; reason?: string } {
-		const validTransitions: Record<
-			PipelineStage["status"],
-			PipelineStage["status"][]
-		> = {
-			pending: ["processing"],
-			processing: ["completed", "error"],
+		const validTransitions: Record<PipelineStage['status'], PipelineStage['status'][]> = {
+			pending: ['processing'],
+			processing: ['completed', 'error'],
 			completed: [], // Completed stages cannot transition
-			error: ["processing"], // Can retry from error
+			error: ['processing'], // Can retry from error
 		};
 
 		const allowedTransitions = validTransitions[fromStatus] || [];
@@ -436,17 +425,17 @@ export class PipelineValidationUtils {
 		reason?: string;
 	} {
 		if (stages.length === 0) {
-			return { canStart: false, reason: "No stages defined" };
+			return { canStart: false, reason: 'No stages defined' };
 		}
 
-		const hasProcessing = stages.some((stage) => stage.status === "processing");
+		const hasProcessing = stages.some((stage) => stage.status === 'processing');
 		if (hasProcessing) {
-			return { canStart: false, reason: "Pipeline is already running" };
+			return { canStart: false, reason: 'Pipeline is already running' };
 		}
 
-		const allCompleted = stages.every((stage) => stage.status === "completed");
+		const allCompleted = stages.every((stage) => stage.status === 'completed');
 		if (allCompleted) {
-			return { canStart: false, reason: "Pipeline is already completed" };
+			return { canStart: false, reason: 'Pipeline is already completed' };
 		}
 
 		return { canStart: true };
@@ -460,17 +449,17 @@ export class PipelineValidationUtils {
 		reason?: string;
 	} {
 		if (stages.length === 0) {
-			return { canRetry: false, reason: "No stages defined" };
+			return { canRetry: false, reason: 'No stages defined' };
 		}
 
-		const hasError = stages.some((stage) => stage.status === "error");
+		const hasError = stages.some((stage) => stage.status === 'error');
 		if (!hasError) {
-			return { canRetry: false, reason: "No failed stages to retry" };
+			return { canRetry: false, reason: 'No failed stages to retry' };
 		}
 
-		const hasProcessing = stages.some((stage) => stage.status === "processing");
+		const hasProcessing = stages.some((stage) => stage.status === 'processing');
 		if (hasProcessing) {
-			return { canRetry: false, reason: "Pipeline is currently running" };
+			return { canRetry: false, reason: 'Pipeline is currently running' };
 		}
 
 		return { canRetry: true };
@@ -513,12 +502,9 @@ export class PipelineDataUtils {
 	/**
 	 * Extract stage results by type
 	 */
-	static extractStageResults<T = any>(
-		stages: PipelineStage[],
-		stageId: number,
-	): T | null {
+	static extractStageResults<T = any>(stages: PipelineStage[], stageId: number): T | null {
 		const stage = stages.find((s) => s.id === stageId);
-		return stage?.result || null;
+		return (stage?.result as T) || null;
 	}
 
 	/**
@@ -528,7 +514,7 @@ export class PipelineDataUtils {
 		const results: Record<number, any> = {};
 
 		stages
-			.filter((stage) => stage.status === "completed" && stage.result)
+			.filter((stage) => stage.status === 'completed' && stage.result)
 			.forEach((stage) => {
 				results[stage.id] = stage.result;
 			});
@@ -549,9 +535,7 @@ export class PipelineDataUtils {
 	} {
 		const duration =
 			stage.startTime && stage.endTime
-				? PipelineTimingUtils.formatDuration(
-						stage.endTime.getTime() - stage.startTime.getTime(),
-					)
+				? PipelineTimingUtils.formatDuration(stage.endTime.getTime() - stage.startTime.getTime())
 				: undefined;
 
 		return {
@@ -577,9 +561,7 @@ export class PipelineDataUtils {
 		stages: ReturnType<typeof PipelineDataUtils.createStageSummary>[];
 	} {
 		const summary = PipelineStatusUtils.getPipelineSummary(context.stages);
-		const totalDuration = PipelineTimingUtils.calculateTotalDuration(
-			context.stages,
-		);
+		const totalDuration = PipelineTimingUtils.calculateTotalDuration(context.stages);
 
 		return {
 			projectId: context.projectId,
@@ -587,9 +569,7 @@ export class PipelineDataUtils {
 			completedStages: summary.completed,
 			progress: summary.progress,
 			status: summary.status,
-			totalDuration: totalDuration
-				? PipelineTimingUtils.formatDuration(totalDuration)
-				: undefined,
+			totalDuration: totalDuration ? PipelineTimingUtils.formatDuration(totalDuration) : undefined,
 			stages: context.stages.map((stage) => this.createStageSummary(stage)),
 		};
 	}

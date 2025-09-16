@@ -1,37 +1,30 @@
-"use client";
+'use client';
 
-import type { Project } from "~/types/project";
+import type { Project } from '~/types/project';
 
-interface DashboardStatsProps {
+export interface DashboardStatsProps {
 	projects: Project[];
 	isLoading?: boolean;
 }
 
-export function DashboardStats({
-	projects,
-	isLoading = false,
-}: DashboardStatsProps) {
+export function DashboardStats({ projects, isLoading = false }: DashboardStatsProps) {
 	const stats = {
 		total: projects.length,
-		processing: projects.filter((p) => p.status === "PROCESSING").length,
-		completed: projects.filter((p) => p.status === "COMPLETED").length,
-		error: projects.filter((p) => p.status === "ERROR").length,
+		processing: projects.filter((p) => p.status === 'PROCESSING').length,
+		completed: projects.filter((p) => p.status === 'COMPLETED').length,
+		error: projects.filter((p) => p.status === 'ERROR').length,
 	};
 
 	const statCards = [
 		{
-			title: "Total Projects",
+			title: 'Total Projects',
 			value: stats.total,
-			description: stats.total === 0 ? "No projects yet" : "All time",
-			color: "text-indigo-600",
-			bgColor: "bg-indigo-50",
+			description: stats.total === 0 ? 'No projects yet' : 'All time',
+			color: 'text-indigo-600',
+			bgColor: 'bg-indigo-50',
 			icon: (
-				<svg
-					className="h-6 w-6"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
+				<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<title>Total Projects</title>
 					<path
 						strokeLinecap="round"
 						strokeLinejoin="round"
@@ -42,19 +35,14 @@ export function DashboardStats({
 			),
 		},
 		{
-			title: "In Progress",
+			title: 'In Progress',
 			value: stats.processing,
-			description:
-				stats.processing === 0 ? "None processing" : "Currently processing",
-			color: "text-yellow-600",
-			bgColor: "bg-yellow-50",
+			description: stats.processing === 0 ? 'None processing' : 'Currently processing',
+			color: 'text-yellow-600',
+			bgColor: 'bg-yellow-50',
 			icon: (
-				<svg
-					className="h-6 w-6"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
+				<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<title>In Progress</title>
 					<path
 						strokeLinecap="round"
 						strokeLinejoin="round"
@@ -65,19 +53,14 @@ export function DashboardStats({
 			),
 		},
 		{
-			title: "Completed",
+			title: 'Completed',
 			value: stats.completed,
-			description:
-				stats.completed === 0 ? "None completed" : "Ready for download",
-			color: "text-green-600",
-			bgColor: "bg-green-50",
+			description: stats.completed === 0 ? 'None completed' : 'Ready for download',
+			color: 'text-green-600',
+			bgColor: 'bg-green-50',
 			icon: (
-				<svg
-					className="h-6 w-6"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
+				<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<title>Completed</title>
 					<path
 						strokeLinecap="round"
 						strokeLinejoin="round"
@@ -88,18 +71,14 @@ export function DashboardStats({
 			),
 		},
 		{
-			title: "Errors",
+			title: 'Errors',
 			value: stats.error,
-			description: stats.error === 0 ? "No errors" : "Need attention",
-			color: "text-red-600",
-			bgColor: "bg-red-50",
+			description: stats.error === 0 ? 'No errors' : 'Need attention',
+			color: 'text-red-600',
+			bgColor: 'bg-red-50',
 			icon: (
-				<svg
-					className="h-6 w-6"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
+				<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<title>Errors</title>
 					<path
 						strokeLinecap="round"
 						strokeLinejoin="round"
@@ -139,9 +118,7 @@ export function DashboardStats({
 							<div className={stat.color}>{stat.icon}</div>
 						</div>
 						<div className="ml-4">
-							<h3 className="font-medium text-gray-900 text-sm">
-								{stat.title}
-							</h3>
+							<h3 className="font-medium text-gray-900 text-sm">{stat.title}</h3>
 							<p className={`font-bold text-2xl ${stat.color}`}>{stat.value}</p>
 							<p className="text-gray-500 text-xs">{stat.description}</p>
 						</div>

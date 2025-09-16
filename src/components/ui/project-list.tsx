@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useMemo, useState } from "react";
-import type { Project } from "~/types/project";
-import { ProjectCard } from "./project-card";
+import { useMemo, useState } from 'react';
+import type { Project } from '~/types/project';
+import { ProjectCard } from './project-card';
 
-interface ProjectListProps {
+export interface ProjectListProps {
 	projects: Project[];
 	onView?: (projectId: string) => void;
 	onDownload?: (projectId: string) => void;
@@ -12,8 +12,8 @@ interface ProjectListProps {
 	isLoading?: boolean;
 }
 
-type SortOption = "newest" | "oldest" | "title" | "status";
-type FilterOption = "all" | "uploaded" | "processing" | "completed" | "error";
+type SortOption = 'newest' | 'oldest' | 'title' | 'status' | 'size' | 'pages';
+type FilterOption = 'all' | 'uploaded' | 'processing' | 'completed' | 'error';
 
 export function ProjectList({
 	projects,
@@ -22,9 +22,9 @@ export function ProjectList({
 	onDelete,
 	isLoading = false,
 }: ProjectListProps) {
-	const [searchQuery, setSearchQuery] = useState("");
-	const [sortBy, setSortBy] = useState<SortOption>("newest");
-	const [filterBy, setFilterBy] = useState<FilterOption>("all");
+	const [searchQuery, setSearchQuery] = useState('');
+	const [sortBy, setSortBy] = useState<SortOption>('newest');
+	const [filterBy, setFilterBy] = useState<FilterOption>('all');
 
 	const filteredAndSortedProjects = useMemo(() => {
 		let filtered = projects;
@@ -35,35 +35,33 @@ export function ProjectList({
 			filtered = filtered.filter(
 				(project) =>
 					project.title.toLowerCase().includes(query) ||
-					project.metadata?.fileName.toLowerCase().includes(query) ||
-					project.metadata?.authors?.some((author) =>
-						author.toLowerCase().includes(query),
-					),
+					project.metadata?.fileName?.toLowerCase().includes(query) ||
+					project.metadata?.authors?.some((author) => author.toLowerCase().includes(query)) ||
+					project.metadata?.abstract?.toLowerCase().includes(query) ||
+					project.metadata?.keywords?.some((keyword) => keyword.toLowerCase().includes(query))
 			);
 		}
 
 		// Apply status filter
-		if (filterBy !== "all") {
-			filtered = filtered.filter((project) =>
-				project.status.toLowerCase().includes(filterBy),
-			);
+		if (filterBy !== 'all') {
+			filtered = filtered.filter((project) => project.status.toLowerCase().includes(filterBy));
 		}
 
 		// Apply sorting
 		filtered.sort((a, b) => {
 			switch (sortBy) {
-				case "newest":
-					return (
-						new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-					);
-				case "oldest":
-					return (
-						new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-					);
-				case "title":
+				case 'newest':
+					return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+				case 'oldest':
+					return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+				case 'title':
 					return a.title.localeCompare(b.title);
-				case "status":
+				case 'status':
 					return a.status.localeCompare(b.status);
+				case 'size':
+					return (b.metadata?.fileSize || 0) - (a.metadata?.fileSize || 0);
+				case 'pages':
+					return (b.metadata?.pageCount || 0) - (a.metadata?.pageCount || 0);
 				default:
 					return 0;
 			}
@@ -75,10 +73,10 @@ export function ProjectList({
 	const getStatusCounts = () => {
 		return {
 			all: projects.length,
-			uploaded: projects.filter((p) => p.status === "UPLOADED").length,
-			processing: projects.filter((p) => p.status === "PROCESSING").length,
-			completed: projects.filter((p) => p.status === "COMPLETED").length,
-			error: projects.filter((p) => p.status === "ERROR").length,
+			uploaded: projects.filter((p) => p.status === 'UPLOADED').length,
+			processing: projects.filter((p) => p.status === 'PROCESSING').length,
+			completed: projects.filter((p) => p.status === 'COMPLETED').length,
+			error: projects.filter((p) => p.status === 'ERROR').length,
 		};
 	};
 
@@ -135,7 +133,7 @@ export function ProjectList({
 						<input
 							id="search"
 							type="text"
-							placeholder="Search by title, filename, or author..."
+							placeholder="Search by title, filename, author, abstract, or keywords..."
 							value={searchQuery}
 							onChange={(e) => setSearchQuery(e.target.value)}
 							className="block w-full rounded-md border-gray-300 py-2 pr-3 pl-10 text-sm placeholder-gray-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
@@ -146,28 +144,22 @@ export function ProjectList({
 				<div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
 					{/* Status Filter */}
 					<div className="flex flex-wrap gap-2">
-						{(
-							[
-								"all",
-								"uploaded",
-								"processing",
-								"completed",
-								"error",
-							] as FilterOption[]
-						).map((status) => (
-							<button
-								key={status}
-								onClick={() => setFilterBy(status)}
-								className={`inline-flex items-center rounded-full px-3 py-1 font-medium text-sm ${
-									filterBy === status
-										? "bg-indigo-100 text-indigo-800"
-										: "bg-gray-100 text-gray-700 hover:bg-gray-200"
-								}`}
-							>
-								{status.charAt(0).toUpperCase() + status.slice(1)}
-								<span className="ml-1 text-xs">({statusCounts[status]})</span>
-							</button>
-						))}
+						{(['all', 'uploaded', 'processing', 'completed', 'error'] as FilterOption[]).map(
+							(status) => (
+								<button
+									key={status}
+									onClick={() => setFilterBy(status)}
+									className={`inline-flex items-center rounded-full px-3 py-1 font-medium text-sm ${
+										filterBy === status
+											? 'bg-indigo-100 text-indigo-800'
+											: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+									}`}
+								>
+									{status.charAt(0).toUpperCase() + status.slice(1)}
+									<span className="ml-1 text-xs">({statusCounts[status]})</span>
+								</button>
+							)
+						)}
 					</div>
 
 					{/* Sort Options */}
@@ -185,6 +177,8 @@ export function ProjectList({
 							<option value="oldest">Oldest First</option>
 							<option value="title">Title A-Z</option>
 							<option value="status">Status</option>
+							<option value="size">File Size</option>
+							<option value="pages">Page Count</option>
 						</select>
 					</div>
 				</div>
@@ -193,15 +187,14 @@ export function ProjectList({
 			{/* Results Summary */}
 			<div className="flex items-center justify-between">
 				<p className="text-gray-600 text-sm">
-					Showing {filteredAndSortedProjects.length} of {projects.length}{" "}
-					projects
+					Showing {filteredAndSortedProjects.length} of {projects.length} projects
 				</p>
 			</div>
 
 			{/* Project Grid */}
 			{filteredAndSortedProjects.length === 0 ? (
 				<div className="rounded-lg bg-white p-12 text-center shadow">
-					{searchQuery || filterBy !== "all" ? (
+					{searchQuery || filterBy !== 'all' ? (
 						<>
 							<svg
 								className="mx-auto h-12 w-12 text-gray-400"
@@ -216,16 +209,14 @@ export function ProjectList({
 									d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
 								/>
 							</svg>
-							<h3 className="mt-2 font-medium text-gray-900 text-sm">
-								No projects found
-							</h3>
+							<h3 className="mt-2 font-medium text-gray-900 text-sm">No projects found</h3>
 							<p className="mt-1 text-gray-500 text-sm">
 								Try adjusting your search or filter criteria.
 							</p>
 							<button
 								onClick={() => {
-									setSearchQuery("");
-									setFilterBy("all");
+									setSearchQuery('');
+									setFilterBy('all');
 								}}
 								className="mt-4 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 text-sm hover:bg-gray-50"
 							>
@@ -247,9 +238,7 @@ export function ProjectList({
 									d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
 								/>
 							</svg>
-							<h3 className="mt-2 font-medium text-gray-900 text-sm">
-								No projects yet
-							</h3>
+							<h3 className="mt-2 font-medium text-gray-900 text-sm">No projects yet</h3>
 							<p className="mt-1 text-gray-500 text-sm">
 								Get started by uploading your first research paper.
 							</p>

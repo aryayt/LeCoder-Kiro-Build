@@ -1,27 +1,24 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { z } from "zod";
-import { forgetPassword } from "~/lib/auth-client";
-import {
-	type PasswordResetData,
-	passwordResetSchema,
-} from "~/lib/auth/validation";
+import { useState } from 'react';
+import { z } from 'zod';
+import { forgetPassword } from '~/lib/auth-client';
+import { type PasswordResetData, passwordResetSchema } from '~/lib/auth/validation';
 
 export function PasswordResetForm() {
 	const [formData, setFormData] = useState<PasswordResetData>({
-		email: "",
+		email: '',
 	});
 	const [isLoading, setIsLoading] = useState(false);
 	const [errors, setErrors] = useState<Partial<PasswordResetData>>({});
 	const [success, setSuccess] = useState(false);
-	const [generalError, setGeneralError] = useState("");
+	const [generalError, setGeneralError] = useState('');
 
 	const handleInputChange = (field: keyof PasswordResetData, value: string) => {
 		setFormData((prev) => ({ ...prev, [field]: value }));
 		// Clear field-specific error when user starts typing
 		if (errors[field]) {
-			setErrors((prev) => ({ ...prev, [field]: "" }));
+			setErrors((prev) => ({ ...prev, [field]: '' }));
 		}
 	};
 
@@ -45,7 +42,7 @@ export function PasswordResetForm() {
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
-		setGeneralError("");
+		setGeneralError('');
 
 		if (!validateForm()) {
 			return;
@@ -56,16 +53,16 @@ export function PasswordResetForm() {
 		try {
 			const result = await forgetPassword({
 				email: formData.email,
-				redirectTo: "/auth/reset-password",
+				redirectTo: '/auth/reset-password',
 			});
 
 			if (result.error) {
-				setGeneralError(result.error.message || "Failed to send reset email");
+				setGeneralError(result.error.message || 'Failed to send reset email');
 			} else {
 				setSuccess(true);
 			}
 		} catch (err) {
-			setGeneralError("An unexpected error occurred. Please try again.");
+			setGeneralError('An unexpected error occurred. Please try again.');
 		} finally {
 			setIsLoading(false);
 		}
@@ -77,11 +74,7 @@ export function PasswordResetForm() {
 				<div className="rounded-md border border-green-200 bg-green-50 p-4">
 					<div className="flex">
 						<div className="flex-shrink-0">
-							<svg
-								className="h-5 w-5 text-green-400"
-								viewBox="0 0 20 20"
-								fill="currentColor"
-							>
+							<svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
 								<title>Success</title>
 								<path
 									fillRule="evenodd"
@@ -91,14 +84,11 @@ export function PasswordResetForm() {
 							</svg>
 						</div>
 						<div className="ml-3">
-							<h3 className="font-medium text-green-800 text-sm">
-								Reset email sent!
-							</h3>
+							<h3 className="font-medium text-green-800 text-sm">Reset email sent!</h3>
 							<div className="mt-2 text-green-700 text-sm">
 								<p>
-									We've sent a password reset link to {formData.email}. Please
-									check your email and follow the instructions to reset your
-									password.
+									We've sent a password reset link to {formData.email}. Please check your email and
+									follow the instructions to reset your password.
 								</p>
 							</div>
 						</div>
@@ -109,7 +99,7 @@ export function PasswordResetForm() {
 						type="button"
 						onClick={() => {
 							setSuccess(false);
-							setFormData({ email: "" });
+							setFormData({ email: '' });
 						}}
 						className="text-indigo-600 text-sm hover:text-indigo-500"
 					>
@@ -124,40 +114,31 @@ export function PasswordResetForm() {
 		<div className="mx-auto w-full max-w-md">
 			<form onSubmit={handleSubmit} className="space-y-4">
 				<div>
-					<label
-						htmlFor="email"
-						className="block font-medium text-gray-700 text-sm"
-					>
+					<label htmlFor="email" className="block font-medium text-gray-700 text-sm">
 						Email Address
 					</label>
 					<input
 						id="email"
 						type="email"
 						value={formData.email}
-						onChange={(e) => handleInputChange("email", e.target.value)}
+						onChange={(e) => handleInputChange('email', e.target.value)}
 						className={`mt-1 block w-full rounded-md border px-3 py-2 shadow-sm focus:outline-none focus:ring-2 ${
 							errors.email
-								? "border-red-300 focus:border-red-500 focus:ring-red-500"
-								: "border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+								? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+								: 'border-gray-300 focus:border-indigo-500 focus:ring-indigo-500'
 						}`}
 						disabled={isLoading}
 						autoComplete="email"
 						placeholder="Enter your email address"
 					/>
-					{errors.email && (
-						<p className="mt-1 text-red-600 text-sm">{errors.email}</p>
-					)}
+					{errors.email && <p className="mt-1 text-red-600 text-sm">{errors.email}</p>}
 				</div>
 
 				{generalError && (
 					<div className="rounded-md border border-red-200 bg-red-50 p-3">
 						<div className="flex">
 							<div className="flex-shrink-0">
-								<svg
-									className="h-5 w-5 text-red-400"
-									viewBox="0 0 20 20"
-									fill="currentColor"
-								>
+								<svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
 									<title>Error</title>
 									<path
 										fillRule="evenodd"
@@ -178,7 +159,7 @@ export function PasswordResetForm() {
 					disabled={isLoading}
 					className="flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-sm text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
 				>
-					{isLoading ? "Sending..." : "Send Reset Email"}
+					{isLoading ? 'Sending...' : 'Send Reset Email'}
 				</button>
 			</form>
 		</div>

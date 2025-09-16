@@ -1,11 +1,11 @@
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { env } from "~/env";
-import { db } from "~/server/db";
+import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { env } from '~/env';
+import { db } from '~/server/db';
 
 export const auth = betterAuth({
 	database: prismaAdapter(db, {
-		provider: "postgresql",
+		provider: 'postgresql',
 	}),
 	emailAndPassword: {
 		enabled: true,
@@ -24,13 +24,13 @@ export const auth = betterAuth({
 	},
 	socialProviders: {
 		google: {
-			clientId: env.GOOGLE_CLIENT_ID || "",
-			clientSecret: env.GOOGLE_CLIENT_SECRET || "",
+			clientId: env.GOOGLE_CLIENT_ID || '',
+			clientSecret: env.GOOGLE_CLIENT_SECRET || '',
 			enabled: !!(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
 		},
 		github: {
-			clientId: env.GITHUB_CLIENT_ID || "",
-			clientSecret: env.GITHUB_CLIENT_SECRET || "",
+			clientId: env.GITHUB_CLIENT_ID || '',
+			clientSecret: env.GITHUB_CLIENT_SECRET || '',
 			enabled: !!(env.GITHUB_CLIENT_ID && env.GITHUB_CLIENT_SECRET),
 		},
 	},
@@ -40,8 +40,8 @@ export const auth = betterAuth({
 	},
 	account: {
 		fields: {
-			providerId: "providerId",
-			accountId: "accountId",
+			providerId: 'providerId',
+			accountId: 'accountId',
 		},
 	},
 	rateLimit: {
@@ -53,4 +53,4 @@ export const auth = betterAuth({
 });
 
 export type Session = typeof auth.$Infer.Session;
-export type User = Session["user"];
+export type User = Session['user'];

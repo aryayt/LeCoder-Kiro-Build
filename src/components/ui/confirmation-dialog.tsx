@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
+import { useEffect } from 'react';
 
 interface ConfirmationDialogProps {
 	isOpen: boolean;
@@ -10,7 +10,7 @@ interface ConfirmationDialogProps {
 	message: string;
 	confirmText?: string;
 	cancelText?: string;
-	type?: "danger" | "warning" | "info";
+	type?: 'danger' | 'warning' | 'info';
 	isLoading?: boolean;
 }
 
@@ -20,28 +20,28 @@ export function ConfirmationDialog({
 	onConfirm,
 	title,
 	message,
-	confirmText = "Confirm",
-	cancelText = "Cancel",
-	type = "danger",
+	confirmText = 'Confirm',
+	cancelText = 'Cancel',
+	type = 'danger',
 	isLoading = false,
 }: ConfirmationDialogProps) {
 	// Handle escape key
 	useEffect(() => {
 		const handleEscape = (e: KeyboardEvent) => {
-			if (e.key === "Escape" && isOpen && !isLoading) {
+			if (e.key === 'Escape' && isOpen && !isLoading) {
 				onClose();
 			}
 		};
 
 		if (isOpen) {
-			document.addEventListener("keydown", handleEscape);
+			document.addEventListener('keydown', handleEscape);
 			// Prevent body scroll
-			document.body.style.overflow = "hidden";
+			document.body.style.overflow = 'hidden';
 		}
 
 		return () => {
-			document.removeEventListener("keydown", handleEscape);
-			document.body.style.overflow = "unset";
+			document.removeEventListener('keydown', handleEscape);
+			document.body.style.overflow = 'unset';
 		};
 	}, [isOpen, isLoading, onClose]);
 
@@ -49,24 +49,23 @@ export function ConfirmationDialog({
 
 	const getTypeStyles = () => {
 		switch (type) {
-			case "danger":
+			case 'danger':
 				return {
-					iconColor: "text-red-600",
-					iconBg: "bg-red-100",
-					confirmButton: "bg-red-600 hover:bg-red-700 focus:ring-red-500",
+					iconColor: 'text-red-600',
+					iconBg: 'bg-red-100',
+					confirmButton: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
 				};
-			case "warning":
+			case 'warning':
 				return {
-					iconColor: "text-yellow-600",
-					iconBg: "bg-yellow-100",
-					confirmButton:
-						"bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500",
+					iconColor: 'text-yellow-600',
+					iconBg: 'bg-yellow-100',
+					confirmButton: 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500',
 				};
-			case "info":
+			case 'info':
 				return {
-					iconColor: "text-blue-600",
-					iconBg: "bg-blue-100",
-					confirmButton: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
+					iconColor: 'text-blue-600',
+					iconBg: 'bg-blue-100',
+					confirmButton: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
 				};
 		}
 	};
@@ -75,14 +74,9 @@ export function ConfirmationDialog({
 
 	const getIcon = () => {
 		switch (type) {
-			case "danger":
+			case 'danger':
 				return (
-					<svg
-						className="h-6 w-6"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<title>Danger</title>
 						<path
 							strokeLinecap="round"
@@ -92,14 +86,9 @@ export function ConfirmationDialog({
 						/>
 					</svg>
 				);
-			case "warning":
+			case 'warning':
 				return (
-					<svg
-						className="h-6 w-6"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<title>Warning</title>
 						<path
 							strokeLinecap="round"
@@ -109,14 +98,9 @@ export function ConfirmationDialog({
 						/>
 					</svg>
 				);
-			case "info":
+			case 'info':
 				return (
-					<svg
-						className="h-6 w-6"
-						fill="none"
-						stroke="currentColor"
-						viewBox="0 0 24 24"
-					>
+					<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 						<title>Info</title>
 						<path
 							strokeLinecap="round"
@@ -173,11 +157,8 @@ export function ConfirmationDialog({
 						>
 							{isLoading ? (
 								<div className="flex items-center justify-center">
-									<svg
-										className="mr-2 h-4 w-4 animate-spin"
-										fill="none"
-										viewBox="0 0 24 24"
-									>
+									<svg className="mr-2 h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+										<title>Loading</title>
 										<circle
 											className="opacity-25"
 											cx="12"

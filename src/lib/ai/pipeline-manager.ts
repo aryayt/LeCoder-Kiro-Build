@@ -1,38 +1,51 @@
-import { ProjectStatus, StageStatus } from "@prisma/client";
+import { ProjectStatus, StageStatus } from '@prisma/client';
 import {
 	createPipelineStages,
 	getStagesByProjectId,
 	updateProjectStatus,
 	updateStageStatus,
-} from "~/lib/db/operations";
+} from '~/lib/db/operations';
 import type {
 	AlgorithmAnalysisResult,
-	AlgorithmSpecs,
 	ConceptExtractionResult,
 	PipelineContext,
 	PipelineStage,
-	ResearchConcepts,
-} from "~/types/ai";
-import { AlgorithmAnalyzerAgent } from "./agents/algorithm-analyzer";
-import { ConceptExtractorAgent } from "./agents/concept-extractor";
-import type { AIConfig, AgentResponse } from "./base-agent";
+} from '~/types/ai';
+import { AlgorithmAnalyzerAgent } from './agents/algorithm-analyzer';
+import { ConceptExtractorAgent } from './agents/concept-extractor';
+import type { AIConfig, AgentResponse } from './base-agent';
 
+/** Configuration for the AI pipeline execution */
 export interface PipelineConfig {
+	/** Configuration for the concept extraction agent */
 	conceptExtractor: AIConfig;
+	/** Configuration for the algorithm analysis agent */
 	algorithmAnalyzer: AIConfig;
+	/** Configuration for the architecture planning agent */
 	architecturePlanner: AIConfig;
+	/** Configuration for the implementation planning agent */
 	implementationPlanner: AIConfig;
+	/** Configuration for the code generation agent */
 	codeGenerator: AIConfig;
+	/** Configuration for the documentation generation agent */
 	documentationGenerator: AIConfig;
+	/** Maximum number of retry attempts per stage (default: 3) */
 	maxRetries?: number;
+	/** Base delay in milliseconds between retries (default: 1000) */
 	retryDelay?: number;
+	/** Whether to enable parallel processing where possible (default: false) */
 	enableParallelProcessing?: boolean;
 }
 
+/** Result of pipeline execution with detailed metadata */
 export interface PipelineResult {
+	/** Whether the pipeline completed successfully */
 	success: boolean;
+	/** ID of the project that was processed */
 	projectId: string;
+	/** Number of stages that completed successfully */
 	completedStages: number;
+	/** Results from each pipeline stage */
 	results: {
 		concepts?: ConceptExtractionResult;
 		algorithms?: AlgorithmAnalysisResult;
@@ -41,7 +54,9 @@ export interface PipelineResult {
 		code?: any;
 		documentation?: any;
 	};
+	/** Error message if pipeline failed */
 	error?: string;
+	/** Execution metadata and performance metrics */
 	metadata?: {
 		totalProcessingTime: number;
 		stageTimings: Record<number, number>;
@@ -49,6 +64,46 @@ export interface PipelineResult {
 	};
 }
 
+/**
+ * Manages the execution of the 6-stage AI pipeline for transforming research papers into code.
+ *
+ * The pipeline consists of:
+ * 1. Concept Extraction - Identifies research objectives and key concepts
+ * 2. Algorithm Analysis - Analyzes mathematical formulations and methods
+ * 3. Architecture Planning - Determines system structure and dependencies
+ * 4. Implementation Planning - Creates detailed development roadmap
+ * 5. Code Generation - Produces complete, executable implementations
+ * 6. Documentation Generation - Creates setup guides and documentation
+ *
+ * Features:
+ * - Automatic retry logic with exponential backoff
+ * - Real-time progress tracking and database persistence
+ * - Error recovery and pipeline resumption
+ * - Performance monitoring and metrics collection
+ *
+ * @example
+ * ```typescript
+ * const pipelineManager = new PipelineManager({
+ *   conceptExtractor: { provider: 'openai', model: 'gpt-4' },
+ *   algorithmAnalyzer: { provider: 'anthropic', model: 'claude-3' },
+ *   // ... other agent configs
+ *   maxRetries: 3,
+ *   retryDelay: 1000
+ * });
+ *
+ * const result = await pipelineManager.executePipeline({
+ *   projectId: 'project-uuid',
+ *   paperContent: 'extracted PDF content...',
+ *   metadata: { fileName: 'paper.pdf' }
+ * });
+ *
+ * if (result.success) {
+ *   console.log('Pipeline completed:', result.results);
+ * } else {
+ *   console.error('Pipeline failed:', result.error);
+ * }
+ * ```
+ */
 export class PipelineManager {
 	private config: PipelineConfig;
 	private conceptExtractor: ConceptExtractorAgent;
@@ -63,16 +118,21 @@ export class PipelineManager {
 		};
 
 		// Initialize AI agents
-		this.conceptExtractor = new ConceptExtractorAgent(
-			this.config.conceptExtractor,
-		);
-		this.algorithmAnalyzer = new AlgorithmAnalyzerAgent(
-			this.config.algorithmAnalyzer,
-		);
+		this.conceptExtractor = new ConceptExtractorAgent(this.config.conceptExtractor);
+		this.algorithmAnalyzer = new AlgorithmAnalyzerAgent(this.config.algorithmAnalyzer);
 	}
 
 	/**
-	 * Execute the complete 6-stage pipeline for a project
+	 * Executes the complete 6-stage AI pipeline for transforming a research paper into code.
+	 *
+	 * The pipeline runs sequentially through all stages, with automatic retry logic
+	 * and database persistence for progress tracking. Each stage builds upon the
+	 * results of previous stages.
+	 *
+	 * @param context - Pipeline execution context containing project data
+	 * @returns Promise resolving to pipeline execution result
+	 *
+	 * @throws {Error} When pipeline initialization fails
 	 */
 	async executePipeline(context: PipelineContext): Promise<PipelineResult> {
 		const startTime = Date.now();
@@ -91,29 +151,21 @@ export class PipelineManager {
 			context.stages = stages.map((stage) => ({
 				id: stage.stageNumber,
 				name: stage.stageName,
-				status: stage.status as
-					| "pending"
-					| "processing"
-					| "completed"
-					| "error",
+				status: stage.status.toLowerCase() as 'pending' | 'processing' | 'completed' | 'error',
 				result: stage.outputData,
 				error: stage.errorMessage || undefined,
 				startTime: stage.startedAt || undefined,
 				endTime: stage.completedAt || undefined,
 			}));
 
-			const results: PipelineResult["results"] = {};
+			const results: PipelineResult['results'] = {};
 
 			// Execute stages sequentially
 			for (let stageNumber = 1; stageNumber <= 6; stageNumber++) {
 				const stageStartTime = Date.now();
 
 				try {
-					const stageResult = await this.executeStageWithRetry(
-						context,
-						stageNumber,
-						results,
-					);
+					const stageResult = await this.executeStageWithRetry(context, stageNumber, results);
 
 					if (!stageResult.success) {
 						throw new Error(stageResult.error || `Stage ${stageNumber} failed`);
@@ -144,14 +196,9 @@ export class PipelineManager {
 					stageTimings[stageNumber] = Date.now() - stageStartTime;
 
 					// Update project current stage
-					await updateProjectStatus(
-						context.projectId,
-						ProjectStatus.PROCESSING,
-						stageNumber,
-					);
+					await updateProjectStatus(context.projectId, ProjectStatus.PROCESSING, stageNumber);
 				} catch (error) {
-					const errorMessage =
-						error instanceof Error ? error.message : "Unknown error";
+					const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
 					// Update stage status to error
 					const stage = stages.find((s) => s.stageNumber === stageNumber);
@@ -162,11 +209,7 @@ export class PipelineManager {
 					}
 
 					// Update project status to error
-					await updateProjectStatus(
-						context.projectId,
-						ProjectStatus.ERROR,
-						stageNumber - 1,
-					);
+					await updateProjectStatus(context.projectId, ProjectStatus.ERROR, stageNumber - 1);
 
 					return {
 						success: false,
@@ -198,8 +241,7 @@ export class PipelineManager {
 				},
 			};
 		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : "Unknown pipeline error";
+			const errorMessage = error instanceof Error ? error.message : 'Unknown pipeline error';
 
 			// Update project status to error
 			await updateProjectStatus(context.projectId, ProjectStatus.ERROR);
@@ -220,12 +262,17 @@ export class PipelineManager {
 	}
 
 	/**
-	 * Execute a single stage with retry logic
+	 * Executes a single pipeline stage with automatic retry logic and exponential backoff.
+	 *
+	 * @param context - Pipeline execution context
+	 * @param stageNumber - The stage number to execute (1-6)
+	 * @param previousResults - Results from previous stages
+	 * @returns Promise resolving to agent response
 	 */
 	private async executeStageWithRetry(
 		context: PipelineContext,
 		stageNumber: number,
-		previousResults: PipelineResult["results"],
+		previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		let lastError: Error | null = null;
 
@@ -243,11 +290,7 @@ export class PipelineManager {
 				await updateStageStatus(stage.id, StageStatus.PROCESSING);
 
 				// Execute the specific stage
-				const result = await this.executeStage(
-					context,
-					stageNumber,
-					previousResults,
-				);
+				const result = await this.executeStage(context, stageNumber, previousResults);
 
 				if (result.success) {
 					// Update stage status to completed with output data
@@ -257,7 +300,7 @@ export class PipelineManager {
 
 					return result;
 				} else {
-					throw new Error(result.error || "Stage execution failed");
+					throw new Error(result.error || 'Stage execution failed');
 				}
 			} catch (error) {
 				lastError = error instanceof Error ? error : new Error(String(error));
@@ -281,7 +324,7 @@ export class PipelineManager {
 
 		return {
 			success: false,
-			error: lastError?.message || "Stage execution failed after all retries",
+			error: lastError?.message || 'Stage execution failed after all retries',
 		};
 	}
 
@@ -291,7 +334,7 @@ export class PipelineManager {
 	private async executeStage(
 		context: PipelineContext,
 		stageNumber: number,
-		previousResults: PipelineResult["results"],
+		previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		switch (stageNumber) {
 			case 1:
@@ -323,12 +366,8 @@ export class PipelineManager {
 	/**
 	 * Stage 1: Concept Extraction
 	 */
-	private async executeConceptExtraction(
-		context: PipelineContext,
-	): Promise<AgentResponse> {
-		return this.conceptExtractor.extractConceptsWithFallback(
-			context.paperContent,
-		);
+	private async executeConceptExtraction(context: PipelineContext): Promise<AgentResponse> {
+		return this.conceptExtractor.extractConceptsWithFallback(context.paperContent);
 	}
 
 	/**
@@ -336,18 +375,18 @@ export class PipelineManager {
 	 */
 	private async executeAlgorithmAnalysis(
 		context: PipelineContext,
-		conceptsResult?: ConceptExtractionResult,
+		conceptsResult?: ConceptExtractionResult
 	): Promise<AgentResponse> {
 		if (!conceptsResult) {
 			return {
 				success: false,
-				error: "Concepts extraction result is required for algorithm analysis",
+				error: 'Concepts extraction result is required for algorithm analysis',
 			};
 		}
 
 		return this.algorithmAnalyzer.analyzeAlgorithmsWithFallback(
 			conceptsResult.concepts,
-			context.paperContent,
+			context.paperContent
 		);
 	}
 
@@ -356,14 +395,14 @@ export class PipelineManager {
 	 */
 	private async executeArchitecturePlanning(
 		context: PipelineContext,
-		previousResults: PipelineResult["results"],
+		previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement architecture planning agent
 		return {
 			success: true,
 			data: {
-				architecture: "placeholder",
-				message: "Architecture planning not yet implemented",
+				architecture: 'placeholder',
+				message: 'Architecture planning not yet implemented',
 			},
 		};
 	}
@@ -373,14 +412,14 @@ export class PipelineManager {
 	 */
 	private async executeImplementationPlanning(
 		context: PipelineContext,
-		previousResults: PipelineResult["results"],
+		previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement implementation planning agent
 		return {
 			success: true,
 			data: {
-				implementation: "placeholder",
-				message: "Implementation planning not yet implemented",
+				implementation: 'placeholder',
+				message: 'Implementation planning not yet implemented',
 			},
 		};
 	}
@@ -390,14 +429,14 @@ export class PipelineManager {
 	 */
 	private async executeCodeGeneration(
 		context: PipelineContext,
-		previousResults: PipelineResult["results"],
+		previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement code generation agent
 		return {
 			success: true,
 			data: {
-				code: "placeholder",
-				message: "Code generation not yet implemented",
+				code: 'placeholder',
+				message: 'Code generation not yet implemented',
 			},
 		};
 	}
@@ -407,14 +446,14 @@ export class PipelineManager {
 	 */
 	private async executeDocumentationGeneration(
 		context: PipelineContext,
-		previousResults: PipelineResult["results"],
+		previousResults: PipelineResult['results']
 	): Promise<AgentResponse> {
 		// TODO: Implement documentation generation agent
 		return {
 			success: true,
 			data: {
-				documentation: "placeholder",
-				message: "Documentation generation not yet implemented",
+				documentation: 'placeholder',
+				message: 'Documentation generation not yet implemented',
 			},
 		};
 	}
@@ -444,19 +483,17 @@ export class PipelineManager {
 		const pipelineStages: PipelineStage[] = stages.map((stage) => ({
 			id: stage.stageNumber,
 			name: stage.stageName,
-			status: stage.status as "pending" | "processing" | "completed" | "error",
+			status: stage.status.toLowerCase() as 'pending' | 'processing' | 'completed' | 'error',
 			result: stage.outputData,
 			error: stage.errorMessage || undefined,
 			startTime: stage.startedAt || undefined,
 			endTime: stage.completedAt || undefined,
 		}));
 
-		const completedStages = pipelineStages.filter(
-			(s) => s.status === "completed",
-		).length;
-		const hasError = pipelineStages.some((s) => s.status === "error");
+		const completedStages = pipelineStages.filter((s) => s.status === 'completed').length;
+		const hasError = pipelineStages.some((s) => s.status === 'error');
 		const isProcessing = pipelineStages.some(
-			(s) => s.status === "processing" || s.status === "retrying",
+			(s) => s.status === 'processing'
 		);
 
 		let status: ProjectStatus;
@@ -487,14 +524,12 @@ export class PipelineManager {
 		// Update any processing stages to cancelled
 		const stages = await getStagesByProjectId(projectId);
 		const processingStages = stages.filter(
-			(s) =>
-				s.status === StageStatus.PROCESSING ||
-				s.status === StageStatus.RETRYING,
+			(s) => s.status === StageStatus.PROCESSING || s.status === StageStatus.RETRYING
 		);
 
 		for (const stage of processingStages) {
 			await updateStageStatus(stage.id, StageStatus.ERROR, {
-				errorMessage: "Pipeline cancelled by user",
+				errorMessage: 'Pipeline cancelled by user',
 			});
 		}
 	}
@@ -509,7 +544,7 @@ export class PipelineManager {
 		const errorStages = stages.filter((s) => s.status === StageStatus.ERROR);
 		for (const stage of errorStages) {
 			await updateStageStatus(stage.id, StageStatus.PENDING, {
-				errorMessage: null,
+				errorMessage: undefined,
 			});
 		}
 
@@ -518,11 +553,7 @@ export class PipelineManager {
 			.filter((s) => s.status === StageStatus.COMPLETED)
 			.reduce((max, stage) => Math.max(max, stage.stageNumber), 0);
 
-		await updateProjectStatus(
-			context.projectId,
-			ProjectStatus.PROCESSING,
-			lastCompletedStage,
-		);
+		await updateProjectStatus(context.projectId, ProjectStatus.PROCESSING, lastCompletedStage);
 
 		// Execute pipeline from where it left off
 		return this.executePipeline(context);

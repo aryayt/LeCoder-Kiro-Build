@@ -1,12 +1,12 @@
-import { headers } from "next/headers";
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import type { AIProvider } from "~/lib/ai/base-agent";
-import { auth } from "~/lib/auth";
-import { ApiKeyService } from "~/lib/services/api-key-service";
+import { headers } from 'next/headers';
+import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import type { AIProvider } from '~/lib/ai/base-agent';
+import { auth } from '~/lib/auth';
+import { ApiKeyService } from '~/lib/services/api-key-service';
 
 const CreateApiKeySchema = z.object({
-	provider: z.enum(["GOOGLE", "OPENAI", "ANTHROPIC"]),
+	provider: z.enum(['GOOGLE', 'OPENAI', 'ANTHROPIC']),
 	apiKey: z.string().min(20).max(200),
 	keyName: z.string().optional(),
 });
@@ -28,10 +28,7 @@ export async function GET() {
 		});
 
 		if (!session?.user?.id) {
-			return NextResponse.json(
-				{ error: "Authentication required" },
-				{ status: 401 },
-			);
+			return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
 		}
 
 		const apiKeys = await ApiKeyService.getUserApiKeys(session.user.id);
@@ -41,15 +38,14 @@ export async function GET() {
 			data: apiKeys,
 		});
 	} catch (error) {
-		console.error("Error fetching API keys:", error);
+		console.error('Error fetching API keys:', error);
 
 		return NextResponse.json(
 			{
 				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to fetch API keys",
+				error: error instanceof Error ? error.message : 'Failed to fetch API keys',
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
@@ -64,10 +60,7 @@ export async function POST(request: NextRequest) {
 		});
 
 		if (!session?.user?.id) {
-			return NextResponse.json(
-				{ error: "Authentication required" },
-				{ status: 401 },
-			);
+			return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
 		}
 
 		const body = await request.json();
@@ -77,20 +70,17 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json(
 				{
 					success: false,
-					error: "Invalid request data",
+					error: 'Invalid request data',
 					details: validation.error.errors,
 				},
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
 		const { provider, apiKey, keyName } = validation.data;
 
 		// Test the API key before storing
-		const isValid = await ApiKeyService.testApiKey(
-			provider as AIProvider,
-			apiKey,
-		);
+		const isValid = await ApiKeyService.testApiKey(provider as AIProvider, apiKey);
 
 		if (!isValid) {
 			return NextResponse.json(
@@ -98,7 +88,7 @@ export async function POST(request: NextRequest) {
 					success: false,
 					error: `Invalid or non-functional API key for ${provider}`,
 				},
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
@@ -111,19 +101,18 @@ export async function POST(request: NextRequest) {
 
 		return NextResponse.json({
 			success: true,
-			message: "API key saved successfully",
+			message: 'API key saved successfully',
 			data: result,
 		});
 	} catch (error) {
-		console.error("Error creating API key:", error);
+		console.error('Error creating API key:', error);
 
 		return NextResponse.json(
 			{
 				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to save API key",
+				error: error instanceof Error ? error.message : 'Failed to save API key',
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
@@ -138,10 +127,7 @@ export async function PUT(request: NextRequest) {
 		});
 
 		if (!session?.user?.id) {
-			return NextResponse.json(
-				{ error: "Authentication required" },
-				{ status: 401 },
-			);
+			return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
 		}
 
 		const body = await request.json();
@@ -151,10 +137,10 @@ export async function PUT(request: NextRequest) {
 			return NextResponse.json(
 				{
 					success: false,
-					error: "Invalid request data",
+					error: 'Invalid request data',
 					details: validation.error.errors,
 				},
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
@@ -170,19 +156,18 @@ export async function PUT(request: NextRequest) {
 
 		return NextResponse.json({
 			success: true,
-			message: "API key updated successfully",
+			message: 'API key updated successfully',
 			data: result,
 		});
 	} catch (error) {
-		console.error("Error updating API key:", error);
+		console.error('Error updating API key:', error);
 
 		return NextResponse.json(
 			{
 				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to update API key",
+				error: error instanceof Error ? error.message : 'Failed to update API key',
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

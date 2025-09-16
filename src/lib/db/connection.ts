@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Database connection utilities for LeCodeR
@@ -11,12 +11,12 @@ declare global {
 	var __prisma: PrismaClient | undefined;
 }
 
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === 'production') {
 	prisma = new PrismaClient();
 } else {
 	if (!global.__prisma) {
 		global.__prisma = new PrismaClient({
-			log: ["query", "error", "warn"],
+			log: ['query', 'error', 'warn'],
 		});
 	}
 	prisma = global.__prisma;
@@ -30,10 +30,10 @@ export { prisma };
 export async function testConnection(): Promise<boolean> {
 	try {
 		await prisma.$queryRaw`SELECT 1`;
-		console.log("✅ Database connection successful");
+		console.log('✅ Database connection successful');
 		return true;
 	} catch (error) {
-		console.error("❌ Database connection failed:", error);
+		console.error('❌ Database connection failed:', error);
 		return false;
 	}
 }
@@ -50,7 +50,7 @@ export async function disconnect(): Promise<void> {
  */
 export function getConnectionInfo() {
 	return {
-		url: process.env.DATABASE_URL?.replace(/:[^:@]*@/, ":***@"), // Hide password
+		url: process.env.DATABASE_URL?.replace(/:[^:@]*@/, ':***@'), // Hide password
 		connected: prisma ? true : false,
 		environment: process.env.NODE_ENV,
 	};

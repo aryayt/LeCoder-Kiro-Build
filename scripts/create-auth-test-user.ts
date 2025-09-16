@@ -1,15 +1,14 @@
-import { PrismaClient } from "@prisma/client";
-import { auth } from "~/lib/auth";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function createAuthTestUser() {
-	console.log("🔧 Creating test user with Better Auth...");
+	console.info('🔧 Creating test user with Better Auth...');
 
 	try {
-		const email = "aryatest1@gmail.com";
-		const password = "Aryateja@5";
-		const name = "aryatest1";
+		const email = 'aryatest1@gmail.com';
+		const password = 'Aryateja@5';
+		const name = 'aryatest1';
 
 		// First, check if user already exists in Better Auth system
 		const existingUser = await prisma.user.findUnique({
@@ -17,7 +16,7 @@ async function createAuthTestUser() {
 		});
 
 		if (existingUser) {
-			console.log("ℹ️ User already exists, deleting to recreate...");
+			console.info('ℹ️ User already exists, deleting to recreate...');
 			// Delete existing user and related data
 			await prisma.session.deleteMany({
 				where: { userId: existingUser.id },
@@ -34,10 +33,10 @@ async function createAuthTestUser() {
 		}
 
 		// Create user through Better Auth API (simulating registration)
-		const response = await fetch("http://localhost:3000/api/auth/sign-up", {
-			method: "POST",
+		const response = await fetch('http://localhost:3000/api/auth/sign-up', {
+			method: 'POST',
 			headers: {
-				"Content-Type": "application/json",
+				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
 				email,
@@ -52,7 +51,7 @@ async function createAuthTestUser() {
 		}
 
 		const userData = await response.json();
-		console.log("✅ User created through Better Auth");
+		console.info('✅ User created through Better Auth');
 
 		// Now get the created user from database
 		const user = await prisma.user.findUnique({
@@ -60,14 +59,14 @@ async function createAuthTestUser() {
 		});
 
 		if (!user) {
-			throw new Error("User not found after creation");
+			throw new Error('User not found after creation');
 		}
 
 		// Create a sample project for this user
 		const project = await prisma.project.create({
 			data: {
 				userId: user.id,
-				title: "AI-Powered Code Generation Research",
+				title: 'AI-Powered Code Generation Research',
 				paperContent: `
 Abstract: This paper explores the application of artificial intelligence for automated code generation
 from natural language descriptions. We present a novel approach using transformer models.
@@ -81,28 +80,28 @@ Methodology: Our approach consists of three main components:
 
 Results: Our experiments show significant improvements in code quality and development speed...
         `,
-				status: "PROCESSING",
+				status: 'PROCESSING',
 				currentStage: 1,
 				metadata: {
-					fileName: "ai_code_generation.pdf",
+					fileName: 'ai_code_generation.pdf',
 					fileSize: 1500000,
 					pageCount: 8,
-					authors: ["aryatest1"],
+					authors: ['aryatest1'],
 					abstract:
-						"This paper explores the application of artificial intelligence for automated code generation from natural language descriptions.",
-					keywords: ["AI", "code generation", "transformers", "NLP"],
+						'This paper explores the application of artificial intelligence for automated code generation from natural language descriptions.',
+					keywords: ['AI', 'code generation', 'transformers', 'NLP'],
 				},
 			},
 		});
 
 		// Create pipeline stages for the project
 		const stages = [
-			{ name: "Concept Extraction", number: 1 },
-			{ name: "Algorithm Analysis", number: 2 },
-			{ name: "Architecture Planning", number: 3 },
-			{ name: "Implementation Planning", number: 4 },
-			{ name: "Code Generation", number: 5 },
-			{ name: "Documentation Generation", number: 6 },
+			{ name: 'Concept Extraction', number: 1 },
+			{ name: 'Algorithm Analysis', number: 2 },
+			{ name: 'Architecture Planning', number: 3 },
+			{ name: 'Implementation Planning', number: 4 },
+			{ name: 'Code Generation', number: 5 },
+			{ name: 'Documentation Generation', number: 6 },
 		];
 
 		// Create first stage as completed, second as processing, rest as pending
@@ -112,12 +111,7 @@ Results: Our experiments show significant improvements in code quality and devel
 					projectId: project.id,
 					stageNumber: stage.number,
 					stageName: stage.name,
-					status:
-						stage.number === 1
-							? "COMPLETED"
-							: stage.number === 2
-								? "PROCESSING"
-								: "PENDING",
+					status: stage.number === 1 ? 'COMPLETED' : stage.number === 2 ? 'PROCESSING' : 'PENDING',
 					inputData:
 						stage.number <= 2
 							? {
@@ -130,29 +124,26 @@ Results: Our experiments show significant improvements in code quality and devel
 							? {
 									stage: stage.number,
 									result: `Completed ${stage.name} successfully`,
-									concepts: ["AI", "Code Generation", "Transformers"],
+									concepts: ['AI', 'Code Generation', 'Transformers'],
 								}
 							: undefined,
 					startedAt:
-						stage.number <= 2
-							? new Date(Date.now() - (3 - stage.number) * 60000)
-							: undefined,
-					completedAt:
-						stage.number === 1 ? new Date(Date.now() - 120000) : undefined,
+						stage.number <= 2 ? new Date(Date.now() - (3 - stage.number) * 60000) : undefined,
+					completedAt: stage.number === 1 ? new Date(Date.now() - 120000) : undefined,
 				},
 			});
 		}
 
-		console.log("✅ Sample project created");
-		console.log("🎉 Test user setup completed!");
-		console.log("Credentials for login:");
-		console.log("Email:", email);
-		console.log("Password:", password);
-		console.log("Name:", name);
-		console.log("");
-		console.log("You can now login at: http://localhost:3000/auth/login");
+		console.info('✅ Sample project created');
+		console.info('🎉 Test user setup completed!');
+		console.info('Credentials for login:');
+		console.info('Email:', email);
+		console.info('Password:', password);
+		console.info('Name:', name);
+		console.info('');
+		console.info('You can now login at: http://localhost:3000/auth/login');
 	} catch (error) {
-		console.error("❌ Failed to create user:", error);
+		console.error('❌ Failed to create user:', error);
 	} finally {
 		await prisma.$disconnect();
 	}

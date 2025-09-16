@@ -1,0 +1,15 @@
+import { createMDX } from 'fumadocs-mdx/next';
+import "./src/env.js";
+
+const withMDX = createMDX();
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+	reactStrictMode: true,
+	experimental: {
+		mdxRs: true,
+	},
+	pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
+};
+
+export default withMDX(nextConfig);

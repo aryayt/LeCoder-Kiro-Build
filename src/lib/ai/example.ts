@@ -3,7 +3,7 @@
  * This file demonstrates how to use the ConceptExtractorAgent and AlgorithmAnalyzerAgent
  */
 
-import { createAlgorithmAnalyzer, createConceptExtractor } from "./index";
+import { createAlgorithmAnalyzer, createConceptExtractor } from './index';
 
 // Example paper content for testing
 const samplePaperContent = `
@@ -31,27 +31,27 @@ The proposed hybrid architecture demonstrates superior performance for text clas
 export async function extractConceptsExample() {
 	try {
 		// Create a concept extractor using Google's Gemini model (default)
-		const extractor = createConceptExtractor("google");
+		const extractor = createConceptExtractor('google');
 
-		console.log("Extracting concepts from research paper...");
+		console.log('Extracting concepts from research paper...');
 
 		// Extract concepts from the sample paper
 		const result = await extractor.extractConcepts(samplePaperContent);
 
 		if (result.success) {
-			console.log("✅ Concept extraction successful!");
-			console.log("Main Objective:", result.data?.concepts.mainObjective);
-			console.log("Key Methods:", result.data?.concepts.keyMethods);
-			console.log("Algorithms:", result.data?.concepts.algorithms);
-			console.log("Confidence:", result.data?.confidence);
+			console.log('✅ Concept extraction successful!');
+			console.log('Main Objective:', result.data?.concepts.mainObjective);
+			console.log('Key Methods:', result.data?.concepts.keyMethods);
+			console.log('Algorithms:', result.data?.concepts.algorithms);
+			console.log('Confidence:', result.data?.confidence);
 
 			return result.data;
 		} else {
-			console.error("❌ Concept extraction failed:", result.error);
+			console.error('❌ Concept extraction failed:', result.error);
 			return null;
 		}
 	} catch (error) {
-		console.error("❌ Error in concept extraction:", error);
+		console.error('❌ Error in concept extraction:', error);
 		return null;
 	}
 }
@@ -62,49 +62,42 @@ export async function extractConceptsExample() {
 export async function analyzeAlgorithmsExample() {
 	try {
 		// First extract concepts
-		const conceptExtractor = createConceptExtractor("google");
-		const conceptResult =
-			await conceptExtractor.extractConcepts(samplePaperContent);
+		const conceptExtractor = createConceptExtractor('google');
+		const conceptResult = await conceptExtractor.extractConcepts(samplePaperContent);
 
 		if (!conceptResult.success) {
-			console.error("❌ Failed to extract concepts first");
+			console.error('❌ Failed to extract concepts first');
 			return null;
 		}
 
 		// Create an algorithm analyzer
-		const analyzer = createAlgorithmAnalyzer("google");
+		const analyzer = createAlgorithmAnalyzer('google');
 
-		console.log("Analyzing algorithms from extracted concepts...");
+		console.log('Analyzing algorithms from extracted concepts...');
 
 		// Analyze algorithms
 		const result = await analyzer.analyzeAlgorithms(
 			conceptResult.data!.concepts,
-			samplePaperContent,
+			samplePaperContent
 		);
 
 		if (result.success) {
-			console.log("✅ Algorithm analysis successful!");
+			console.log('✅ Algorithm analysis successful!');
+			console.log('Number of algorithms:', result.data?.specs.algorithms.length);
 			console.log(
-				"Number of algorithms:",
-				result.data?.specs.algorithms.length,
+				'Programming language:',
+				result.data?.specs.systemRequirements.programmingLanguage
 			);
-			console.log(
-				"Programming language:",
-				result.data?.specs.systemRequirements.programmingLanguage,
-			);
-			console.log(
-				"Implementation complexity:",
-				result.data?.specs.implementationComplexity,
-			);
-			console.log("Confidence:", result.data?.confidence);
+			console.log('Implementation complexity:', result.data?.specs.implementationComplexity);
+			console.log('Confidence:', result.data?.confidence);
 
 			return result.data;
 		} else {
-			console.error("❌ Algorithm analysis failed:", result.error);
+			console.error('❌ Algorithm analysis failed:', result.error);
 			return null;
 		}
 	} catch (error) {
-		console.error("❌ Error in algorithm analysis:", error);
+		console.error('❌ Error in algorithm analysis:', error);
 		return null;
 	}
 }
@@ -113,37 +106,33 @@ export async function analyzeAlgorithmsExample() {
  * Complete pipeline example
  */
 export async function runCompletePipeline() {
-	console.log("🚀 Starting complete AI analysis pipeline...\n");
+	console.log('🚀 Starting complete AI analysis pipeline...\n');
 
 	// Step 1: Extract concepts
-	console.log("📝 Step 1: Extracting concepts...");
+	console.log('📝 Step 1: Extracting concepts...');
 	const concepts = await extractConceptsExample();
 
 	if (!concepts) {
-		console.log("❌ Pipeline failed at concept extraction");
+		console.log('❌ Pipeline failed at concept extraction');
 		return;
 	}
 
-	console.log("\n");
+	console.log('\n');
 
 	// Step 2: Analyze algorithms
-	console.log("🔍 Step 2: Analyzing algorithms...");
+	console.log('🔍 Step 2: Analyzing algorithms...');
 	const algorithms = await analyzeAlgorithmsExample();
 
 	if (!algorithms) {
-		console.log("❌ Pipeline failed at algorithm analysis");
+		console.log('❌ Pipeline failed at algorithm analysis');
 		return;
 	}
 
-	console.log("\n✅ Complete pipeline finished successfully!");
-	console.log("📊 Summary:");
+	console.log('\n✅ Complete pipeline finished successfully!');
+	console.log('📊 Summary:');
 	console.log(`- Extracted ${concepts.concepts.algorithms.length} algorithms`);
-	console.log(
-		`- Identified ${algorithms.specs.algorithms.length} detailed algorithm specs`,
-	);
-	console.log(
-		`- Target language: ${algorithms.specs.systemRequirements.programmingLanguage}`,
-	);
+	console.log(`- Identified ${algorithms.specs.algorithms.length} detailed algorithm specs`);
+	console.log(`- Target language: ${algorithms.specs.systemRequirements.programmingLanguage}`);
 	console.log(`- Complexity: ${algorithms.specs.implementationComplexity}`);
 
 	return {

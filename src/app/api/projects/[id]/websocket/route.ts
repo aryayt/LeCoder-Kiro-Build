@@ -1,19 +1,16 @@
-import type { NextRequest } from "next/server";
-import { db } from "~/server/db";
+import type { NextRequest } from 'next/server';
+import { db } from '~/server/db';
 
-export const runtime = "nodejs";
+export const runtime = 'nodejs';
 
 // WebSocket fallback using long polling
-export async function GET(
-	request: NextRequest,
-	{ params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	const { id: projectId } = await params;
 	const url = new URL(request.url);
-	const lastUpdate = url.searchParams.get("lastUpdate");
+	const lastUpdate = url.searchParams.get('lastUpdate');
 
 	if (!projectId) {
-		return Response.json({ error: "Project ID is required" }, { status: 400 });
+		return Response.json({ error: 'Project ID is required' }, { status: 400 });
 	}
 
 	try {
@@ -22,13 +19,13 @@ export async function GET(
 			where: { id: projectId },
 			include: {
 				stages: {
-					orderBy: { stageNumber: "asc" },
+					orderBy: { stageNumber: 'asc' },
 				},
 			},
 		});
 
 		if (!project) {
-			return Response.json({ error: "Project not found" }, { status: 404 });
+			return Response.json({ error: 'Project not found' }, { status: 404 });
 		}
 
 		// If lastUpdate is provided, wait for changes
@@ -45,7 +42,7 @@ export async function GET(
 					where: { id: projectId },
 					include: {
 						stages: {
-							orderBy: { stageNumber: "asc" },
+							orderBy: { stageNumber: 'asc' },
 						},
 					},
 				});
@@ -60,12 +57,12 @@ export async function GET(
 					currentProject.stages.some(
 						(stage) =>
 							(stage.startedAt && stage.startedAt > lastUpdateDate) ||
-							(stage.completedAt && stage.completedAt > lastUpdateDate),
+							(stage.completedAt && stage.completedAt > lastUpdateDate)
 					);
 
 				if (hasUpdates) {
 					return Response.json({
-						type: "update",
+						type: 'update',
 						projectId,
 						status: currentProject.status,
 						currentStage: currentProject.currentStage,
@@ -83,11 +80,9 @@ export async function GET(
 				}
 
 				// Stop polling if project is in final state
-				if (
-					["COMPLETED", "ERROR", "CANCELLED"].includes(currentProject.status)
-				) {
+				if (['COMPLETED', 'ERROR', 'CANCELLED'].includes(currentProject.status)) {
 					return Response.json({
-						type: "final",
+						type: 'final',
 						projectId,
 						status: currentProject.status,
 						currentStage: currentProject.currentStage,
@@ -110,7 +105,7 @@ export async function GET(
 
 			// Timeout reached, return current state
 			return Response.json({
-				type: "timeout",
+				type: 'timeout',
 				projectId,
 				status: project.status,
 				currentStage: project.currentStage,
@@ -129,7 +124,7 @@ export async function GET(
 
 		// Return current state immediately
 		return Response.json({
-			type: "current",
+			type: 'current',
 			projectId,
 			status: project.status,
 			currentStage: project.currentStage,
@@ -145,13 +140,13 @@ export async function GET(
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error("WebSocket fallback error:", error);
+		console.error('WebSocket fallback error:', error);
 		return Response.json(
 			{
-				error: "Failed to fetch project progress",
+				error: 'Failed to fetch project progress',
 				timestamp: new Date().toISOString(),
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

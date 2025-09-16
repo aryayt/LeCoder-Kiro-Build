@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { signOut } from "~/lib/auth-client";
-import { useAuth } from "./auth-provider";
+import { useState } from 'react';
+import { signOut } from '~/lib/auth-client';
+import { useAuth } from './auth-provider';
 
 export function UserMenu() {
 	const { session, isLoading } = useAuth();
@@ -38,9 +38,9 @@ export function UserMenu() {
 	const handleSignOut = async () => {
 		try {
 			await signOut();
-			window.location.href = "/";
+			window.location.href = '/';
 		} catch (error) {
-			console.error("Sign out error:", error);
+			console.error('Sign out error:', error);
 		}
 	};
 
@@ -54,7 +54,7 @@ export function UserMenu() {
 				{session.user.image ? (
 					<img
 						src={session.user.image}
-						alt={session.user.name || "User"}
+						alt={session.user.name || 'User'}
 						className="h-8 w-8 rounded-full"
 					/>
 				) : (
@@ -65,22 +65,15 @@ export function UserMenu() {
 						</span>
 					</div>
 				)}
-				<span className="font-medium text-sm">
-					{session.user.name || session.user.email}
-				</span>
+				<span className="font-medium text-sm">{session.user.name || session.user.email}</span>
 				<svg
-					className={`h-4 w-4 transition-transform ${isOpen ? "rotate-180" : ""}`}
+					className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
 					fill="none"
 					viewBox="0 0 24 24"
 					stroke="currentColor"
 				>
 					<title>User menu</title>
-					<path
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						strokeWidth={2}
-						d="M19 9l-7 7-7-7"
-					/>
+					<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
 				</svg>
 			</button>
 

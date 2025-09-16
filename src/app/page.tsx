@@ -1,6 +1,6 @@
-import { headers } from "next/headers";
-import Link from "next/link";
-import { auth } from "~/lib/auth";
+import { headers } from 'next/headers';
+import Link from 'next/link';
+import { auth } from '~/lib/auth';
 
 export default async function Home() {
 	const session = await auth.api.getSession({
@@ -16,9 +16,8 @@ export default async function Home() {
 						<span className="text-indigo-300">CodeR</span>
 					</h1>
 					<p className="mb-8 max-w-2xl text-indigo-200 text-xl">
-						Transform academic research papers into working code repositories
-						using AI. Upload your PDF, get complete, executable code with
-						documentation.
+						Transform academic research papers into working code repositories using AI. Upload your
+						PDF, get complete, executable code with documentation.
 					</p>
 				</div>
 
@@ -58,21 +57,14 @@ export default async function Home() {
 								Sign In
 							</Link>
 						</div>
-						<p className="text-indigo-300 text-sm">
-							No account required to try it out
-						</p>
+						<p className="text-indigo-300 text-sm">No account required to try it out</p>
 					</div>
 				)}
 
 				<div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-3 md:gap-8">
 					<div className="flex flex-col items-center rounded-xl bg-white/5 p-6 text-center">
 						<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-indigo-500">
-							<svg
-								className="h-6 w-6"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
+							<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<title>Upload PDF</title>
 								<path
 									strokeLinecap="round"
@@ -90,12 +82,7 @@ export default async function Home() {
 
 					<div className="flex flex-col items-center rounded-xl bg-white/5 p-6 text-center">
 						<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-purple-500">
-							<svg
-								className="h-6 w-6"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
+							<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<title>AI Analysis</title>
 								<path
 									strokeLinecap="round"
@@ -107,19 +94,13 @@ export default async function Home() {
 						</div>
 						<h3 className="mb-2 font-bold text-xl">AI Analysis</h3>
 						<p className="text-indigo-200">
-							Our AI analyzes your paper through 6 stages to understand the
-							research
+							Our AI analyzes your paper through 6 stages to understand the research
 						</p>
 					</div>
 
 					<div className="flex flex-col items-center rounded-xl bg-white/5 p-6 text-center">
 						<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-green-500">
-							<svg
-								className="h-6 w-6"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
+							<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<title>Download Code</title>
 								<path
 									strokeLinecap="round"
@@ -131,8 +112,7 @@ export default async function Home() {
 						</div>
 						<h3 className="mb-2 font-bold text-xl">Download Code</h3>
 						<p className="text-indigo-200">
-							Get a complete, executable codebase with documentation and setup
-							instructions
+							Get a complete, executable codebase with documentation and setup instructions
 						</p>
 					</div>
 				</div>

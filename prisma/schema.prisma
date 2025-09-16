@@ -20,6 +20,8 @@ model User {
   projects      Project[]
   sessions      Session[]
   apiKeys       UserApiKey[]
+  auditLogs     AuditLog[]
+  securityEvents SecurityEvent[]
 
   @@map("user")
 }
@@ -164,4 +166,116 @@ enum AIProvider {
   ANTHROPIC
 
   @@map("ai_provider")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?     // Null for anonymous actions
+  action      AuditAction
+  resource    String      // e.g., "project", "user", "api_key"
+  resourceId  String?     // ID of the affected resource
+  details     Json?       // Additional context about the action
+  ipAddress   String?
+  userAgent   String?
+  success     Boolean     @default(true)
+  errorMessage String?
+  createdAt   DateTime    @default(now())
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model SecurityEvent {
+  id          String        @id @default(cuid())
+  eventType   SecurityEventType
+  severity    EventSeverity
+  description String
+  details     Json?
+  ipAddress   String?
+  userAgent   String?
+  userId      String?
+  resolved    Boolean       @default(false)
+  resolvedAt  DateTime?
+  resolvedBy  String?
+  createdAt   DateTime      @default(now())
+  user        User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([eventType])
+  @@index([severity])
+  @@index([resolved])
+  @@index([createdAt])
+  @@map("security_events")
+}
+
+enum AuditAction {
+  // User actions
+  USER_REGISTER
+  USER_LOGIN
+  USER_LOGOUT
+  USER_UPDATE_PROFILE
+  USER_DELETE_ACCOUNT
+  USER_CHANGE_PASSWORD
+  
+  // Project actions
+  PROJECT_CREATE
+  PROJECT_UPDATE
+  PROJECT_DELETE
+  PROJECT_DOWNLOAD
+  
+  // File actions
+  FILE_UPLOAD
+  FILE_DOWNLOAD
+  FILE_DELETE
+  
+  // API Key actions
+  API_KEY_CREATE
+  API_KEY_UPDATE
+  API_KEY_DELETE
+  API_KEY_USE
+  
+  // AI actions
+  AI_PROCESS_START
+  AI_PROCESS_COMPLETE
+  AI_PROCESS_FAIL
+  
+  // Security actions
+  RATE_LIMIT_EXCEEDED
+  INVALID_LOGIN_ATTEMPT
+  SUSPICIOUS_ACTIVITY
+  FILE_QUARANTINE
+  
+  // Admin actions
+  ADMIN_USER_MODERATE
+  ADMIN_PROJECT_MODERATE
+
+  @@map("audit_action")
+}
+
+enum SecurityEventType {
+  RATE_LIMIT_EXCEEDED
+  INVALID_LOGIN_ATTEMPT
+  SUSPICIOUS_FILE_UPLOAD
+  MALICIOUS_CONTENT_DETECTED
+  UNAUTHORIZED_ACCESS_ATTEMPT
+  BRUTE_FORCE_ATTACK
+  SQL_INJECTION_ATTEMPT
+  XSS_ATTEMPT
+  CSRF_ATTEMPT
+  FILE_QUARANTINE
+  API_ABUSE
+
+  @@map("security_event_type")
+}
+
+enum EventSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+
+  @@map("event_severity")
 }

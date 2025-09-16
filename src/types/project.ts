@@ -21,7 +21,7 @@ export interface PipelineStage {
 	id: string;
 	stageNumber: number;
 	stageName: string;
-	status: "PENDING" | "PROCESSING" | "COMPLETED" | "ERROR" | "RETRYING";
+	status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'ERROR' | 'RETRYING';
 	errorMessage?: string | null;
 	startedAt?: Date | null;
 	completedAt?: Date | null;
@@ -31,7 +31,7 @@ export interface Project {
 	id: string;
 	userId?: string | null;
 	title: string;
-	status: "UPLOADED" | "PROCESSING" | "COMPLETED" | "ERROR" | "CANCELLED";
+	status: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'ERROR' | 'CANCELLED';
 	currentStage: number;
 	metadata: ProjectMetadata | null;
 	createdAt: string;

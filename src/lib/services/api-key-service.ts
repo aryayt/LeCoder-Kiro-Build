@@ -1,11 +1,12 @@
-import type { AIProvider } from "~/lib/ai/base-agent";
+import type { AIProvider } from '~/lib/ai/base-agent';
+import { AIProviderUtils } from '~/lib/ai/base-agent';
 import {
 	decryptApiKey,
 	encryptApiKey,
 	maskApiKey,
 	validateApiKeyFormat,
-} from "~/lib/crypto/api-key-encryption";
-import { db } from "~/server/db";
+} from '~/lib/crypto/api-key-encryption';
+import { db } from '~/server/db';
 
 export interface UserApiKeyData {
 	id: string;
@@ -36,9 +37,7 @@ export namespace ApiKeyService {
 	/**
 	 * Store a new API key for a user
 	 */
-	export async function createApiKey(
-		request: CreateApiKeyRequest,
-	): Promise<UserApiKeyData> {
+	export async function createApiKey(request: CreateApiKeyRequest): Promise<UserApiKeyData> {
 		const { userId, provider, apiKey, keyName } = request;
 
 		// Validate API key format
@@ -54,7 +53,7 @@ export namespace ApiKeyService {
 			where: {
 				userId_provider: {
 					userId,
-					provider,
+					provider: AIProviderUtils.toPrisma(provider),
 				},
 			},
 			update: {
@@ -65,7 +64,7 @@ export namespace ApiKeyService {
 			},
 			create: {
 				userId,
-				provider,
+				provider: AIProviderUtils.toPrisma(provider),
 				encryptedKey,
 				keyName,
 				isActive: true,
@@ -74,7 +73,7 @@ export namespace ApiKeyService {
 
 		return {
 			id: userApiKey.id,
-			provider: userApiKey.provider,
+			provider: AIProviderUtils.fromPrisma(userApiKey.provider),
 			keyName: userApiKey.keyName || undefined,
 			maskedKey: maskApiKey(apiKey),
 			isActive: userApiKey.isActive,
@@ -89,14 +88,14 @@ export namespace ApiKeyService {
 	export async function getUserApiKeys(userId: string): Promise<UserApiKeyData[]> {
 		const apiKeys = await db.userApiKey.findMany({
 			where: { userId },
-			orderBy: { createdAt: "desc" },
+			orderBy: { createdAt: 'desc' },
 		});
 
 		return apiKeys.map((key) => ({
 			id: key.id,
-			provider: key.provider,
+			provider: AIProviderUtils.fromPrisma(key.provider),
 			keyName: key.keyName || undefined,
-			maskedKey: "****", // We can't unmask without decrypting
+			maskedKey: '****', // We can't unmask without decrypting
 			isActive: key.isActive,
 			lastUsed: key.lastUsed || undefined,
 			createdAt: key.createdAt,
@@ -108,13 +107,13 @@ export namespace ApiKeyService {
 	 */
 	export async function getDecryptedApiKey(
 		userId: string,
-		provider: AIProvider,
+		provider: AIProvider
 	): Promise<string | null> {
 		const userApiKey = await db.userApiKey.findUnique({
 			where: {
 				userId_provider: {
 					userId,
-					provider,
+					provider: AIProviderUtils.toPrisma(provider),
 				},
 			},
 		});
@@ -134,7 +133,7 @@ export namespace ApiKeyService {
 
 			return decryptedKey;
 		} catch (error) {
-			console.error("Failed to decrypt API key:", error);
+			console.error('Failed to decrypt API key:', error);
 			return null;
 		}
 	}
@@ -142,9 +141,7 @@ export namespace ApiKeyService {
 	/**
 	 * Update an existing API key
 	 */
-	export async function updateApiKey(
-		request: UpdateApiKeyRequest,
-	): Promise<UserApiKeyData> {
+	export async function updateApiKey(request: UpdateApiKeyRequest): Promise<UserApiKeyData> {
 		const { keyId, userId, apiKey, keyName, isActive } = request;
 
 		// Verify ownership
@@ -156,13 +153,19 @@ export namespace ApiKeyService {
 		});
 
 		if (!existingKey) {
-			throw new Error("API key not found or access denied");
+			throw new Error('API key not found or access denied');
 		}
 
-		const updateData: { encryptedKey?: string; keyName?: string; isActive?: boolean; updatedAt?: Date } = {};
+		const updateData: {
+			encryptedKey?: string;
+			keyName?: string;
+			isActive?: boolean;
+			updatedAt?: Date;
+		} = {};
 
 		if (apiKey !== undefined) {
-			if (!validateApiKeyFormat(existingKey.provider.toLowerCase(), apiKey)) {
+			const providerStr = AIProviderUtils.fromPrisma(existingKey.provider);
+			if (!validateApiKeyFormat(providerStr, apiKey)) {
 				throw new Error(`Invalid API key format for ${existingKey.provider}`);
 			}
 			updateData.encryptedKey = await encryptApiKey(apiKey);
@@ -185,9 +188,9 @@ export namespace ApiKeyService {
 
 		return {
 			id: updatedKey.id,
-			provider: updatedKey.provider,
+			provider: AIProviderUtils.fromPrisma(updatedKey.provider),
 			keyName: updatedKey.keyName || undefined,
-			maskedKey: apiKey ? maskApiKey(apiKey) : "****",
+			maskedKey: apiKey ? maskApiKey(apiKey) : '****',
 			isActive: updatedKey.isActive,
 			lastUsed: updatedKey.lastUsed || undefined,
 			createdAt: updatedKey.createdAt,
@@ -206,72 +209,82 @@ export namespace ApiKeyService {
 		});
 
 		if (result.count === 0) {
-			throw new Error("API key not found or access denied");
+			throw new Error('API key not found or access denied');
 		}
 	}
 
 	/**
 	 * Test an API key by making a simple request
 	 */
-	export async function testApiKey(
-		provider: AIProvider,
-		apiKey: string,
-	): Promise<boolean> {
+	export async function testApiKey(provider: AIProvider | 'huggingface', apiKey: string): Promise<boolean> {
 		try {
 			// Import AI SDK dynamically to avoid circular dependencies
-			const { createGoogleGenerativeAI } = await import("@ai-sdk/google");
-			const { generateText } = await import("ai");
+			const { createGoogleGenerativeAI } = await import('@ai-sdk/google');
+			const { generateText } = await import('ai');
 
 			switch (provider) {
-				case "GOOGLE": {
+				case 'google': {
 					const google = createGoogleGenerativeAI({ apiKey });
-					const model = google("gemini-2.0-flash-exp");
+					const model = google('gemini-2.0-flash-exp');
 
 					await generateText({
 						model,
 						prompt: 'Say "test" if you can read this.',
-						maxTokens: 10,
 					});
 
 					return true;
 				}
 
-				case "OPENAI": {
-					const { openai } = await import("@ai-sdk/openai");
-					const { createOpenAI } = await import("@ai-sdk/openai");
+				case 'openai': {
+					const { createOpenAI } = await import('@ai-sdk/openai');
 
 					const openaiClient = createOpenAI({ apiKey });
-					const model = openaiClient("gpt-3.5-turbo");
+					const model = openaiClient('gpt-3.5-turbo');
 
 					await generateText({
 						model,
 						prompt: 'Say "test" if you can read this.',
-						maxTokens: 10,
 					});
 
 					return true;
 				}
 
-				case "ANTHROPIC": {
-					const { createAnthropic } = await import("@ai-sdk/anthropic");
+				case 'anthropic': {
+					const { createAnthropic } = await import('@ai-sdk/anthropic');
 
 					const anthropicClient = createAnthropic({ apiKey });
-					const model = anthropicClient("claude-3-haiku-20240307");
+					const model = anthropicClient('claude-3-haiku-20240307');
 
 					await generateText({
 						model,
 						prompt: 'Say "test" if you can read this.',
-						maxTokens: 10,
 					});
 
 					return true;
+				}
+
+				case 'huggingface': {
+					// Test Hugging Face API by making a simple embedding request
+					const response = await fetch('https://api-inference.huggingface.co/models/google/embeddinggemma-300m', {
+						method: 'POST',
+						headers: {
+							'Authorization': `Bearer ${apiKey}`,
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							inputs: 'test',
+							options: { wait_for_model: true }
+						}),
+					});
+
+					return response.ok;
 				}
 
 				default:
 					return false;
 			}
 		} catch (error) {
-			console.error("API key test failed:", error);
+			console.error('API key test failed:', error);
 			return false;
 		}
 	}
@@ -279,10 +292,7 @@ export namespace ApiKeyService {
 	/**
 	 * Check if user has a valid API key for a provider
 	 */
-	export async function hasValidApiKey(
-		userId: string,
-		provider: AIProvider,
-	): Promise<boolean> {
+	export async function hasValidApiKey(userId: string, provider: AIProvider): Promise<boolean> {
 		const apiKey = await ApiKeyService.getDecryptedApiKey(userId, provider);
 		return apiKey !== null;
 	}
@@ -301,6 +311,6 @@ export namespace ApiKeyService {
 			},
 		});
 
-		return apiKeys.map((key) => key.provider);
+		return apiKeys.map((key) => AIProviderUtils.fromPrisma(key.provider));
 	}
 }

@@ -1,4 +1,16 @@
 {
-	"title": "LeCodeR MVP Documentation",
-	"pages": ["index", "getting-started", "api-reference", "architecture"]
+  "title": "LeCodeR MVP Documentation",
+  "pages": [
+    "index",
+    "getting-started",
+    {
+      "title": "API Reference",
+      "pages": ["api-reference", "trpc-api", "rest-api"]
+    },
+    "architecture",
+    {
+      "title": "Development",
+      "pages": ["contributing", "database-schema", "types"]
+    }
+  ]
 }

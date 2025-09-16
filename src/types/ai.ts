@@ -13,20 +13,15 @@ export interface ResearchConcepts {
 export interface AlgorithmSpecs {
 	algorithms: Algorithm[];
 	systemRequirements: SystemRequirements;
-	implementationComplexity: "low" | "medium" | "high";
+	implementationComplexity: 'low' | 'medium' | 'high';
 	estimatedDevelopmentTime: string;
 }
 
 export interface Algorithm {
 	name: string;
 	description: string;
-	type:
-		| "machine_learning"
-		| "optimization"
-		| "data_processing"
-		| "statistical"
-		| "other";
-	complexity: "low" | "medium" | "high";
+	type: 'machine_learning' | 'optimization' | 'data_processing' | 'statistical' | 'other';
+	complexity: 'low' | 'medium' | 'high';
 	inputs: AlgorithmInput[];
 	outputs: AlgorithmOutput[];
 	parameters: AlgorithmParameter[];
@@ -80,7 +75,7 @@ export interface SystemRequirements {
 export interface PipelineStage {
 	id: number;
 	name: string;
-	status: "pending" | "processing" | "completed" | "error";
+	status: 'pending' | 'processing' | 'completed' | 'error';
 	result?: unknown;
 	error?: string;
 	startTime?: Date;
@@ -152,7 +147,7 @@ export interface DirectorySpec {
 
 export interface FileSpec {
 	path: string;
-	type: "source" | "config" | "documentation" | "test" | "data";
+	type: 'source' | 'config' | 'documentation' | 'test' | 'data';
 	purpose: string;
 	dependencies?: string[];
 }
@@ -172,7 +167,7 @@ export interface FunctionSpec {
 	purpose: string;
 	parameters: ParameterSpec[];
 	returnType: string;
-	complexity: "low" | "medium" | "high";
+	complexity: 'low' | 'medium' | 'high';
 }
 
 export interface ClassSpec {
@@ -192,7 +187,7 @@ export interface ParameterSpec {
 export interface PropertySpec {
 	name: string;
 	type: string;
-	visibility: "public" | "private" | "protected";
+	visibility: 'public' | 'private' | 'protected';
 	description: string;
 }
 
@@ -205,7 +200,7 @@ export interface DataFlowSpec {
 
 export interface APIEndpoint {
 	path: string;
-	method: "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+	method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	purpose: string;
 	parameters: ParameterSpec[];
 	responseType: string;
@@ -228,7 +223,7 @@ export interface ColumnSpec {
 }
 
 export interface RelationshipSpec {
-	type: "one-to-one" | "one-to-many" | "many-to-many";
+	type: 'one-to-one' | 'one-to-many' | 'many-to-many';
 	targetTable: string;
 	foreignKey: string;
 	description: string;
@@ -242,7 +237,7 @@ export interface IndexSpec {
 
 export interface DeploymentStrategy {
 	platform: string;
-	environment: "development" | "staging" | "production";
+	environment: 'development' | 'staging' | 'production';
 	requirements: string[];
 	steps: DeploymentStep[];
 }
@@ -273,7 +268,7 @@ export interface GeneratedCodebase {
 export interface GeneratedFile {
 	path: string;
 	content: string;
-	type: "source" | "config" | "documentation" | "test";
+	type: 'source' | 'config' | 'documentation' | 'test';
 	language: string;
 	dependencies: string[];
 	exports?: string[];
@@ -282,7 +277,7 @@ export interface GeneratedFile {
 export interface TestFile {
 	path: string;
 	content: string;
-	testType: "unit" | "integration" | "e2e";
+	testType: 'unit' | 'integration' | 'e2e';
 	targetFile: string;
 	coverage: string[];
 }
@@ -503,7 +498,7 @@ export interface ChangelogEntry {
 }
 
 export interface ChangeItem {
-	type: "added" | "changed" | "deprecated" | "removed" | "fixed" | "security";
+	type: 'added' | 'changed' | 'deprecated' | 'removed' | 'fixed' | 'security';
 	description: string;
 }
 
@@ -525,8 +520,8 @@ export interface DesignDecision {
 
 export interface RiskAssessment {
 	risk: string;
-	impact: "low" | "medium" | "high";
-	probability: "low" | "medium" | "high";
+	impact: 'low' | 'medium' | 'high';
+	probability: 'low' | 'medium' | 'high';
 	mitigation: string[];
 }
 
@@ -539,7 +534,7 @@ export interface CodeGenerationResult {
 }
 
 export interface QualityMetrics {
-	codeComplexity: "low" | "medium" | "high";
+	codeComplexity: 'low' | 'medium' | 'high';
 	testCoverage: number;
 	documentationCoverage: number;
 	codeQualityScore: number;

@@ -1,21 +1,21 @@
-import { auth } from "~/lib/auth";
-import { db } from "~/server/db";
+import { auth } from '~/lib/auth';
+import { db } from '~/server/db';
 
 async function createTestUser() {
-	console.log("🔧 Creating test user account...");
+	console.info('🔧 Creating test user account...');
 
 	try {
 		// Create user through Better Auth
 		const user = await auth.api.signUpEmail({
 			body: {
-				email: "aryateja2106@gmail.com",
-				password: "aryateja5",
-				name: "aryateja",
+				email: 'aryateja2106@gmail.com',
+				password: 'aryateja5',
+				name: 'aryateja',
 			},
 		});
 
-		console.log("✅ Test user created successfully!");
-		console.log("User details:", {
+		console.info('✅ Test user created successfully!');
+		console.info('User details:', {
 			id: user.user?.id,
 			email: user.user?.email,
 			name: user.user?.name,
@@ -26,23 +26,22 @@ async function createTestUser() {
 			await db.user.update({
 				where: { id: user.user.id },
 				data: {
-					name: "aryateja",
-					image:
-						"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+					name: 'aryateja',
+					image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
 				},
 			});
-			console.log("✅ User profile updated");
+			console.info('✅ User profile updated');
 		}
 	} catch (error) {
-		console.error("❌ Failed to create test user:", error);
+		console.error('❌ Failed to create test user:', error);
 
 		// Check if user already exists
 		const existingUser = await db.user.findUnique({
-			where: { email: "aryateja2106@gmail.com" },
+			where: { email: 'aryateja2106@gmail.com' },
 		});
 
 		if (existingUser) {
-			console.log("ℹ️ User already exists in database:", {
+			console.info('ℹ️ User already exists in database:', {
 				id: existingUser.id,
 				email: existingUser.email,
 				name: existingUser.name,
@@ -53,10 +52,10 @@ async function createTestUser() {
 
 createTestUser()
 	.then(() => {
-		console.log("🎉 Test user setup completed!");
+		console.info('🎉 Test user setup completed!');
 		process.exit(0);
 	})
 	.catch((error) => {
-		console.error("❌ Setup failed:", error);
+		console.error('❌ Setup failed:', error);
 		process.exit(1);
 	});

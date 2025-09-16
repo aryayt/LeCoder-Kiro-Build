@@ -1,10 +1,10 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
-import type { AIProvider } from "~/lib/ai/base-agent";
-import { ApiKeyService } from "~/lib/services/api-key-service";
+import { type NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import type { AIProvider } from '~/lib/ai/base-agent';
+import { ApiKeyService } from '~/lib/services/api-key-service';
 
 const TestApiKeySchema = z.object({
-	provider: z.enum(["GOOGLE", "OPENAI", "ANTHROPIC"]),
+	provider: z.enum(['GOOGLE', 'OPENAI', 'ANTHROPIC']),
 	apiKey: z.string().min(20).max(200),
 });
 
@@ -20,20 +20,17 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json(
 				{
 					success: false,
-					error: "Invalid request data",
+					error: 'Invalid request data',
 					details: validation.error.errors,
 				},
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
 		const { provider, apiKey } = validation.data;
 
 		// Test the API key
-		const isValid = await ApiKeyService.testApiKey(
-			provider as AIProvider,
-			apiKey,
-		);
+		const isValid = await ApiKeyService.testApiKey(provider as AIProvider, apiKey);
 
 		if (isValid) {
 			return NextResponse.json({
@@ -46,18 +43,17 @@ export async function POST(request: NextRequest) {
 				success: false,
 				error: `${provider} API key test failed. Please check your key and try again.`,
 			},
-			{ status: 400 },
+			{ status: 400 }
 		);
 	} catch (error) {
-		console.error("Error testing API key:", error);
+		console.error('Error testing API key:', error);
 
 		return NextResponse.json(
 			{
 				success: false,
-				error:
-					error instanceof Error ? error.message : "Failed to test API key",
+				error: error instanceof Error ? error.message : 'Failed to test API key',
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }

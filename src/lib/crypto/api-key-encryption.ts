@@ -1,11 +1,11 @@
-import { createCipheriv, createDecipheriv, randomBytes, scrypt } from "crypto";
-import { promisify } from "util";
-import { env } from "~/env.js";
+import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
+import { promisify } from 'util';
+import { env } from '~/env.js';
 
 const scryptAsync = promisify(scrypt);
 
 // Use a consistent algorithm
-const ALGORITHM = "aes-256-gcm";
+const ALGORITHM = 'aes-256-gcm';
 const KEY_LENGTH = 32;
 const IV_LENGTH = 16;
 const TAG_LENGTH = 16;
@@ -29,23 +29,18 @@ export async function encryptApiKey(apiKey: string): Promise<string> {
 
 		const cipher = createCipheriv(ALGORITHM, key, iv);
 
-		let encrypted = cipher.update(apiKey, "utf8", "hex");
-		encrypted += cipher.final("hex");
+		let encrypted = cipher.update(apiKey, 'utf8', 'hex');
+		encrypted += cipher.final('hex');
 
 		const tag = cipher.getAuthTag();
 
 		// Combine salt, iv, tag, and encrypted data
-		const combined = Buffer.concat([
-			salt,
-			iv,
-			tag,
-			Buffer.from(encrypted, "hex"),
-		]);
+		const combined = Buffer.concat([salt, iv, tag, Buffer.from(encrypted, 'hex')]);
 
-		return combined.toString("base64");
+		return combined.toString('base64');
 	} catch (error) {
 		throw new Error(
-			`Failed to encrypt API key: ${error instanceof Error ? error.message : "Unknown error"}`,
+			`Failed to encrypt API key: ${error instanceof Error ? error.message : 'Unknown error'}`
 		);
 	}
 }
@@ -55,7 +50,7 @@ export async function encryptApiKey(apiKey: string): Promise<string> {
  */
 export async function decryptApiKey(encryptedData: string): Promise<string> {
 	try {
-		const combined = Buffer.from(encryptedData, "base64");
+		const combined = Buffer.from(encryptedData, 'base64');
 
 		// Extract components
 		const salt = combined.subarray(0, 16);
@@ -68,13 +63,13 @@ export async function decryptApiKey(encryptedData: string): Promise<string> {
 		const decipher = createDecipheriv(ALGORITHM, key, iv);
 		decipher.setAuthTag(tag);
 
-		let decrypted = decipher.update(encrypted, undefined, "utf8");
-		decrypted += decipher.final("utf8");
+		let decrypted = decipher.update(encrypted, undefined, 'utf8');
+		decrypted += decipher.final('utf8');
 
 		return decrypted;
 	} catch (error) {
 		throw new Error(
-			`Failed to decrypt API key: ${error instanceof Error ? error.message : "Unknown error"}`,
+			`Failed to decrypt API key: ${error instanceof Error ? error.message : 'Unknown error'}`
 		);
 	}
 }
@@ -82,22 +77,19 @@ export async function decryptApiKey(encryptedData: string): Promise<string> {
 /**
  * Validate API key format for different providers
  */
-export function validateApiKeyFormat(
-	provider: string,
-	apiKey: string,
-): boolean {
+export function validateApiKeyFormat(provider: string, apiKey: string): boolean {
 	const trimmedKey = apiKey.trim();
 
 	switch (provider.toLowerCase()) {
-		case "google":
+		case 'google':
 			// Google API keys typically start with "AIza" and are 39 characters long
 			return /^AIza[0-9A-Za-z_-]{35}$/.test(trimmedKey);
 
-		case "openai":
+		case 'openai':
 			// OpenAI API keys start with "sk-" and are typically 51 characters
 			return /^sk-[a-zA-Z0-9]{48}$/.test(trimmedKey);
 
-		case "anthropic":
+		case 'anthropic':
 			// Anthropic API keys start with "sk-ant-"
 			return /^sk-ant-[a-zA-Z0-9_-]+$/.test(trimmedKey);
 
@@ -112,12 +104,12 @@ export function validateApiKeyFormat(
  */
 export function maskApiKey(apiKey: string): string {
 	if (apiKey.length <= 8) {
-		return "*".repeat(apiKey.length);
+		return '*'.repeat(apiKey.length);
 	}
 
 	const start = apiKey.substring(0, 4);
 	const end = apiKey.substring(apiKey.length - 4);
-	const middle = "*".repeat(Math.max(4, apiKey.length - 8));
+	const middle = '*'.repeat(Math.max(4, apiKey.length - 8));
 
 	return `${start}${middle}${end}`;
 }
@@ -127,13 +119,13 @@ export function maskApiKey(apiKey: string): string {
  */
 export function generateTestApiKey(provider: string): string {
 	switch (provider.toLowerCase()) {
-		case "google":
-			return `AIza${"x".repeat(35)}`;
-		case "openai":
-			return `sk-${"x".repeat(48)}`;
-		case "anthropic":
-			return `sk-ant-${"x".repeat(20)}`;
+		case 'google':
+			return `AIza${'x'.repeat(35)}`;
+		case 'openai':
+			return `sk-${'x'.repeat(48)}`;
+		case 'anthropic':
+			return `sk-ant-${'x'.repeat(20)}`;
 		default:
-			return `test-${provider}-${"x".repeat(20)}`;
+			return `test-${provider}-${'x'.repeat(20)}`;
 	}
 }

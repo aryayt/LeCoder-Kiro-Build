@@ -1,13 +1,15 @@
-"use client";
+'use client';
 
-import { useCallback, useState } from "react";
-import { api } from "~/trpc/react";
-import type { Project } from "~/types/project";
+import { useCallback, useState } from 'react';
+import { api } from '~/trpc/react';
 
-export function useProjects(userId?: string) {
-	const [deletingProjectId, setDeletingProjectId] = useState<string | null>(
-		null,
-	);
+export function useProjects(filters?: {
+	status?: 'UPLOADED' | 'PROCESSING' | 'COMPLETED' | 'ERROR' | 'CANCELLED';
+	search?: string;
+	page?: number;
+	limit?: number;
+}) {
+	const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
 
 	// Fetch projects
 	const {
@@ -16,10 +18,15 @@ export function useProjects(userId?: string) {
 		error,
 		refetch,
 	} = api.project.getAll.useQuery(
-		{ userId },
+		{
+			page: filters?.page ?? 1,
+			limit: filters?.limit ?? 10,
+			status: filters?.status,
+			search: filters?.search,
+		},
 		{
 			refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
-		},
+		}
 	);
 
 	// Delete project mutation
@@ -29,7 +36,7 @@ export function useProjects(userId?: string) {
 			setDeletingProjectId(null);
 		},
 		onError: (error) => {
-			console.error("Failed to delete project:", error);
+			console.error('Failed to delete project:', error);
 			setDeletingProjectId(null);
 		},
 	});
@@ -43,30 +50,30 @@ export function useProjects(userId?: string) {
 			try {
 				await deleteProjectMutation.mutateAsync({ id: projectId });
 			} catch (error) {
-				console.error("Delete failed:", error);
+				console.error('Delete failed:', error);
 				setDeletingProjectId(null);
 			}
 		},
-		[deleteProjectMutation],
+		[deleteProjectMutation]
 	);
 
 	const handleDownloadProject = useCallback(async (projectId: string) => {
 		try {
 			// For now, just open the download URL directly
 			const downloadUrl = `/api/projects/${projectId}/download`;
-			window.open(downloadUrl, "_blank");
+			window.open(downloadUrl, '_blank');
 		} catch (error) {
-			console.error("Download failed:", error);
+			console.error('Download failed:', error);
 		}
 	}, []);
 
 	const getProjectStats = useCallback(() => {
 		return {
 			total: projects.length,
-			uploaded: projects.filter((p) => p.status === "UPLOADED").length,
-			processing: projects.filter((p) => p.status === "PROCESSING").length,
-			completed: projects.filter((p) => p.status === "COMPLETED").length,
-			error: projects.filter((p) => p.status === "ERROR").length,
+			uploaded: projects.filter((p) => p.status === 'UPLOADED').length,
+			processing: projects.filter((p) => p.status === 'PROCESSING').length,
+			completed: projects.filter((p) => p.status === 'COMPLETED').length,
+			error: projects.filter((p) => p.status === 'ERROR').length,
 		};
 	}, [projects]);
 

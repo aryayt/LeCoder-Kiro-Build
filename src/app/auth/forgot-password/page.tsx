@@ -1,5 +1,5 @@
-import Link from "next/link";
-import { PasswordResetForm } from "~/components/auth/password-reset-form";
+import Link from 'next/link';
+import { PasswordResetForm } from '~/components/auth/password-reset-form';
 
 export default function ForgotPasswordPage() {
 	return (
@@ -10,8 +10,7 @@ export default function ForgotPasswordPage() {
 						Reset your password
 					</h2>
 					<p className="mt-2 text-center text-gray-600 text-sm">
-						Enter your email address and we'll send you a link to reset your
-						password.
+						Enter your email address and we'll send you a link to reset your password.
 					</p>
 				</div>
 				<PasswordResetForm />

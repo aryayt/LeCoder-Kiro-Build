@@ -1,29 +1,27 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
-import { api } from "~/trpc/react";
+import { api } from '~/trpc/react';
 
 export function LatestPost() {
 	const [latestProject] = api.post.getLatest.useSuspenseQuery();
 
 	const utils = api.useUtils();
-	const [title, setTitle] = useState("");
-	const [paperContent, setPaperContent] = useState("");
+	const [title, setTitle] = useState('');
+	const [paperContent, setPaperContent] = useState('');
 	const createProject = api.post.create.useMutation({
 		onSuccess: async () => {
 			await utils.post.invalidate();
-			setTitle("");
-			setPaperContent("");
+			setTitle('');
+			setPaperContent('');
 		},
 	});
 
 	return (
 		<div className="w-full max-w-xs">
 			{latestProject ? (
-				<p className="truncate">
-					Your most recent project: {latestProject.title}
-				</p>
+				<p className="truncate">Your most recent project: {latestProject.title}</p>
 			) : (
 				<p>You have no projects yet.</p>
 			)}
@@ -53,7 +51,7 @@ export function LatestPost() {
 					className="rounded-full bg-white/10 px-10 py-3 font-semibold transition hover:bg-white/20"
 					disabled={createProject.isPending}
 				>
-					{createProject.isPending ? "Submitting..." : "Submit"}
+					{createProject.isPending ? 'Submitting...' : 'Submit'}
 				</button>
 			</form>
 		</div>

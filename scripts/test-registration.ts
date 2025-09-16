@@ -1,25 +1,25 @@
-import { auth } from "~/lib/auth";
+import { auth } from '~/lib/auth';
 
 async function testRegistration() {
-	console.log("🧪 Testing Better Auth registration...");
+	console.info('🧪 Testing Better Auth registration...');
 
 	try {
 		// Test the signup API directly
 		const result = await auth.api.signUpEmail({
 			body: {
-				email: "testuser@example.com",
-				password: "TestPassword123!",
-				name: "Test User",
+				email: 'testuser@example.com',
+				password: 'TestPassword123!',
+				name: 'Test User',
 			},
 		});
 
-		console.log("✅ Registration test successful!");
-		console.log("Result:", result);
+		console.info('✅ Registration test successful!');
+		console.info('Result:', result);
 	} catch (error: unknown) {
-		console.error("❌ Registration test failed:");
+		console.error('❌ Registration test failed:');
 		const errorMessage = error instanceof Error ? error.message : String(error);
-		console.error("Error:", errorMessage);
-		console.error("Full error:", error);
+		console.error('Error:', errorMessage);
+		console.error('Full error:', error);
 	}
 }
 

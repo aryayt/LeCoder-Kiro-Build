@@ -1,15 +1,12 @@
 import type {
-	DeveloperGuide,
-	Documentation,
 	DocumentationGenerationResult,
 	DocumentationMetrics,
 	GeneratedCodebase,
 	ReadmeContent,
 	SetupGuide,
 	SystemArchitecture,
-	UserGuide,
-} from "~/types/ai";
-import { type AIConfig, type AgentResponse, BaseAIAgent } from "../base-agent";
+} from '~/types/ai';
+import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class DocumentationGeneratorAgent extends BaseAIAgent {
 	constructor(config: AIConfig) {
@@ -22,7 +19,7 @@ export class DocumentationGeneratorAgent extends BaseAIAgent {
 	async generateDocumentation(
 		codebase: GeneratedCodebase,
 		architecture: SystemArchitecture,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<DocumentationGenerationResult>> {
 		const systemPrompt = `You are an expert technical writer specializing in software documentation. Your task is to generate comprehensive, clear, and actionable documentation for a research implementation codebase.
 
@@ -379,7 +376,7 @@ Guidelines:
 				buildInstructions: codebase.buildInstructions,
 			},
 			null,
-			2,
+			2
 		);
 
 		const architectureText = JSON.stringify(
@@ -388,7 +385,7 @@ Guidelines:
 				modules: architecture.modules,
 			},
 			null,
-			2,
+			2
 		);
 
 		const content = paperContent
@@ -397,7 +394,7 @@ Guidelines:
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Please generate comprehensive documentation for this research implementation:\n\n${content}`,
 			},
 		];
@@ -413,17 +410,13 @@ Guidelines:
 		}
 
 		// Parse the JSON response
-		const parseResult = this.parseJsonResponse<DocumentationGenerationResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<DocumentationGenerationResult>(response.data!);
 		if (!parseResult.success) {
 			return parseResult;
 		}
 
 		// Validate the response structure
-		const validationResult = this.validateDocumentationGenerationResult(
-			parseResult.data!,
-		);
+		const validationResult = this.validateDocumentationGenerationResult(parseResult.data!);
 		if (!validationResult.success) {
 			return validationResult;
 		}
@@ -439,13 +432,13 @@ Guidelines:
 	 * Validate the documentation generation result
 	 */
 	private validateDocumentationGenerationResult(
-		data: DocumentationGenerationResult,
+		data: DocumentationGenerationResult
 	): AgentResponse<DocumentationGenerationResult> {
 		// Check if documentation object exists
 		if (!data.documentation) {
 			return {
 				success: false,
-				error: "Missing documentation object in response",
+				error: 'Missing documentation object in response',
 			};
 		}
 
@@ -455,33 +448,39 @@ Guidelines:
 		if (!doc.readme) {
 			return {
 				success: false,
-				error: "Missing readme in documentation",
+				error: 'Missing readme in documentation',
 			};
 		}
 
 		const readmeValidation = this.validateReadmeContent(doc.readme);
 		if (!readmeValidation.success) {
-			return readmeValidation;
+			return {
+				success: false,
+				error: `README validation failed: ${readmeValidation.error}`,
+			};
 		}
 
 		// Validate setup guide
 		if (!doc.setupGuide) {
 			return {
 				success: false,
-				error: "Missing setupGuide in documentation",
+				error: 'Missing setupGuide in documentation',
 			};
 		}
 
 		const setupValidation = this.validateSetupGuide(doc.setupGuide);
 		if (!setupValidation.success) {
-			return setupValidation;
+			return {
+				success: false,
+				error: `Setup guide validation failed: ${setupValidation.error}`,
+			};
 		}
 
 		// Validate user guide
 		if (!doc.userGuide) {
 			return {
 				success: false,
-				error: "Missing userGuide in documentation",
+				error: 'Missing userGuide in documentation',
 			};
 		}
 
@@ -489,7 +488,7 @@ Guidelines:
 		if (!doc.developerGuide) {
 			return {
 				success: false,
-				error: "Missing developerGuide in documentation",
+				error: 'Missing developerGuide in documentation',
 			};
 		}
 
@@ -497,26 +496,22 @@ Guidelines:
 		if (!Array.isArray(doc.apiDocs)) {
 			return {
 				success: false,
-				error: "apiDocs must be an array",
+				error: 'apiDocs must be an array',
 			};
 		}
 
 		if (!Array.isArray(doc.changelog)) {
 			return {
 				success: false,
-				error: "changelog must be an array",
+				error: 'changelog must be an array',
 			};
 		}
 
 		// Validate confidence score
-		if (
-			typeof data.confidence !== "number" ||
-			data.confidence < 0 ||
-			data.confidence > 1
-		) {
+		if (typeof data.confidence !== 'number' || data.confidence < 0 || data.confidence > 1) {
 			return {
 				success: false,
-				error: "Confidence score must be a number between 0 and 1",
+				error: 'Confidence score must be a number between 0 and 1',
 			};
 		}
 
@@ -525,20 +520,20 @@ Guidelines:
 		if (!metrics) {
 			return {
 				success: false,
-				error: "Missing documentationMetrics in response",
+				error: 'Missing documentationMetrics in response',
 			};
 		}
 
 		const requiredMetrics: (keyof DocumentationMetrics)[] = [
-			"completeness",
-			"readability",
-			"technicalAccuracy",
-			"exampleCoverage",
+			'completeness',
+			'readability',
+			'technicalAccuracy',
+			'exampleCoverage',
 		];
 
 		for (const metric of requiredMetrics) {
 			const value = metrics[metric];
-			if (typeof value !== "number" || value < 0 || value > 100) {
+			if (typeof value !== 'number' || value < 0 || value > 100) {
 				return {
 					success: false,
 					error: `Invalid ${metric} in documentationMetrics - must be a number between 0 and 100`,
@@ -550,7 +545,7 @@ Guidelines:
 		if (!Array.isArray(data.generationNotes)) {
 			return {
 				success: false,
-				error: "generationNotes must be an array",
+				error: 'generationNotes must be an array',
 			};
 		}
 
@@ -560,17 +555,15 @@ Guidelines:
 	/**
 	 * Validate README content structure
 	 */
-	private validateReadmeContent(
-		readme: ReadmeContent,
-	): AgentResponse<ReadmeContent> {
+	private validateReadmeContent(readme: ReadmeContent): AgentResponse<ReadmeContent> {
 		const requiredFields: (keyof ReadmeContent)[] = [
-			"title",
-			"description",
-			"features",
-			"installation",
-			"usage",
-			"contributing",
-			"license",
+			'title',
+			'description',
+			'features',
+			'installation',
+			'usage',
+			'contributing',
+			'license',
 		];
 
 		for (const field of requiredFields) {
@@ -584,10 +577,10 @@ Guidelines:
 
 		// Validate arrays
 		const arrayFields: (keyof ReadmeContent)[] = [
-			"features",
-			"installation",
-			"usage",
-			"contributing",
+			'features',
+			'installation',
+			'usage',
+			'contributing',
 		];
 
 		for (const field of arrayFields) {
@@ -602,12 +595,7 @@ Guidelines:
 		// Validate usage examples
 		for (let i = 0; i < readme.usage.length; i++) {
 			const usage = readme.usage[i];
-			if (
-				!usage.title ||
-				!usage.description ||
-				!usage.code ||
-				!usage.language
-			) {
+			if (!usage || !usage.title || !usage.description || !usage.code || !usage.language) {
 				return {
 					success: false,
 					error: `Usage example ${i}: missing required fields (title, description, code, language)`,
@@ -621,14 +609,12 @@ Guidelines:
 	/**
 	 * Validate setup guide structure
 	 */
-	private validateSetupGuide(
-		setupGuide: SetupGuide,
-	): AgentResponse<SetupGuide> {
+	private validateSetupGuide(setupGuide: SetupGuide): AgentResponse<SetupGuide> {
 		const requiredFields: (keyof SetupGuide)[] = [
-			"prerequisites",
-			"installationSteps",
-			"configuration",
-			"verification",
+			'prerequisites',
+			'installationSteps',
+			'configuration',
+			'verification',
 		];
 
 		for (const field of requiredFields) {
@@ -643,7 +629,7 @@ Guidelines:
 		// Validate prerequisites
 		for (let i = 0; i < setupGuide.prerequisites.length; i++) {
 			const prereq = setupGuide.prerequisites[i];
-			if (!prereq.name || !prereq.description) {
+			if (!prereq || !prereq.name || !prereq.description) {
 				return {
 					success: false,
 					error: `Prerequisite ${i}: missing required fields (name, description)`,
@@ -654,7 +640,7 @@ Guidelines:
 		// Validate installation steps
 		for (let i = 0; i < setupGuide.installationSteps.length; i++) {
 			const step = setupGuide.installationSteps[i];
-			if (!step.title || !step.description || typeof step.order !== "number") {
+			if (!step || !step.title || !step.description || typeof step.order !== 'number') {
 				return {
 					success: false,
 					error: `Installation step ${i}: missing required fields (order, title, description)`,
@@ -671,24 +657,17 @@ Guidelines:
 	async generateDocumentationWithFallback(
 		codebase: GeneratedCodebase,
 		architecture: SystemArchitecture,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<DocumentationGenerationResult>> {
 		// Try detailed documentation generation first
-		const detailedResult = await this.generateDocumentation(
-			codebase,
-			architecture,
-			paperContent,
-		);
+		const detailedResult = await this.generateDocumentation(codebase, architecture, paperContent);
 
 		if (detailedResult.success) {
 			return detailedResult;
 		}
 
 		// Fallback to simpler documentation generation
-		const fallbackResult = await this.generateBasicDocumentation(
-			codebase,
-			architecture,
-		);
+		const fallbackResult = await this.generateBasicDocumentation(codebase, architecture);
 
 		if (fallbackResult.success) {
 			return {
@@ -705,13 +684,13 @@ Guidelines:
 	 */
 	private async generateBasicDocumentation(
 		codebase: GeneratedCodebase,
-		architecture: SystemArchitecture,
+		architecture: SystemArchitecture
 	): Promise<AgentResponse<DocumentationGenerationResult>> {
 		const systemPrompt = `Generate basic but complete documentation. Return minimal but functional JSON structure with all required fields.`;
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Generate basic documentation for: ${JSON.stringify({ structure: codebase.structure, modules: architecture.modules })}`,
 			},
 		];
@@ -726,9 +705,7 @@ Guidelines:
 			};
 		}
 
-		const parseResult = this.parseJsonResponse<DocumentationGenerationResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<DocumentationGenerationResult>(response.data!);
 		return parseResult;
 	}
 }

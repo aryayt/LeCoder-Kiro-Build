@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs';
+import { z } from 'zod';
 
 export const env = createEnv({
 	/**
@@ -8,9 +8,7 @@ export const env = createEnv({
 	 */
 	server: {
 		DATABASE_URL: z.string().url(),
-		NODE_ENV: z
-			.enum(["development", "test", "production"])
-			.default("development"),
+		NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
 
 		// Better Auth
 		BETTER_AUTH_SECRET: z.string().min(1),
@@ -26,6 +24,12 @@ export const env = createEnv({
 		OPENAI_API_KEY: z.string().optional(),
 		GOOGLE_GENERATIVE_AI_API_KEY: z.string().optional(),
 		ANTHROPIC_API_KEY: z.string().optional(),
+		
+		// Hugging Face for Embeddings
+		HUGGINGFACE_API_KEY: z.string().optional(),
+		
+		// Redis for caching
+		REDIS_URL: z.string().optional(),
 	},
 
 	/**
@@ -60,6 +64,12 @@ export const env = createEnv({
 		OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 		GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
 		ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+		
+		// Hugging Face for Embeddings
+		HUGGINGFACE_API_KEY: process.env.HUGGINGFACE_API_KEY,
+		
+		// Redis for caching
+		REDIS_URL: process.env.REDIS_URL,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -1,5 +1,5 @@
-import { getProjectById, getStagesByProjectId } from "~/lib/db/operations";
-import type { PaperMetadata, PipelineContext } from "~/types/ai";
+import { getProjectById, getStagesByProjectId } from '~/lib/db/operations';
+import type { PaperMetadata, PipelineContext } from '~/types/ai';
 
 /**
  * Factory for creating pipeline contexts
@@ -8,9 +8,7 @@ export class PipelineContextFactory {
 	/**
 	 * Create a pipeline context from a project ID
 	 */
-	static async fromProjectId(
-		projectId: string,
-	): Promise<PipelineContext | null> {
+	static async fromProjectId(projectId: string): Promise<PipelineContext | null> {
 		try {
 			const project = await getProjectById(projectId);
 
@@ -23,11 +21,7 @@ export class PipelineContextFactory {
 			const pipelineStages = stages.map((stage) => ({
 				id: stage.stageNumber,
 				name: stage.stageName,
-				status: stage.status as
-					| "pending"
-					| "processing"
-					| "completed"
-					| "error",
+				status: stage.status.toLowerCase() as 'pending' | 'processing' | 'completed' | 'error',
 				result: stage.outputData,
 				error: stage.errorMessage || undefined,
 				startTime: stage.startedAt || undefined,
@@ -35,16 +29,17 @@ export class PipelineContextFactory {
 			}));
 
 			// Extract metadata from project
+			const projectMetadata = project.metadata as any;
 			const metadata: PaperMetadata = {
-				fileName: project.metadata?.fileName || "unknown.pdf",
-				fileSize: project.metadata?.fileSize || 0,
-				pageCount: project.metadata?.pageCount,
-				authors: project.metadata?.authors,
+				fileName: projectMetadata?.fileName || 'unknown.pdf',
+				fileSize: projectMetadata?.fileSize || 0,
+				pageCount: projectMetadata?.pageCount,
+				authors: projectMetadata?.authors,
 				title: project.title,
-				abstract: project.metadata?.abstract,
-				keywords: project.metadata?.keywords,
-				publicationYear: project.metadata?.publicationYear,
-				venue: project.metadata?.venue,
+				abstract: projectMetadata?.abstract,
+				keywords: projectMetadata?.keywords,
+				publicationYear: projectMetadata?.publicationYear,
+				venue: projectMetadata?.venue,
 			};
 
 			return {
@@ -54,7 +49,7 @@ export class PipelineContextFactory {
 				metadata,
 			};
 		} catch (error) {
-			console.error("Error creating pipeline context:", error);
+			console.error('Error creating pipeline context:', error);
 			return null;
 		}
 	}
@@ -69,12 +64,12 @@ export class PipelineContextFactory {
 		stages: Array<{
 			id: number;
 			name: string;
-			status: "pending" | "processing" | "completed" | "error";
+			status: 'pending' | 'processing' | 'completed' | 'error';
 			result?: any;
 			error?: string;
 			startTime?: Date;
 			endTime?: Date;
-		}> = [],
+		}> = []
 	): PipelineContext {
 		return {
 			projectId,
@@ -91,7 +86,7 @@ export class PipelineContextFactory {
 		projectId: string,
 		paperContent: string,
 		fileName: string,
-		fileSize: number,
+		fileSize: number
 	): PipelineContext {
 		const metadata: PaperMetadata = {
 			fileName,
@@ -100,12 +95,12 @@ export class PipelineContextFactory {
 
 		// Create default stages
 		const stages = [
-			{ id: 1, name: "Concept Extraction", status: "pending" as const },
-			{ id: 2, name: "Algorithm Analysis", status: "pending" as const },
-			{ id: 3, name: "Architecture Planning", status: "pending" as const },
-			{ id: 4, name: "Implementation Planning", status: "pending" as const },
-			{ id: 5, name: "Code Generation", status: "pending" as const },
-			{ id: 6, name: "Documentation Generation", status: "pending" as const },
+			{ id: 1, name: 'Concept Extraction', status: 'pending' as const },
+			{ id: 2, name: 'Algorithm Analysis', status: 'pending' as const },
+			{ id: 3, name: 'Architecture Planning', status: 'pending' as const },
+			{ id: 4, name: 'Implementation Planning', status: 'pending' as const },
+			{ id: 5, name: 'Code Generation', status: 'pending' as const },
+			{ id: 6, name: 'Documentation Generation', status: 'pending' as const },
 		];
 
 		return {
@@ -125,53 +120,53 @@ export class PipelineContextFactory {
 	} {
 		const errors: string[] = [];
 
-		if (!context.projectId || typeof context.projectId !== "string") {
-			errors.push("Project ID is required and must be a string");
+		if (!context.projectId || typeof context.projectId !== 'string') {
+			errors.push('Project ID is required and must be a string');
 		}
 
-		if (!context.paperContent || typeof context.paperContent !== "string") {
-			errors.push("Paper content is required and must be a string");
+		if (!context.paperContent || typeof context.paperContent !== 'string') {
+			errors.push('Paper content is required and must be a string');
 		}
 
 		if (context.paperContent && context.paperContent.length < 100) {
-			errors.push("Paper content seems too short (less than 100 characters)");
+			errors.push('Paper content seems too short (less than 100 characters)');
 		}
 
 		if (!context.metadata) {
-			errors.push("Metadata is required");
+			errors.push('Metadata is required');
 		} else {
 			if (!context.metadata.fileName) {
-				errors.push("File name is required in metadata");
+				errors.push('File name is required in metadata');
 			}
 
-			if (
-				typeof context.metadata.fileSize !== "number" ||
-				context.metadata.fileSize <= 0
-			) {
-				errors.push("File size must be a positive number");
+			if (typeof context.metadata.fileSize !== 'number' || context.metadata.fileSize <= 0) {
+				errors.push('File size must be a positive number');
 			}
 		}
 
 		if (!Array.isArray(context.stages)) {
-			errors.push("Stages must be an array");
+			errors.push('Stages must be an array');
 		} else if (context.stages.length > 0) {
 			// Validate stage structure
 			for (let i = 0; i < context.stages.length; i++) {
 				const stage = context.stages[i];
+				
+				if (!stage) {
+					errors.push(`Stage ${i}: Missing stage data`);
+					continue;
+				}
 
-				if (typeof stage.id !== "number") {
+				if (typeof stage.id !== 'number') {
 					errors.push(`Stage ${i}: ID must be a number`);
 				}
 
-				if (!stage.name || typeof stage.name !== "string") {
+				if (!stage.name || typeof stage.name !== 'string') {
 					errors.push(`Stage ${i}: Name is required and must be a string`);
 				}
 
-				const validStatuses = ["pending", "processing", "completed", "error"];
+				const validStatuses = ['pending', 'processing', 'completed', 'error'];
 				if (!validStatuses.includes(stage.status)) {
-					errors.push(
-						`Stage ${i}: Status must be one of ${validStatuses.join(", ")}`,
-					);
+					errors.push(`Stage ${i}: Status must be one of ${validStatuses.join(', ')}`);
 				}
 			}
 		}
@@ -189,12 +184,12 @@ export class PipelineContextFactory {
 		context: PipelineContext,
 		stageId: number,
 		updates: Partial<{
-			status: "pending" | "processing" | "completed" | "error";
+			status: 'pending' | 'processing' | 'completed' | 'error';
 			result: any;
 			error: string;
 			startTime: Date;
 			endTime: Date;
-		}>,
+		}>
 	): PipelineContext {
 		const updatedStages = context.stages.map((stage) => {
 			if (stage.id === stageId) {
@@ -214,47 +209,40 @@ export class PipelineContextFactory {
 	 */
 	static getStageFromContext(
 		context: PipelineContext,
-		stageId: number,
-	): PipelineContext["stages"][0] | null {
+		stageId: number
+	): PipelineContext['stages'][0] | null {
 		return context.stages.find((stage) => stage.id === stageId) || null;
 	}
 
 	/**
 	 * Get completed stages from context
 	 */
-	static getCompletedStages(
-		context: PipelineContext,
-	): PipelineContext["stages"] {
-		return context.stages.filter((stage) => stage.status === "completed");
+	static getCompletedStages(context: PipelineContext): PipelineContext['stages'] {
+		return context.stages.filter((stage) => stage.status === 'completed');
 	}
 
 	/**
 	 * Get failed stages from context
 	 */
-	static getFailedStages(context: PipelineContext): PipelineContext["stages"] {
-		return context.stages.filter((stage) => stage.status === "error");
+	static getFailedStages(context: PipelineContext): PipelineContext['stages'] {
+		return context.stages.filter((stage) => stage.status === 'error');
 	}
 
 	/**
 	 * Get current processing stage from context
 	 */
-	static getCurrentStage(
-		context: PipelineContext,
-	): PipelineContext["stages"][0] | null {
+	static getCurrentStage(context: PipelineContext): PipelineContext['stages'][0] | null {
 		return (
-			context.stages.find(
-				(stage) => stage.status === "processing" || stage.status === "error",
-			) || null
+			context.stages.find((stage) => stage.status === 'processing' || stage.status === 'error') ||
+			null
 		);
 	}
 
 	/**
 	 * Get next pending stage from context
 	 */
-	static getNextPendingStage(
-		context: PipelineContext,
-	): PipelineContext["stages"][0] | null {
-		return context.stages.find((stage) => stage.status === "pending") || null;
+	static getNextPendingStage(context: PipelineContext): PipelineContext['stages'][0] | null {
+		return context.stages.find((stage) => stage.status === 'pending') || null;
 	}
 
 	/**
@@ -262,8 +250,7 @@ export class PipelineContextFactory {
 	 */
 	static isPipelineComplete(context: PipelineContext): boolean {
 		return (
-			context.stages.length > 0 &&
-			context.stages.every((stage) => stage.status === "completed")
+			context.stages.length > 0 && context.stages.every((stage) => stage.status === 'completed')
 		);
 	}
 
@@ -271,7 +258,7 @@ export class PipelineContextFactory {
 	 * Check if pipeline has errors
 	 */
 	static hasPipelineErrors(context: PipelineContext): boolean {
-		return context.stages.some((stage) => stage.status === "error");
+		return context.stages.some((stage) => stage.status === 'error');
 	}
 
 	/**
@@ -280,9 +267,7 @@ export class PipelineContextFactory {
 	static getPipelineProgress(context: PipelineContext): number {
 		if (context.stages.length === 0) return 0;
 
-		const completedStages = context.stages.filter(
-			(stage) => stage.status === "completed",
-		).length;
+		const completedStages = context.stages.filter((stage) => stage.status === 'completed').length;
 		return Math.round((completedStages / context.stages.length) * 100);
 	}
 }

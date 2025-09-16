@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import { useCallback, useState } from "react";
+import { useCallback, useState } from 'react';
 // Client-side validation function
 function validatePdfFile(file: File): { message: string; code: string } | null {
 	// Check file type
-	if (!file.type.includes("pdf") && !file.name.toLowerCase().endsWith(".pdf")) {
+	if (!file.type.includes('pdf') && !file.name.toLowerCase().endsWith('.pdf')) {
 		return {
-			message: "Invalid file type. Only PDF files are accepted.",
-			code: "INVALID_FILE_TYPE",
+			message: 'Invalid file type. Only PDF files are accepted.',
+			code: 'INVALID_FILE_TYPE',
 		};
 	}
 
@@ -15,16 +15,16 @@ function validatePdfFile(file: File): { message: string; code: string } | null {
 	const maxSize = 50 * 1024 * 1024; // 50MB in bytes
 	if (file.size > maxSize) {
 		return {
-			message: "File size exceeds 50MB limit.",
-			code: "FILE_TOO_LARGE",
+			message: 'File size exceeds 50MB limit.',
+			code: 'FILE_TOO_LARGE',
 		};
 	}
 
 	// Check if file is empty
 	if (file.size === 0) {
 		return {
-			message: "File is empty.",
-			code: "EMPTY_FILE",
+			message: 'File is empty.',
+			code: 'EMPTY_FILE',
 		};
 	}
 
@@ -70,21 +70,21 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
 
 				// Create form data
 				const formData = new FormData();
-				formData.append("file", file);
+				formData.append('file', file);
 				if (options.userId) {
-					formData.append("userId", options.userId);
+					formData.append('userId', options.userId);
 				}
 
 				// Upload with progress tracking
-				const response = await fetch("/api/upload", {
-					method: "POST",
+				const response = await fetch('/api/upload', {
+					method: 'POST',
 					body: formData,
 				});
 
 				const result = await response.json();
 
 				if (!response.ok) {
-					throw new Error(result.error || "Upload failed");
+					throw new Error(result.error || 'Upload failed');
 				}
 
 				setProgress(100);
@@ -95,8 +95,7 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
 
 				return result;
 			} catch (err) {
-				const errorMessage =
-					err instanceof Error ? err.message : "Upload failed";
+				const errorMessage = err instanceof Error ? err.message : 'Upload failed';
 				setError(errorMessage);
 
 				if (options.onError) {
@@ -111,7 +110,7 @@ export function useFileUpload(options: UseFileUploadOptions = {}) {
 				setIsUploading(false);
 			}
 		},
-		[options],
+		[options]
 	);
 
 	const reset = useCallback(() => {

@@ -4,9 +4,8 @@ import type {
 	DesignDecision,
 	ResearchConcepts,
 	RiskAssessment,
-	SystemArchitecture,
-} from "~/types/ai";
-import { type AIConfig, type AgentResponse, BaseAIAgent } from "../base-agent";
+} from '~/types/ai';
+import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class ArchitecturePlannerAgent extends BaseAIAgent {
 	constructor(config: AIConfig) {
@@ -19,7 +18,7 @@ export class ArchitecturePlannerAgent extends BaseAIAgent {
 	async planArchitecture(
 		concepts: ResearchConcepts,
 		algorithmSpecs: AlgorithmSpecs,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<ArchitecturePlanningResult>> {
 		const systemPrompt = `You are an expert software architect specializing in research-to-code implementations. Your task is to design a comprehensive system architecture based on research concepts and algorithm specifications.
 
@@ -213,7 +212,7 @@ Guidelines:
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Please design a comprehensive system architecture for implementing this research:\n\n${content}`,
 			},
 		];
@@ -229,17 +228,13 @@ Guidelines:
 		}
 
 		// Parse the JSON response
-		const parseResult = this.parseJsonResponse<ArchitecturePlanningResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<ArchitecturePlanningResult>(response.data!);
 		if (!parseResult.success) {
 			return parseResult;
 		}
 
 		// Validate the response structure
-		const validationResult = this.validateArchitecturePlanningResult(
-			parseResult.data!,
-		);
+		const validationResult = this.validateArchitecturePlanningResult(parseResult.data!);
 		if (!validationResult.success) {
 			return validationResult;
 		}
@@ -255,13 +250,13 @@ Guidelines:
 	 * Validate the architecture planning result
 	 */
 	private validateArchitecturePlanningResult(
-		data: ArchitecturePlanningResult,
+		data: ArchitecturePlanningResult
 	): AgentResponse<ArchitecturePlanningResult> {
 		// Check if architecture object exists
 		if (!data.architecture) {
 			return {
 				success: false,
-				error: "Missing architecture object in response",
+				error: 'Missing architecture object in response',
 			};
 		}
 
@@ -270,12 +265,12 @@ Guidelines:
 		if (!projectStructure) {
 			return {
 				success: false,
-				error: "Missing projectStructure in architecture",
+				error: 'Missing projectStructure in architecture',
 			};
 		}
 
 		// Validate required fields in project structure
-		const requiredStructureFields = ["rootDirectory", "directories", "files"];
+		const requiredStructureFields = ['rootDirectory', 'directories', 'files'];
 		for (const field of requiredStructureFields) {
 			if (!projectStructure[field as keyof typeof projectStructure]) {
 				return {
@@ -286,7 +281,7 @@ Guidelines:
 		}
 
 		// Validate arrays
-		const arrayFields = ["directories", "files", "configFiles"];
+		const arrayFields = ['directories', 'files', 'configFiles'];
 		for (const field of arrayFields) {
 			const value = projectStructure[field as keyof typeof projectStructure];
 			if (value && !Array.isArray(value)) {
@@ -301,19 +296,15 @@ Guidelines:
 		if (!Array.isArray(data.architecture.modules)) {
 			return {
 				success: false,
-				error: "modules must be an array",
+				error: 'modules must be an array',
 			};
 		}
 
 		// Validate confidence score
-		if (
-			typeof data.confidence !== "number" ||
-			data.confidence < 0 ||
-			data.confidence > 1
-		) {
+		if (typeof data.confidence !== 'number' || data.confidence < 0 || data.confidence > 1) {
 			return {
 				success: false,
-				error: "Confidence score must be a number between 0 and 1",
+				error: 'Confidence score must be a number between 0 and 1',
 			};
 		}
 
@@ -321,7 +312,7 @@ Guidelines:
 		if (!Array.isArray(data.designDecisions)) {
 			return {
 				success: false,
-				error: "designDecisions must be an array",
+				error: 'designDecisions must be an array',
 			};
 		}
 
@@ -336,10 +327,10 @@ Guidelines:
 			}
 
 			const requiredDecisionFields: (keyof DesignDecision)[] = [
-				"decision",
-				"rationale",
-				"alternatives",
-				"tradeoffs",
+				'decision',
+				'rationale',
+				'alternatives',
+				'tradeoffs',
 			];
 
 			for (const field of requiredDecisionFields) {
@@ -371,7 +362,7 @@ Guidelines:
 		if (!Array.isArray(data.riskAssessment)) {
 			return {
 				success: false,
-				error: "riskAssessment must be an array",
+				error: 'riskAssessment must be an array',
 			};
 		}
 
@@ -386,10 +377,10 @@ Guidelines:
 			}
 
 			const requiredRiskFields: (keyof RiskAssessment)[] = [
-				"risk",
-				"impact",
-				"probability",
-				"mitigation",
+				'risk',
+				'impact',
+				'probability',
+				'mitigation',
 			];
 
 			for (const field of requiredRiskFields) {
@@ -402,7 +393,7 @@ Guidelines:
 			}
 
 			// Validate impact and probability levels
-			const validLevels = ["low", "medium", "high"];
+			const validLevels = ['low', 'medium', 'high'];
 			if (!validLevels.includes(risk.impact)) {
 				return {
 					success: false,
@@ -427,12 +418,12 @@ Guidelines:
 
 		// Validate implementation strategy
 		if (
-			typeof data.implementationStrategy !== "string" ||
-			data.implementationStrategy.trim() === ""
+			typeof data.implementationStrategy !== 'string' ||
+			data.implementationStrategy.trim() === ''
 		) {
 			return {
 				success: false,
-				error: "implementationStrategy must be a non-empty string",
+				error: 'implementationStrategy must be a non-empty string',
 			};
 		}
 
@@ -445,24 +436,17 @@ Guidelines:
 	async planArchitectureWithFallback(
 		concepts: ResearchConcepts,
 		algorithmSpecs: AlgorithmSpecs,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<ArchitecturePlanningResult>> {
 		// Try detailed planning first
-		const detailedResult = await this.planArchitecture(
-			concepts,
-			algorithmSpecs,
-			paperContent,
-		);
+		const detailedResult = await this.planArchitecture(concepts, algorithmSpecs, paperContent);
 
 		if (detailedResult.success) {
 			return detailedResult;
 		}
 
 		// Fallback to simpler planning
-		const fallbackResult = await this.planBasicArchitecture(
-			concepts,
-			algorithmSpecs,
-		);
+		const fallbackResult = await this.planBasicArchitecture(concepts, algorithmSpecs);
 
 		if (fallbackResult.success) {
 			return {
@@ -479,13 +463,13 @@ Guidelines:
 	 */
 	private async planBasicArchitecture(
 		concepts: ResearchConcepts,
-		algorithmSpecs: AlgorithmSpecs,
+		algorithmSpecs: AlgorithmSpecs
 	): Promise<AgentResponse<ArchitecturePlanningResult>> {
 		const systemPrompt = `Create a basic system architecture. Return minimal JSON structure with essential components only.`;
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Create basic architecture for: ${JSON.stringify({ concepts, algorithmSpecs })}`,
 			},
 		];
@@ -500,9 +484,7 @@ Guidelines:
 			};
 		}
 
-		const parseResult = this.parseJsonResponse<ArchitecturePlanningResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<ArchitecturePlanningResult>(response.data!);
 		return parseResult;
 	}
 }

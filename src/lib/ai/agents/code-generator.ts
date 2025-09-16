@@ -3,13 +3,10 @@ import type {
 	BuildInstructions,
 	CodeGenerationResult,
 	CompletenessReport,
-	GeneratedCodebase,
 	GeneratedFile,
-	QualityMetrics,
 	SystemArchitecture,
-	TestFile,
-} from "~/types/ai";
-import { type AIConfig, type AgentResponse, BaseAIAgent } from "../base-agent";
+} from '~/types/ai';
+import { type AIConfig, type AgentResponse, BaseAIAgent } from '../base-agent';
 
 export class CodeGeneratorAgent extends BaseAIAgent {
 	constructor(config: AIConfig) {
@@ -22,7 +19,7 @@ export class CodeGeneratorAgent extends BaseAIAgent {
 	async generateCode(
 		architecture: SystemArchitecture,
 		algorithmSpecs: AlgorithmSpecs,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<CodeGenerationResult>> {
 		const systemPrompt = `You are an expert software developer specializing in implementing research algorithms. Your task is to generate complete, executable, production-ready code based on the system architecture and algorithm specifications.
 
@@ -252,7 +249,7 @@ Guidelines:
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Please generate complete, executable code for this research implementation:\n\n${content}`,
 			},
 		];
@@ -268,17 +265,13 @@ Guidelines:
 		}
 
 		// Parse the JSON response
-		const parseResult = this.parseJsonResponse<CodeGenerationResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<CodeGenerationResult>(response.data!);
 		if (!parseResult.success) {
 			return parseResult;
 		}
 
 		// Validate the response structure
-		const validationResult = this.validateCodeGenerationResult(
-			parseResult.data!,
-		);
+		const validationResult = this.validateCodeGenerationResult(parseResult.data!);
 		if (!validationResult.success) {
 			return validationResult;
 		}
@@ -294,13 +287,13 @@ Guidelines:
 	 * Validate the code generation result
 	 */
 	private validateCodeGenerationResult(
-		data: CodeGenerationResult,
+		data: CodeGenerationResult
 	): AgentResponse<CodeGenerationResult> {
 		// Check if codebase object exists
 		if (!data.codebase) {
 			return {
 				success: false,
-				error: "Missing codebase object in response",
+				error: 'Missing codebase object in response',
 			};
 		}
 
@@ -308,14 +301,14 @@ Guidelines:
 		if (!Array.isArray(data.codebase.files)) {
 			return {
 				success: false,
-				error: "codebase.files must be an array",
+				error: 'codebase.files must be an array',
 			};
 		}
 
 		if (data.codebase.files.length === 0) {
 			return {
 				success: false,
-				error: "codebase.files cannot be empty",
+				error: 'codebase.files cannot be empty',
 			};
 		}
 
@@ -341,7 +334,7 @@ Guidelines:
 		if (!data.codebase.structure) {
 			return {
 				success: false,
-				error: "Missing structure in codebase",
+				error: 'Missing structure in codebase',
 			};
 		}
 
@@ -349,7 +342,7 @@ Guidelines:
 		if (!Array.isArray(data.codebase.tests)) {
 			return {
 				success: false,
-				error: "codebase.tests must be an array",
+				error: 'codebase.tests must be an array',
 			};
 		}
 
@@ -357,17 +350,12 @@ Guidelines:
 		if (!data.codebase.buildInstructions) {
 			return {
 				success: false,
-				error: "Missing buildInstructions in codebase",
+				error: 'Missing buildInstructions in codebase',
 			};
 		}
 
 		const buildInstructions = data.codebase.buildInstructions;
-		const requiredBuildFields = [
-			"installCommands",
-			"buildCommands",
-			"testCommands",
-			"runCommands",
-		];
+		const requiredBuildFields = ['installCommands', 'buildCommands', 'testCommands', 'runCommands'];
 
 		for (const field of requiredBuildFields) {
 			if (!Array.isArray(buildInstructions[field as keyof BuildInstructions])) {
@@ -379,14 +367,10 @@ Guidelines:
 		}
 
 		// Validate confidence score
-		if (
-			typeof data.confidence !== "number" ||
-			data.confidence < 0 ||
-			data.confidence > 1
-		) {
+		if (typeof data.confidence !== 'number' || data.confidence < 0 || data.confidence > 1) {
 			return {
 				success: false,
-				error: "Confidence score must be a number between 0 and 1",
+				error: 'Confidence score must be a number between 0 and 1',
 			};
 		}
 
@@ -395,15 +379,15 @@ Guidelines:
 		if (!qualityMetrics) {
 			return {
 				success: false,
-				error: "Missing qualityMetrics in response",
+				error: 'Missing qualityMetrics in response',
 			};
 		}
 
-		const validComplexity = ["low", "medium", "high"];
+		const validComplexity = ['low', 'medium', 'high'];
 		if (!validComplexity.includes(qualityMetrics.codeComplexity)) {
 			return {
 				success: false,
-				error: "Invalid codeComplexity in qualityMetrics",
+				error: 'Invalid codeComplexity in qualityMetrics',
 			};
 		}
 
@@ -412,15 +396,15 @@ Guidelines:
 		if (!completeness) {
 			return {
 				success: false,
-				error: "Missing completeness report in response",
+				error: 'Missing completeness report in response',
 			};
 		}
 
 		const requiredCompletenessFields: (keyof CompletenessReport)[] = [
-			"implementedFeatures",
-			"missingFeatures",
-			"todoItems",
-			"placeholderCount",
+			'implementedFeatures',
+			'missingFeatures',
+			'todoItems',
+			'placeholderCount',
 		];
 
 		for (const field of requiredCompletenessFields) {
@@ -453,16 +437,13 @@ Guidelines:
 	/**
 	 * Validate individual generated file
 	 */
-	private validateGeneratedFile(
-		file: GeneratedFile,
-		index: number,
-	): AgentResponse<GeneratedFile> {
+	private validateGeneratedFile(file: GeneratedFile, index: number): AgentResponse<GeneratedFile> {
 		const requiredFields: (keyof GeneratedFile)[] = [
-			"path",
-			"content",
-			"type",
-			"language",
-			"dependencies",
+			'path',
+			'content',
+			'type',
+			'language',
+			'dependencies',
 		];
 
 		for (const field of requiredFields) {
@@ -475,7 +456,7 @@ Guidelines:
 		}
 
 		// Validate file type
-		const validTypes = ["source", "config", "documentation", "test"];
+		const validTypes = ['source', 'config', 'documentation', 'test'];
 		if (!validTypes.includes(file.type)) {
 			return {
 				success: false,
@@ -484,7 +465,7 @@ Guidelines:
 		}
 
 		// Validate content is not empty
-		if (typeof file.content !== "string" || file.content.trim() === "") {
+		if (typeof file.content !== 'string' || file.content.trim() === '') {
 			return {
 				success: false,
 				error: `File ${index}: content cannot be empty`,
@@ -493,17 +474,14 @@ Guidelines:
 
 		// Check for TODOs and placeholders in content
 		const content = file.content.toLowerCase();
-		if (content.includes("todo") || content.includes("fixme")) {
+		if (content.includes('todo') || content.includes('fixme')) {
 			return {
 				success: false,
 				error: `File ${index}: contains TODO or FIXME - all code must be complete`,
 			};
 		}
 
-		if (
-			content.includes("placeholder") ||
-			content.includes("not implemented")
-		) {
+		if (content.includes('placeholder') || content.includes('not implemented')) {
 			return {
 				success: false,
 				error: `File ${index}: contains placeholders - all code must be complete`,
@@ -527,24 +505,17 @@ Guidelines:
 	async generateCodeWithFallback(
 		architecture: SystemArchitecture,
 		algorithmSpecs: AlgorithmSpecs,
-		paperContent?: string,
+		paperContent?: string
 	): Promise<AgentResponse<CodeGenerationResult>> {
 		// Try detailed code generation first
-		const detailedResult = await this.generateCode(
-			architecture,
-			algorithmSpecs,
-			paperContent,
-		);
+		const detailedResult = await this.generateCode(architecture, algorithmSpecs, paperContent);
 
 		if (detailedResult.success) {
 			return detailedResult;
 		}
 
 		// Fallback to simpler code generation
-		const fallbackResult = await this.generateBasicCode(
-			architecture,
-			algorithmSpecs,
-		);
+		const fallbackResult = await this.generateBasicCode(architecture, algorithmSpecs);
 
 		if (fallbackResult.success) {
 			return {
@@ -561,13 +532,13 @@ Guidelines:
 	 */
 	private async generateBasicCode(
 		architecture: SystemArchitecture,
-		algorithmSpecs: AlgorithmSpecs,
+		algorithmSpecs: AlgorithmSpecs
 	): Promise<AgentResponse<CodeGenerationResult>> {
 		const systemPrompt = `Generate basic but complete code implementation. Ensure no TODOs or placeholders. Return minimal but functional JSON structure.`;
 
 		const messages = [
 			{
-				role: "user" as const,
+				role: 'user' as const,
 				content: `Generate basic complete code for: ${JSON.stringify({ architecture: architecture.projectStructure, algorithms: algorithmSpecs.algorithms })}`,
 			},
 		];
@@ -582,9 +553,7 @@ Guidelines:
 			};
 		}
 
-		const parseResult = this.parseJsonResponse<CodeGenerationResult>(
-			response.data!,
-		);
+		const parseResult = this.parseJsonResponse<CodeGenerationResult>(response.data!);
 		return parseResult;
 	}
 }

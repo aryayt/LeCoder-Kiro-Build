@@ -1,15 +1,15 @@
-import { PrismaClient } from "@prisma/client";
-import { hash } from "bcryptjs";
+import { PrismaClient } from '@prisma/client';
+import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function createAuthUser() {
-	console.log("🔧 Creating authenticated user account...");
+	console.info('🔧 Creating authenticated user account...');
 
 	try {
-		const email = "aryateja2106@gmail.com";
-		const password = "aryateja5";
-		const name = "aryateja";
+		const email = 'aryateja2106@gmail.com';
+		const password = 'aryateja5';
+		const name = 'aryateja';
 
 		// Check if user already exists
 		let user = await prisma.user.findUnique({
@@ -22,13 +22,12 @@ async function createAuthUser() {
 				data: {
 					email,
 					name,
-					image:
-						"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+					image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
 				},
 			});
-			console.log("✅ User created in database");
+			console.info('✅ User created in database');
 		} else {
-			console.log("ℹ️ User already exists in database");
+			console.info('ℹ️ User already exists in database');
 		}
 
 		// Hash the password using bcryptjs (same as Better Auth)
@@ -38,7 +37,7 @@ async function createAuthUser() {
 		const existingAccount = await prisma.account.findFirst({
 			where: {
 				userId: user.id,
-				providerId: "credential",
+				providerId: 'credential',
 			},
 		});
 
@@ -48,23 +47,23 @@ async function createAuthUser() {
 				data: {
 					userId: user.id,
 					accountId: user.id,
-					providerId: "credential",
+					providerId: 'credential',
 					// Note: Better Auth stores password differently
 					// We'll need to use the Better Auth API for proper password storage
 				},
 			});
-			console.log("✅ Account record created");
+			console.info('✅ Account record created');
 		} else {
-			console.log("ℹ️ Account record already exists");
+			console.info('ℹ️ Account record already exists');
 		}
 
-		console.log("🎉 User setup completed!");
-		console.log("Credentials:");
-		console.log("Email:", email);
-		console.log("Password:", password);
-		console.log("Name:", name);
+		console.info('🎉 User setup completed!');
+		console.info('Credentials:');
+		console.info('Email:', email);
+		console.info('Password:', password);
+		console.info('Name:', name);
 	} catch (error) {
-		console.error("❌ Failed to create user:", error);
+		console.error('❌ Failed to create user:', error);
 	} finally {
 		await prisma.$disconnect();
 	}

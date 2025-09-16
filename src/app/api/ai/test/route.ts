@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
-import { createConceptExtractor } from "~/lib/ai";
+import { type NextRequest, NextResponse } from 'next/server';
+import { createConceptExtractor } from '~/lib/ai';
 
 /**
  * Test endpoint for AI functionality
@@ -20,14 +20,14 @@ export async function GET() {
     `;
 
 		// Test with Google Gemini (free tier)
-		const extractor = createConceptExtractor("google");
+		const extractor = createConceptExtractor('google');
 
 		const result = await extractor.extractConcepts(sampleText);
 
 		if (result.success) {
 			return NextResponse.json({
 				success: true,
-				message: "AI concept extraction successful",
+				message: 'AI concept extraction successful',
 				data: result.data,
 				metadata: result.metadata,
 			});
@@ -38,17 +38,17 @@ export async function GET() {
 				error: result.error,
 				metadata: result.metadata,
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	} catch (error) {
-		console.error("AI test endpoint error:", error);
+		console.error('AI test endpoint error:', error);
 
 		return NextResponse.json(
 			{
 				success: false,
-				error: error instanceof Error ? error.message : "Unknown error",
+				error: error instanceof Error ? error.message : 'Unknown error',
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
@@ -59,15 +59,15 @@ export async function GET() {
 export async function POST(request: NextRequest) {
 	try {
 		const body = await request.json();
-		const { text, provider = "google" } = body;
+		const { text, provider = 'google' } = body;
 
-		if (!text || typeof text !== "string") {
+		if (!text || typeof text !== 'string') {
 			return NextResponse.json(
 				{
 					success: false,
-					error: "Text content is required",
+					error: 'Text content is required',
 				},
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
@@ -75,32 +75,30 @@ export async function POST(request: NextRequest) {
 			return NextResponse.json(
 				{
 					success: false,
-					error: "Text content too long (max 10,000 characters)",
+					error: 'Text content too long (max 10,000 characters)',
 				},
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
-		const validProviders = ["google", "openai", "anthropic"];
+		const validProviders = ['google', 'openai', 'anthropic'];
 		if (!validProviders.includes(provider)) {
 			return NextResponse.json(
 				{
 					success: false,
-					error: `Invalid provider. Must be one of: ${validProviders.join(", ")}`,
+					error: `Invalid provider. Must be one of: ${validProviders.join(', ')}`,
 				},
-				{ status: 400 },
+				{ status: 400 }
 			);
 		}
 
-		const extractor = createConceptExtractor(
-			provider as "google" | "openai" | "anthropic",
-		);
+		const extractor = createConceptExtractor(provider as 'google' | 'openai' | 'anthropic');
 		const result = await extractor.extractConcepts(text);
 
 		if (result.success) {
 			return NextResponse.json({
 				success: true,
-				message: "AI concept extraction successful",
+				message: 'AI concept extraction successful',
 				data: result.data,
 				metadata: result.metadata,
 			});
@@ -111,17 +109,17 @@ export async function POST(request: NextRequest) {
 				error: result.error,
 				metadata: result.metadata,
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	} catch (error) {
-		console.error("AI test POST endpoint error:", error);
+		console.error('AI test POST endpoint error:', error);
 
 		return NextResponse.json(
 			{
 				success: false,
-				error: error instanceof Error ? error.message : "Unknown error",
+				error: error instanceof Error ? error.message : 'Unknown error',
 			},
-			{ status: 500 },
+			{ status: 500 }
 		);
 	}
 }
